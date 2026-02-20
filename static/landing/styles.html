@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Art Styles – Artify</title>
+  <link rel="stylesheet" href="/static/landing/styles.css" />
+  <link rel="stylesheet" href="/static/landing/styles-gallery.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="header header-with-border">
+    <a href="/" class="logo">
+      <span class="logo-icon">🎨</span>
+      <span class="logo-text">Artify</span>
+    </a>
+    <nav class="nav">
+      <a href="/#how-it-works">How it Works</a>
+      <a href="/styles" class="active">Styles</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/styles" class="btn btn-primary btn-header">Transform Now</a>
+    </nav>
+  </header>
+
+  <main class="section" style="padding-top:2rem;">
+    <div class="styles-page-header">
+      <h1>Choose Your Art Style</h1>
+      <p>Select a style and see yourself painted by history's greatest artists.</p>
+    </div>
+
+    <div class="styles-toolbar">
+      <input type="text" class="styles-search" id="styles-search" placeholder="Search styles or artists…" />
+      <div class="styles-filters" id="styles-filters">
+        <button class="filter-btn active" data-cat="all">All</button>
+        <button class="filter-btn" data-cat="Impressionism">Impressionism</button>
+        <button class="filter-btn" data-cat="Renaissance">Renaissance</button>
+        <button class="filter-btn" data-cat="Modern">Modern</button>
+        <button class="filter-btn" data-cat="Pop Art">Pop Art</button>
+        <button class="filter-btn" data-cat="Surrealism">Surrealism</button>
+        <button class="filter-btn" data-cat="Baroque">Baroque</button>
+        <button class="filter-btn" data-cat="Ukiyo-e">Ukiyo-e</button>
+        <button class="filter-btn" data-cat="Fauvism">Fauvism</button>
+      </div>
+    </div>
+
+    <div class="styles-grid" id="styles-grid"></div>
+    <div class="styles-empty" id="styles-empty" style="display:none;">No styles match your search.</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="logo">
+          <span class="logo-icon">🎨</span>
+          <span class="logo-text">Artify</span>
+        </a>
+        <p>Transform any photo into a timeless work of art.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Product</h4>
+        <a href="/#how-it-works">How it Works</a>
+        <a href="/styles">Style Gallery</a>
+        <a href="/#pricing">Pricing</a>
+      </div>
+      <div class="footer-links">
+        <h4>Support</h4>
+        <a href="#">Help Center</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+      <div class="footer-links">
+        <h4>Follow Us</h4>
+        <div class="social-icons">
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="Twitter">𝕏</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Artify. All rights reserved.</span>
+      <span>Made with 🎨 for art lovers everywhere.</span>
+    </div>
+  </footer>
+
+  <script src="/static/landing/styles-data.js"></script>
+  <script src="/static/landing/styles-gallery.js"></script>
+</body>
+</html>

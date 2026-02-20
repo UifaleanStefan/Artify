@@ -1,0 +1,37 @@
+from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, EmailStr, Field
+
+
+class OrderCreateRequest(BaseModel):
+    email: EmailStr
+    style_id: int
+    image_url: str
+    billing_name: Optional[str] = None
+    billing_address: Optional[str] = None
+    billing_city: Optional[str] = None
+    billing_state: Optional[str] = None
+    billing_zip: Optional[str] = None
+    billing_country: Optional[str] = None
+
+
+class OrderResponse(BaseModel):
+    model_config = {"from_attributes": True}
+    id: int
+    order_id: str
+    status: str
+    email: str
+    style_id: Optional[int] = None
+    style_name: Optional[str] = None
+    image_url: str
+    result_urls: Optional[str] = None
+    amount: Optional[float] = None
+    created_at: datetime
+    completed_at: Optional[datetime] = None
+
+
+class OrderStatusResponse(BaseModel):
+    order_id: str
+    status: str
+    result_urls: Optional[str] = None
+    error: Optional[str] = None

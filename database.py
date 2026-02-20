@@ -1,0 +1,94 @@
+"""
+Database setup and models for orders.
+"""
+import os
+from datetime import datetime
+from enum import Enum
+from typing import Optional
+
+from sqlalchemy import Column, DateTime, Float, Integer, String, Text, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+from config import get_settings
+
+Base = declarative_base()
+
+
+class OrderStatus(str, Enum):
+    PENDING = "pending"
+    PAID = "paid"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class Order(Base):
+    __tablename__ = "art_orders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(String(50), unique=True, index=True, nullable=False)
+    status = Column(String(20), default=OrderStatus.PENDING.value, nullable=False)
+
+    email = Column(String(255), nullable=False, index=True)
+
+    style_id = Column(Integer)
+    style_name = Column(String(255))
+
+    image_url = Column(Text, nullable=False)
+    style_image_url = Column(Text)
+    result_urls = Column(Text)  # JSON array of result image URLs
+
+    style_transfer_job_id = Column(String(100))
+    style_transfer_error = Column(Text)
+
+    amount = Column(Float, default=12.00)
+    payment_status = Column(String(20), default="pending")
+    payment_provider = Column(String(50))
+    payment_transaction_id = Column(String(255))
+
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    paid_at = Column(DateTime)
+    completed_at = Column(DateTime)
+    failed_at = Column(DateTime)
+
+    billing_name = Column(String(255))
+    billing_address = Column(Text)
+    billing_city = Column(String(100))
+    billing_state = Column(String(100))
+    billing_zip = Column(String(20))
+    billing_country = Column(String(100))
+
+
+def get_database_url() -> str:
+    settings = get_settings()
+    db_url = settings.database_url or os.environ.get("DATABASE_URL", "").strip()
+    if not db_url:
+        db_url = os.environ.get("POSTGRES_URL", "").strip()
+    if not db_url:
+        raise ValueError(
+            "DATABASE_URL environment variable is not set. "
+            "Set DATABASE_URL in your .env file or environment."
+        )
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    return db_url
+
+
+DATABASE_URL = get_database_url()
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_size=5, max_overflow=10)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def init_db():
+    Base.metadata.create_all(bind=engine)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

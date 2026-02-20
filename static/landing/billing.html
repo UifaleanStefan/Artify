@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Billing – Artify</title>
+  <link rel="stylesheet" href="/static/landing/styles.css" />
+  <link rel="stylesheet" href="/static/landing/billing.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="header header-with-border">
+    <a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a>
+    <nav class="nav"><a href="/#how-it-works">How it Works</a><a href="/styles">Styles</a><a href="/#pricing">Pricing</a><a href="/styles" class="btn btn-primary btn-header">Transform Now</a></nav>
+  </header>
+  <main class="billing-main">
+    <div class="steps-bar">
+      <div class="step done"><span class="step-check">✓</span><span class="step-label">1 Choose Style</span></div>
+      <div class="step-connector"></div>
+      <div class="step done"><span class="step-check">✓</span><span class="step-label">2 Upload Photo</span></div>
+      <div class="step-connector"></div>
+      <div class="step done"><span class="step-check">✓</span><span class="step-label">3 Details</span></div>
+      <div class="step-connector"></div>
+      <div class="step current"><span class="step-num">4</span><span class="step-label">Billing</span></div>
+      <div class="step-connector"></div>
+      <div class="step"><span class="step-num step-num-inactive">5</span><span class="step-label">Payment</span></div>
+    </div>
+    <div class="billing-grid">
+      <section class="billing-left">
+        <h2 class="billing-section-title">Billing Address</h2>
+        <p class="billing-subtitle">Required for payment processing.</p>
+        <form id="billing-form" autocomplete="on">
+          <div class="form-group"><label for="full-name">Full Name <span class="required">*</span></label><input type="text" id="full-name" required placeholder="John Doe" /></div>
+          <div class="form-group"><label for="address1">Address Line 1 <span class="required">*</span></label><input type="text" id="address1" required placeholder="123 Main St" /></div>
+          <div class="form-group"><label for="address2">Address Line 2</label><input type="text" id="address2" placeholder="Apt 4B" /></div>
+          <div class="form-row">
+            <div class="form-group"><label for="city">City <span class="required">*</span></label><input type="text" id="city" required placeholder="New York" /></div>
+            <div class="form-group"><label for="state">State</label><input type="text" id="state" placeholder="NY" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label for="zip">ZIP Code <span class="required">*</span></label><input type="text" id="zip" required placeholder="10001" /></div>
+            <div class="form-group"><label for="country">Country <span class="required">*</span></label><input type="text" id="country" required placeholder="United States" value="United States" /></div>
+          </div>
+          <p class="billing-form-error" id="billing-form-error" style="display:none"></p>
+          <div class="billing-actions">
+            <a href="#" class="billing-back-link" id="billing-back">← Back to Details</a>
+            <button type="submit" class="btn btn-primary btn-lg">Continue to Payment</button>
+          </div>
+        </form>
+      </section>
+      <aside class="billing-right">
+        <div class="billing-summary">
+          <h3>Order Summary</h3>
+          <div class="billing-summary-item" id="billing-summary-item">
+            <div class="billing-summary-thumb" id="billing-thumb"></div>
+            <div><strong id="billing-style-name">—</strong><p id="billing-style-artist" class="billing-summary-meta"></p></div>
+          </div>
+          <div class="billing-summary-line"><span>Delivery</span><span id="billing-email">—</span></div>
+          <div class="billing-summary-line billing-summary-total"><span>Total</span><span>$12.00</span></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a><p>Transform any photo into a timeless work of art.</p></div>
+      <div class="footer-links"><h4>Product</h4><a href="/#how-it-works">How it Works</a><a href="/styles">Style Gallery</a><a href="/#pricing">Pricing</a></div>
+      <div class="footer-links"><h4>Support</h4><a href="#">Help Center</a><a href="#">Terms of Service</a><a href="#">Privacy Policy</a></div>
+      <div class="footer-links"><h4>Follow Us</h4><div class="social-icons"><a href="#">📷</a><a href="#">f</a><a href="#">𝕏</a></div></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 Artify. All rights reserved.</span><span>Made with 🎨 for art lovers everywhere.</span></div>
+  </footer>
+  <script src="/static/landing/styles-data.js"></script>
+  <script src="/static/landing/billing.js"></script>
+</body>
+</html>

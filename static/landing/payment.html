@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complete Your Order – Artify</title>
+  <link rel="stylesheet" href="/static/landing/styles.css" />
+  <link rel="stylesheet" href="/static/landing/payment.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="header header-with-border">
+    <a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a>
+    <nav class="nav"><a href="/#how-it-works">How it Works</a><a href="/styles">Styles</a><a href="/#pricing">Pricing</a><a href="/styles" class="btn btn-primary btn-header">Transform Now</a></nav>
+  </header>
+  <main class="payment-main">
+    <div class="steps-bar">
+      <div class="step done"><span class="step-check">✓</span><span class="step-label">1 Choose Style</span></div>
+      <div class="step-connector"></div>
+      <div class="step done"><span class="step-check">✓</span><span class="step-label">2 Upload Photo</span></div>
+      <div class="step-connector"></div>
+      <div class="step done"><span class="step-check">✓</span><span class="step-label">3 Details</span></div>
+      <div class="step-connector"></div>
+      <div class="step done"><span class="step-check">✓</span><span class="step-label">4 Billing</span></div>
+      <div class="step-connector"></div>
+      <div class="step current"><span class="step-num">5</span><span class="step-label">Payment</span></div>
+    </div>
+    <div class="payment-card-wrap">
+      <div class="payment-card">
+        <h2 class="payment-title">Complete Your Order</h2>
+        <p class="payment-subtitle">Review your details and get your artwork.</p>
+        <div class="payment-style-row" id="payment-style-row">
+          <div class="payment-style-thumb" id="payment-style-thumb"></div>
+          <div class="payment-style-info">
+            <span class="payment-style-tag" id="payment-style-tag"></span>
+            <h3 class="payment-style-name" id="payment-style-name"></h3>
+          </div>
+        </div>
+        <div class="payment-details">
+          <div class="payment-detail-line"><span>Delivery Email</span><span id="payment-delivery" class="payment-ellipsis">—</span></div>
+        </div>
+        <div class="payment-cost">
+          <div class="payment-cost-line"><span>Art Portrait</span><span id="payment-price">$12.00</span></div>
+          <div class="payment-cost-line"><span>Processing Fee</span><span>$0.00</span></div>
+          <div class="payment-cost-line payment-total"><span>Total</span><span id="payment-total">$12.00</span></div>
+        </div>
+        <p class="payment-secured"><span class="payment-lock">🔒</span> Secured by Stripe</p>
+        <button type="button" class="btn btn-primary btn-lg payment-pay-btn" id="payment-pay-btn">Pay $12.00</button>
+        <p class="payment-note">Your payment is processed securely. We never store your card details.</p>
+        <a href="#" class="payment-back-link" id="payment-back">← Back to Billing</a>
+      </div>
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a><p>Transform any photo into a timeless work of art.</p></div>
+      <div class="footer-links"><h4>Product</h4><a href="/#how-it-works">How it Works</a><a href="/styles">Style Gallery</a><a href="/#pricing">Pricing</a></div>
+      <div class="footer-links"><h4>Support</h4><a href="#">Help Center</a><a href="#">Terms of Service</a><a href="#">Privacy Policy</a></div>
+      <div class="footer-links"><h4>Follow Us</h4><div class="social-icons"><a href="#">📷</a><a href="#">f</a><a href="#">𝕏</a></div></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 Artify. All rights reserved.</span><span>Made with 🎨 for art lovers everywhere.</span></div>
+  </footer>
+  <script src="/static/landing/styles-data.js"></script>
+  <script src="/static/landing/payment.js"></script>
+</body>
+</html>

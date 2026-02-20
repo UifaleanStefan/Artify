@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Details – Artify</title>
+  <link rel="stylesheet" href="/static/landing/styles.css" />
+  <link rel="stylesheet" href="/static/landing/details.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="header header-with-border">
+    <a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a>
+    <nav class="nav">
+      <a href="/#how-it-works">How it Works</a>
+      <a href="/styles">Styles</a>
+      <a href="/#pricing">Pricing</a>
+      <a href="/styles" class="btn btn-primary btn-header">Transform Now</a>
+    </nav>
+  </header>
+  <main class="details-main">
+    <div class="steps-bar">
+      <div class="step done"><span class="step-check">✓</span><span class="step-label">1 Choose Style</span></div>
+      <div class="step-connector"></div>
+      <div class="step done"><span class="step-check">✓</span><span class="step-label">2 Upload Photo</span></div>
+      <div class="step-connector"></div>
+      <div class="step current"><span class="step-num">3</span><span class="step-label">Details</span></div>
+      <div class="step-connector"></div>
+      <div class="step"><span class="step-num step-num-inactive">4</span><span class="step-label">Billing</span></div>
+      <div class="step-connector"></div>
+      <div class="step"><span class="step-num step-num-inactive">5</span><span class="step-label">Payment</span></div>
+    </div>
+    <div class="details-grid">
+      <section class="details-left">
+        <h2 class="details-section-title">Your Selection</h2>
+        <div class="details-style-card" id="details-style-card">
+          <div class="details-style-thumb" id="details-style-thumb"></div>
+          <h3 id="details-style-title"></h3>
+          <p id="details-style-artist" class="details-style-artist"></p>
+        </div>
+        <div class="details-photo-card">
+          <h4>Your Photo</h4>
+          <div class="details-photo-preview" id="details-photo-preview">
+            <span id="details-photo-placeholder">📷</span>
+          </div>
+        </div>
+      </section>
+      <section class="details-right">
+        <h2 class="details-section-title">Delivery Details</h2>
+        <p class="details-subtitle">We'll send your finished artwork to this email.</p>
+        <form id="details-form" autocomplete="on">
+          <div class="form-group">
+            <label for="email">Email Address <span class="required">*</span></label>
+            <input type="email" id="email" name="email" required placeholder="you@example.com" />
+          </div>
+          <div class="form-group">
+            <label for="email-confirm">Confirm Email <span class="required">*</span></label>
+            <input type="email" id="email-confirm" name="email-confirm" required placeholder="you@example.com" />
+          </div>
+          <p class="details-form-error" id="details-form-error" style="display:none"></p>
+          <div class="details-actions">
+            <a href="#" class="details-back-link" id="details-back">← Back to Upload</a>
+            <button type="submit" class="btn btn-primary btn-lg" id="details-continue">Continue</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a><p>Transform any photo into a timeless work of art.</p></div>
+      <div class="footer-links"><h4>Product</h4><a href="/#how-it-works">How it Works</a><a href="/styles">Style Gallery</a><a href="/#pricing">Pricing</a></div>
+      <div class="footer-links"><h4>Support</h4><a href="#">Help Center</a><a href="#">Terms of Service</a><a href="#">Privacy Policy</a></div>
+      <div class="footer-links"><h4>Follow Us</h4><div class="social-icons"><a href="#">📷</a><a href="#">f</a><a href="#">𝕏</a></div></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 Artify. All rights reserved.</span><span>Made with 🎨 for art lovers everywhere.</span></div>
+  </footer>
+  <script src="/static/landing/styles-data.js"></script>
+  <script src="/static/landing/details.js"></script>
+</body>
+</html>
