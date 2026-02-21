@@ -53,6 +53,7 @@ logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 STATIC_DIR = Path(__file__).parent / "static"
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
+_ACTIVE_ORDER_TASKS: set[str] = set()
 
 
 def get_provider() -> ReplicateClient:
@@ -73,7 +74,13 @@ def get_service() -> StyleTransferService:
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Artify service starting")
     get_upload_dir().mkdir(parents=True, exist_ok=True)
+    supervisor_task = asyncio.create_task(_processing_supervisor_loop())
     yield
+    supervisor_task.cancel()
+    try:
+        await supervisor_task
+    except asyncio.CancelledError:
+        pass
     logger.info("Artify service shutting down")
 
 
@@ -212,6 +219,50 @@ def _last_order_with_result_urls(db: Session):
         except Exception:
             pass
     return order, urls
+
+
+def _target_image_count(order: Order) -> int:
+    """How many style outputs this order should produce."""
+    if order.style_image_urls:
+        try:
+            arr = json.loads(order.style_image_urls) if isinstance(order.style_image_urls, str) else (order.style_image_urls or [])
+            if isinstance(arr, list):
+                return len(arr)
+        except Exception:
+            pass
+    return 1 if order.style_image_url else 0
+
+
+def _done_image_count(order: Order) -> int:
+    if not order.result_urls:
+        return 0
+    try:
+        arr = json.loads(order.result_urls) if isinstance(order.result_urls, str) else (order.result_urls or [])
+        return len(arr) if isinstance(arr, list) else 0
+    except Exception:
+        return 0
+
+
+async def _processing_supervisor_loop() -> None:
+    """Self-heal stuck orders without external cron.
+    Scans paid/processing orders and re-queues unfinished ones.
+    """
+    while True:
+        db = SessionLocal()
+        try:
+            orders = db.query(Order).filter(
+                Order.status.in_([OrderStatus.PAID.value, OrderStatus.PROCESSING.value])
+            ).all()
+            for o in orders:
+                if o.order_id in _ACTIVE_ORDER_TASKS:
+                    continue
+                target = _target_image_count(o)
+                done = _done_image_count(o)
+                if target > 0 and done < target:
+                    asyncio.create_task(process_order_style_transfer(o.order_id))
+        finally:
+            db.close()
+        await asyncio.sleep(20)
 
 
 # ── Upload API ───────────────────────────────────────────────
@@ -405,7 +456,13 @@ async def pay_order(
 
 async def process_order_style_transfer(order_id: str):
     """Run style transfers in a worker thread so API remains responsive."""
-    await asyncio.to_thread(_run_style_transfer_sync, order_id)
+    if order_id in _ACTIVE_ORDER_TASKS:
+        return
+    _ACTIVE_ORDER_TASKS.add(order_id)
+    try:
+        await asyncio.to_thread(_run_style_transfer_sync, order_id)
+    finally:
+        _ACTIVE_ORDER_TASKS.discard(order_id)
 
 
 def _run_style_transfer_sync(order_id: str) -> None:
