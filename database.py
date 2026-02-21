@@ -41,7 +41,7 @@ class Order(Base):
     style_image_urls = Column(Text)  # JSON array of style URLs for packs (e.g. Masters 15)
     result_urls = Column(Text)  # JSON array of result image URLs
 
-    style_transfer_job_id = Column(String(100))
+    style_transfer_job_id = Column(Text)
     style_transfer_error = Column(Text)
     replicate_prediction_details = Column(Text)  # JSON array of Replicate prediction objects: id, status, error, metrics, created_at, started_at, completed_at, result_url, model, version, source, urls, logs
 
@@ -96,6 +96,7 @@ def init_db():
     for col_sql in (
         "ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS style_image_urls TEXT",
         "ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS replicate_prediction_details TEXT",
+        "ALTER TABLE art_orders ALTER COLUMN style_transfer_job_id TYPE TEXT",
     ):
         try:
             with engine.connect() as conn:
