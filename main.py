@@ -169,6 +169,18 @@ async def get_last_order_results(db: Session = Depends(get_db)) -> JSONResponse:
     )
 
 
+@app.post("/api/debug/resume-order/{order_id}")
+async def resume_order(order_id: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Resume a stuck processing order (e.g. after host killed the worker). Picks up from last saved result."""
+    order = db.query(Order).filter(Order.order_id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order.status != OrderStatus.PROCESSING.value:
+        raise HTTPException(status_code=400, detail=f"Order not processing (status={order.status})")
+    background_tasks.add_task(process_order_style_transfer, order_id)
+    return {"status": "ok", "message": "Resume task queued", "order_id": order_id}
+
+
 @app.get("/api/debug/last-order-results.txt")
 async def get_last_order_results_txt(db: Session = Depends(get_db)):
     """Return only the image URLs from the last order with results, one per line (what the API sent back)."""
@@ -416,15 +428,39 @@ async def _run_style_transfer(order_id: str, db: Session):
         EmailService().send_order_failed(order_id, order.email, error_msg)
         return
 
+    # Resume: if already processing with partial results, skip completed ones
+    result_urls_list = []
+    job_ids = []
+    prediction_details = []
+    skip = 0
+    if order.status == OrderStatus.PROCESSING.value and order.result_urls:
+        try:
+            result_urls_list = json.loads(order.result_urls) if isinstance(order.result_urls, str) else (order.result_urls or [])
+            job_ids = (order.style_transfer_job_id or "").split(",") if order.style_transfer_job_id else []
+            if order.replicate_prediction_details:
+                prediction_details = json.loads(order.replicate_prediction_details) if isinstance(order.replicate_prediction_details, str) else (order.replicate_prediction_details or [])
+            if isinstance(result_urls_list, list) and len(result_urls_list) < len(style_urls):
+                skip = len(result_urls_list)
+                job_ids = [x.strip() for x in job_ids if x.strip()][:skip]
+                prediction_details = prediction_details[:skip] if isinstance(prediction_details, list) else []
+                logger.info(f"Resuming order {order_id}: skipping {skip} done, {len(style_urls) - skip} remaining")
+            else:
+                result_urls_list = []
+                job_ids = []
+                prediction_details = []
+        except (json.JSONDecodeError, TypeError):
+            result_urls_list = []
+            job_ids = []
+            prediction_details = []
+            skip = 0
+
     try:
         order.status = OrderStatus.PROCESSING.value
         db.commit()
 
         service = get_service()
-        result_urls_list = []
-        job_ids = []
-        prediction_details = []
-        for i, style_url in enumerate(style_urls):
+        remaining_style_urls = style_urls[skip:]
+        for i, style_url in enumerate(remaining_style_urls):
             if i > 0:
                 await asyncio.sleep(6)
             result_url, job_id = await service.transfer_style(

@@ -29,6 +29,7 @@
   var detailsSection = document.getElementById('debug-details-section');
   var detailsJson = document.getElementById('debug-details-json');
   var refreshBtn = document.getElementById('debug-refresh-inline');
+  var resumeBtn = document.getElementById('debug-resume-btn');
 
   var lastOrderId = null;
 
@@ -63,9 +64,11 @@
         lastOrderId = orderId;
         output.style.display = 'block';
         if (refreshBtn) refreshBtn.style.display = 'inline-flex';
+        var status = (data.status || '').toLowerCase();
+        if (resumeBtn) resumeBtn.style.display = status === 'processing' ? 'inline-flex' : 'none';
         orderIdEl.textContent = data.order_id || orderId;
         statusEl.textContent = 'Status: ' + (data.status || '—');
-        statusEl.className = 'debug-status status-' + ((data.status || '').toLowerCase());
+        statusEl.className = 'debug-status status-' + status;
 
         errorMsgEl.style.display = 'none';
         if (data.error) {
@@ -138,6 +141,27 @@
         input.value = lastOrderId;
         submit.click();
       }
+    });
+  }
+  if (resumeBtn) {
+    resumeBtn.addEventListener('click', function () {
+      if (!lastOrderId) return;
+      resumeBtn.disabled = true;
+      resumeBtn.textContent = 'Resuming…';
+      fetch('/api/debug/resume-order/' + encodeURIComponent(lastOrderId), { method: 'POST' })
+        .then(function (r) {
+          if (!r.ok) return r.json().then(function (d) { throw new Error(d.detail || d.message || 'Resume failed'); });
+          return r.json();
+        })
+        .then(function () {
+          resumeBtn.textContent = 'Resume queued – refresh in a minute';
+          setTimeout(function () { submit.click(); }, 2000);
+        })
+        .catch(function (err) {
+          resumeBtn.disabled = false;
+          resumeBtn.textContent = 'Resume order (continue from last image)';
+          showError(err.message || 'Resume failed');
+        });
     });
   }
 })();
