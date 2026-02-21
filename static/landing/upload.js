@@ -25,8 +25,7 @@
   var uploadFilename = document.getElementById('upload-filename');
   var createBtn = document.getElementById('create-btn');
   var uploadError = document.getElementById('upload-error');
-  var stylePreviewsWrap = document.getElementById('style-previews-wrap');
-  var stylePreviewsScroll = document.getElementById('style-previews-scroll');
+  var styleCardPreviews = document.getElementById('style-card-previews');
 
   function showError(msg) { if (uploadError) { uploadError.textContent = msg; uploadError.style.display = 'block'; } }
   function hideError() { if (uploadError) { uploadError.textContent = ''; uploadError.style.display = 'none'; } }
@@ -155,17 +154,17 @@
     if (styleArtist) styleArtist.textContent = style.artist;
     if (styleDesc) styleDesc.textContent = style.description || '';
     var previewUrls = style.previewImageUrls && style.previewImageUrls.length > 0 ? style.previewImageUrls : (style.id === 13 ? ['/static/landing/styles/masters/masters-01.jpg', '/static/landing/styles/masters/masters-02.jpg', '/static/landing/styles/masters/masters-03.jpg', '/static/landing/styles/masters/masters-04.jpg', '/static/landing/styles/masters/masters-05.jpg'] : null);
-    if (stylePreviewsWrap && stylePreviewsScroll && previewUrls && previewUrls.length > 0) {
-      stylePreviewsWrap.style.display = 'block';
-      stylePreviewsScroll.innerHTML = '';
+    if (styleCardPreviews && previewUrls && previewUrls.length > 0) {
+      styleCardPreviews.style.display = 'block';
+      styleCardPreviews.innerHTML = '';
       previewUrls.forEach(function (url) {
         var img = document.createElement('img');
         img.src = url;
         img.alt = 'Style preview';
-        stylePreviewsScroll.appendChild(img);
+        styleCardPreviews.appendChild(img);
       });
-    } else if (stylePreviewsWrap) {
-      stylePreviewsWrap.style.display = 'none';
+    } else if (styleCardPreviews) {
+      styleCardPreviews.style.display = 'none';
     }
   }
 })();

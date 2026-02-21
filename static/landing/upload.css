@@ -16,19 +16,18 @@
 .upload-section-title { margin: 0 0 1.25rem; font-size: 1.375rem; font-weight: 600; color: var(--text); }
 .upload-subtitle { margin: 0 0 1.25rem; font-size: 0.9375rem; color: var(--text-muted); line-height: 1.5; }
 
-/* Style preview strip (5 images, scroll) */
-.upload-style-previews { margin-bottom: 1.25rem; }
-.upload-style-previews-title { margin: 0 0 0.5rem; font-size: 0.875rem; font-weight: 600; color: var(--text); }
-.upload-style-previews-scroll {
-  display: flex; gap: 0.75rem; overflow-x: auto; overflow-y: hidden;
-  padding: 0.25rem 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+/* Left card: scrollable preview images (5 images) */
+.upload-card-previews {
+  max-height: 280px; overflow-y: auto; overflow-x: hidden;
+  margin: 1rem 0; padding: 0.25rem 0; display: flex; flex-direction: column; gap: 0.5rem;
+  border-radius: 8px; background: var(--bg-accent);
 }
-.upload-style-previews-scroll::-webkit-scrollbar { height: 8px; }
-.upload-style-previews-scroll::-webkit-scrollbar-track { background: var(--bg-accent); border-radius: 4px; }
-.upload-style-previews-scroll::-webkit-scrollbar-thumb { background: var(--accent-light); border-radius: 4px; }
-.upload-style-previews-scroll img {
-  flex-shrink: 0; width: 140px; height: 140px; object-fit: cover; border-radius: 8px;
-  scroll-snap-align: start; border: 2px solid #e5e0d5;
+.upload-card-previews::-webkit-scrollbar { width: 8px; }
+.upload-card-previews::-webkit-scrollbar-track { background: #e5e0d5; border-radius: 4px; }
+.upload-card-previews::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+.upload-card-previews img {
+  display: block; width: 100%; height: auto; max-height: 160px; object-fit: cover; border-radius: 8px;
+  border: 2px solid #e5e0d5;
 }
 
 /* Left: Selected style card */
