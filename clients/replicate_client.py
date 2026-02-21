@@ -59,7 +59,8 @@ class ReplicateClient:
             "input": {
                 "structure_image": image_url,
                 "style_image": style_image_url,
-                "structure_denoising_strength": 0.65,
+                "prompt": "Adapt the style of the style image to the structure image, keeping the brush strokes and brush details.",
+                "structure_denoising_strength": 1,
                 "output_format": "webp",
                 "output_quality": 80,
                 "number_of_images": 1,
