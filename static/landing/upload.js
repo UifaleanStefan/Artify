@@ -131,15 +131,18 @@
   } else {
     if (createBtn) createBtn.disabled = true;
     if (styleThumb) {
-      styleThumb.className = 'upload-style-thumb ' + (style.thumbnailClass || '');
-      styleThumb.style.backgroundImage = style.thumbnailClass ? '' : '';
+      var useImage = style.styleImageUrl && style.styleImageUrl.length > 0;
+      styleThumb.className = 'upload-style-thumb ' + (useImage ? 'upload-style-thumb-with-img' : (style.thumbnailClass || ''));
+      styleThumb.style.backgroundImage = '';
+      styleThumb.style.background = useImage ? '#f0ede8' : '';
       var existingImg = styleThumb.querySelector('img');
       if (existingImg) existingImg.remove();
-      if (style.styleImageUrl) {
+      if (useImage) {
         var thumbImg = document.createElement('img');
         thumbImg.src = style.styleImageUrl;
         thumbImg.alt = style.title || 'Style';
         thumbImg.setAttribute('aria-hidden', 'true');
+        thumbImg.onerror = function () { this.style.display = 'none'; };
         styleThumb.appendChild(thumbImg);
       }
     }
