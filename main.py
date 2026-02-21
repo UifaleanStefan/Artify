@@ -388,12 +388,12 @@ async def process_order_style_transfer(order_id: str):
     """Run style transfers in background. Uses its own DB session so the task outlives the request."""
     db = SessionLocal()
     try:
-        _run_style_transfer(order_id, db)
+        await _run_style_transfer(order_id, db)
     finally:
         db.close()
 
 
-def _run_style_transfer(order_id: str, db: Session):
+async def _run_style_transfer(order_id: str, db: Session):
     order = db.query(Order).filter(Order.order_id == order_id).first()
     if not order:
         logger.error(f"Order not found for processing: {order_id}")
