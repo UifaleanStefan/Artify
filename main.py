@@ -54,6 +54,7 @@ logging.getLogger("httpcore").setLevel(logging.WARNING)
 STATIC_DIR = Path(__file__).parent / "static"
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
 _ACTIVE_ORDER_TASKS: set[str] = set()
+_DB_INIT_STARTED = False
 
 
 def get_provider() -> ReplicateClient:
@@ -74,6 +75,7 @@ def get_service() -> StyleTransferService:
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Artify service starting")
     get_upload_dir().mkdir(parents=True, exist_ok=True)
+    _start_db_init_once()
     supervisor_task = asyncio.create_task(_processing_supervisor_loop())
     yield
     supervisor_task.cancel()
@@ -82,6 +84,23 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except asyncio.CancelledError:
         pass
     logger.info("Artify service shutting down")
+
+
+def _start_db_init_once() -> None:
+    """Start automatic DB init/migration in background exactly once per process."""
+    global _DB_INIT_STARTED
+    if _DB_INIT_STARTED:
+        return
+    _DB_INIT_STARTED = True
+    asyncio.get_event_loop().run_in_executor(None, _run_db_init_background)
+
+
+def _run_db_init_background() -> None:
+    try:
+        init_db()
+        logger.info("Database initialized")
+    except Exception as e:
+        logger.exception("Automatic DB init failed: %s", e)
 
 
 app = FastAPI(
@@ -248,6 +267,7 @@ async def _processing_supervisor_loop() -> None:
     Scans paid/processing orders and re-queues unfinished ones.
     """
     while True:
+        _start_db_init_once()
         db = SessionLocal()
         try:
             orders = db.query(Order).filter(
@@ -260,6 +280,8 @@ async def _processing_supervisor_loop() -> None:
                 done = _done_image_count(o)
                 if target > 0 and done < target:
                     asyncio.create_task(process_order_style_transfer(o.order_id))
+        except Exception as e:
+            logger.warning("Supervisor loop temporary DB/error: %s", e)
         finally:
             db.close()
         await asyncio.sleep(20)
