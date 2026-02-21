@@ -34,7 +34,7 @@ def _resolve_style_image_url(style_image_url: Optional[str]) -> Optional[str]:
     return url
 
 
-from database import Order, OrderStatus, get_db, init_db
+from database import Order, OrderStatus, get_db, init_db, SessionLocal
 from models import StyleTransferResponse
 from models.order_schemas import OrderCreateRequest, OrderResponse, OrderStatusResponse
 from services import StyleTransferService
@@ -379,12 +379,21 @@ async def pay_order(
     order.paid_at = datetime.utcnow()
     db.commit()
 
-    background_tasks.add_task(process_order_style_transfer, order_id, db)
+    background_tasks.add_task(process_order_style_transfer, order_id)
     logger.info(f"Order paid, processing started: {order_id}")
     return {"status": "ok", "order_id": order_id}
 
 
-async def process_order_style_transfer(order_id: str, db: Session):
+async def process_order_style_transfer(order_id: str):
+    """Run style transfers in background. Uses its own DB session so the task outlives the request."""
+    db = SessionLocal()
+    try:
+        _run_style_transfer(order_id, db)
+    finally:
+        db.close()
+
+
+def _run_style_transfer(order_id: str, db: Session):
     order = db.query(Order).filter(Order.order_id == order_id).first()
     if not order:
         logger.error(f"Order not found for processing: {order_id}")
