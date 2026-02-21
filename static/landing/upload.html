@@ -41,12 +41,15 @@
       <section class="upload-left">
         <h2 class="upload-section-title">Selected Style</h2>
         <div class="upload-style-card" id="style-card">
-          <div class="upload-style-thumb" id="style-thumb"></div>
+          <div class="upload-style-thumb-wrap">
+            <button type="button" class="upload-thumb-arrow upload-thumb-prev" id="style-thumb-prev" aria-label="Previous image" style="display:none">‹</button>
+            <div class="upload-style-thumb" id="style-thumb"></div>
+            <button type="button" class="upload-thumb-arrow upload-thumb-next" id="style-thumb-next" aria-label="Next image" style="display:none">›</button>
+          </div>
           <span class="upload-style-tag" id="style-tag"></span>
           <h3 class="upload-style-title" id="style-title"></h3>
           <p class="upload-style-artist" id="style-artist"></p>
           <p class="upload-style-desc" id="style-desc"></p>
-          <div class="upload-card-previews" id="style-card-previews" style="display:none"></div>
           <a href="/styles" class="upload-change-link">← Change Style</a>
         </div>
       </section>
@@ -74,12 +77,12 @@
         <div class="upload-tips">
           <span class="upload-tips-icon">📷</span>
           <div>
-            <h4 class="upload-tips-title">Photo Tips for Best Results</h4>
+            <h4 class="upload-tips-title">Tips for Best Art Results</h4>
             <ul>
-              <li>Front-facing, clear photo</li>
-              <li>No sunglasses or hats</li>
-              <li>Good lighting</li>
-              <li>One person per photo</li>
+              <li>Clear face visible so the style transfers well</li>
+              <li>One person per photo for portrait styles</li>
+              <li>Good lighting helps keep details sharp in the artwork</li>
+              <li>Higher resolution photos give better final results</li>
             </ul>
           </div>
         </div>

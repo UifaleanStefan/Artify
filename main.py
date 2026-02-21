@@ -169,6 +169,13 @@ async def upload_image(file: UploadFile = File(...)) -> JSONResponse:
 
 # ── Styles data helper ───────────────────────────────────────
 
+# Masters pack: one style, 15 reference images (user gets photo in all 15)
+STYLE_ID_MASTERS_PACK = 13
+MASTERS_PACK_PATHS = [
+    f"/static/landing/styles/masters/masters-{i:02d}.jpg" for i in range(1, 16)
+]
+
+
 def _load_styles_data() -> list:
     styles_file = Path(__file__).parent / "static" / "landing" / "styles-data.js"
     if not styles_file.exists():
@@ -197,6 +204,13 @@ async def create_order(
 
     order_id = f"ART-{int(datetime.utcnow().timestamp() * 1000)}-{uuid.uuid4().hex[:8].upper()}"
 
+    style_image_url = _resolve_style_image_url(style_data.get("styleImageUrl") if style_data else None)
+    style_image_urls = None
+    if order_data.style_id == STYLE_ID_MASTERS_PACK:
+        style_image_urls = json.dumps([_resolve_style_image_url(p) for p in MASTERS_PACK_PATHS])
+        if not style_image_url:
+            style_image_url = _resolve_style_image_url(MASTERS_PACK_PATHS[0])
+
     order = Order(
         order_id=order_id,
         status=OrderStatus.PENDING.value,
@@ -204,7 +218,8 @@ async def create_order(
         style_id=order_data.style_id,
         style_name=style_data.get("title") if style_data else None,
         image_url=order_data.image_url,
-        style_image_url=_resolve_style_image_url(style_data.get("styleImageUrl") if style_data else None),
+        style_image_url=style_image_url,
+        style_image_urls=style_image_urls,
         amount=12.00,
         billing_name=order_data.billing_name,
         billing_address=order_data.billing_address,
@@ -274,7 +289,15 @@ async def process_order_style_transfer(order_id: str, db: Session):
         logger.error(f"Order not found for processing: {order_id}")
         return
 
-    if not order.style_image_url:
+    style_urls = []
+    if order.style_image_urls:
+        try:
+            style_urls = json.loads(order.style_image_urls)
+        except (json.JSONDecodeError, TypeError):
+            style_urls = []
+    if not style_urls and order.style_image_url:
+        style_urls = [order.style_image_url]
+    if not style_urls:
         error_msg = "Style reference image missing"
         order.status = OrderStatus.FAILED.value
         order.style_transfer_error = error_msg
@@ -288,18 +311,24 @@ async def process_order_style_transfer(order_id: str, db: Session):
         db.commit()
 
         service = get_service()
-        result_url, job_id = await service.transfer_style(
-            image_url=order.image_url,
-            style_image_url=order.style_image_url,
-        )
+        result_urls_list = []
+        job_ids = []
+        for style_url in style_urls:
+            result_url, job_id = await service.transfer_style(
+                image_url=order.image_url,
+                style_image_url=style_url,
+            )
+            result_urls_list.append(result_url)
+            job_ids.append(job_id)
 
         order.status = OrderStatus.COMPLETED.value
-        order.result_urls = json.dumps([result_url])
-        order.style_transfer_job_id = job_id
+        order.result_urls = json.dumps(result_urls_list)
+        order.style_transfer_job_id = ",".join(job_ids) if job_ids else None
         order.completed_at = datetime.utcnow()
         db.commit()
 
-        EmailService().send_result_ready(order_id, order.email, result_url, order.style_name)
+        first_result_url = result_urls_list[0] if result_urls_list else None
+        EmailService().send_result_ready(order_id, order.email, first_result_url, order.style_name)
 
     except StyleTransferRateLimit as e:
         order.status = OrderStatus.FAILED.value

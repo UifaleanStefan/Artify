@@ -32,7 +32,11 @@
         <h2 class="payment-title">Complete Your Order</h2>
         <p class="payment-subtitle">Review your details and get your artwork.</p>
         <div class="payment-style-row" id="payment-style-row">
-          <div class="payment-style-thumb" id="payment-style-thumb"></div>
+          <div class="style-thumb-wrap payment-thumb-wrap">
+            <button type="button" class="style-thumb-arrow style-thumb-prev" id="payment-thumb-prev" aria-label="Previous" style="display:none">‹</button>
+            <div class="payment-style-thumb" id="payment-style-thumb"></div>
+            <button type="button" class="style-thumb-arrow style-thumb-next" id="payment-thumb-next" aria-label="Next" style="display:none">›</button>
+          </div>
           <div class="payment-style-info">
             <span class="payment-style-tag" id="payment-style-tag"></span>
             <h3 class="payment-style-name" id="payment-style-name"></h3>

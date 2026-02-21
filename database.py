@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from sqlalchemy import Column, DateTime, Float, Integer, String, Text, create_engine
+from sqlalchemy import Column, DateTime, Float, Integer, String, Text, create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
@@ -38,6 +38,7 @@ class Order(Base):
 
     image_url = Column(Text, nullable=False)
     style_image_url = Column(Text)
+    style_image_urls = Column(Text)  # JSON array of style URLs for packs (e.g. Masters 15)
     result_urls = Column(Text)  # JSON array of result image URLs
 
     style_transfer_job_id = Column(String(100))
@@ -84,6 +85,13 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    # Ensure style_image_urls exists for Masters pack (existing DBs from before this column)
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS style_image_urls TEXT"))
+            conn.commit()
+    except Exception:
+        pass  # Column may already exist or DB may not support IF NOT EXISTS
 
 
 def get_db():

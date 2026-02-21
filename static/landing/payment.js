@@ -15,9 +15,37 @@
   var deliveryEl = document.getElementById('payment-delivery');
   var backLink = document.getElementById('payment-back');
   var payBtn = document.getElementById('payment-pay-btn');
+  var thumbPrev = document.getElementById('payment-thumb-prev');
+  var thumbNext = document.getElementById('payment-thumb-next');
+
+  function fillPackThumb(el, s, prevBtn, nextBtn) {
+    var previewUrls = (s.previewImageUrls && s.previewImageUrls.length) ? s.previewImageUrls : (s.id === 13 ? ['/static/landing/styles/masters/masters-01.jpg', '/static/landing/styles/masters/masters-02.jpg', '/static/landing/styles/masters/masters-03.jpg', '/static/landing/styles/masters/masters-04.jpg', '/static/landing/styles/masters/masters-05.jpg'] : null);
+    if (previewUrls && previewUrls.length) {
+      el.className = 'payment-style-thumb style-thumb-h-scroll';
+      el.innerHTML = '';
+      previewUrls.forEach(function (url) {
+        var img = document.createElement('img');
+        img.src = url;
+        img.alt = s.title || 'Style';
+        el.appendChild(img);
+      });
+      if (prevBtn) { prevBtn.style.display = 'flex'; prevBtn.classList.add('show'); prevBtn.onclick = function () { el.scrollBy({ left: -el.clientWidth, behavior: 'smooth' }); }; }
+      if (nextBtn) { nextBtn.style.display = 'flex'; nextBtn.classList.add('show'); nextBtn.onclick = function () { el.scrollBy({ left: el.clientWidth, behavior: 'smooth' }); }; }
+    } else if (s.styleImageUrl) {
+      el.className = 'payment-style-thumb style-thumb-single';
+      el.innerHTML = '<img src="' + s.styleImageUrl + '" alt="' + (s.title || 'Style') + '" />';
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
+    } else {
+      el.className = 'payment-style-thumb ' + (s.thumbnailClass || '');
+      el.innerHTML = '';
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
+    }
+  }
 
   if (style) {
-    if (thumb) thumb.className = 'payment-style-thumb ' + (style.thumbnailClass || '');
+    if (thumb) fillPackThumb(thumb, style, thumbPrev, thumbNext);
     if (tag) { tag.textContent = style.category; var catKey = style.category ? style.category.toLowerCase().replace(/[\s-]+/g, '') : ''; tag.className = 'payment-style-tag tag-' + catKey; }
     if (name) name.textContent = style.title;
   }

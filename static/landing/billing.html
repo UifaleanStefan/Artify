@@ -54,7 +54,11 @@
         <div class="billing-summary">
           <h3>Order Summary</h3>
           <div class="billing-summary-item" id="billing-summary-item">
-            <div class="billing-summary-thumb" id="billing-thumb"></div>
+            <div class="style-thumb-wrap billing-thumb-wrap">
+              <button type="button" class="style-thumb-arrow style-thumb-prev" id="billing-thumb-prev" aria-label="Previous" style="display:none">‹</button>
+              <div class="billing-summary-thumb" id="billing-thumb"></div>
+              <button type="button" class="style-thumb-arrow style-thumb-next" id="billing-thumb-next" aria-label="Next" style="display:none">›</button>
+            </div>
             <div><strong id="billing-style-name">—</strong><p id="billing-style-artist" class="billing-summary-meta"></p></div>
           </div>
           <div class="billing-summary-line"><span>Delivery</span><span id="billing-email">—</span></div>

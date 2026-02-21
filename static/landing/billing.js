@@ -14,9 +14,37 @@
   var styleArtist = document.getElementById('billing-style-artist');
   var emailEl = document.getElementById('billing-email');
   var backLink = document.getElementById('billing-back');
+  var thumbPrev = document.getElementById('billing-thumb-prev');
+  var thumbNext = document.getElementById('billing-thumb-next');
+
+  function fillPackThumb(el, s, prevBtn, nextBtn) {
+    var previewUrls = (s.previewImageUrls && s.previewImageUrls.length) ? s.previewImageUrls : (s.id === 13 ? ['/static/landing/styles/masters/masters-01.jpg', '/static/landing/styles/masters/masters-02.jpg', '/static/landing/styles/masters/masters-03.jpg', '/static/landing/styles/masters/masters-04.jpg', '/static/landing/styles/masters/masters-05.jpg'] : null);
+    if (previewUrls && previewUrls.length) {
+      el.className = 'billing-summary-thumb style-thumb-h-scroll';
+      el.innerHTML = '';
+      previewUrls.forEach(function (url) {
+        var img = document.createElement('img');
+        img.src = url;
+        img.alt = s.title || 'Style';
+        el.appendChild(img);
+      });
+      if (prevBtn) { prevBtn.style.display = 'flex'; prevBtn.classList.add('show'); prevBtn.onclick = function () { el.scrollBy({ left: -el.clientWidth, behavior: 'smooth' }); }; }
+      if (nextBtn) { nextBtn.style.display = 'flex'; nextBtn.classList.add('show'); nextBtn.onclick = function () { el.scrollBy({ left: el.clientWidth, behavior: 'smooth' }); }; }
+    } else if (s.styleImageUrl) {
+      el.className = 'billing-summary-thumb style-thumb-single';
+      el.innerHTML = '<img src="' + s.styleImageUrl + '" alt="' + (s.title || 'Style') + '" />';
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
+    } else {
+      el.className = 'billing-summary-thumb ' + (s.thumbnailClass || '');
+      el.innerHTML = '';
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
+    }
+  }
 
   if (style) {
-    if (thumb) thumb.className = 'billing-summary-thumb ' + (style.thumbnailClass || '');
+    if (thumb) fillPackThumb(thumb, style, thumbPrev, thumbNext);
     if (styleName) styleName.textContent = style.title;
     if (styleArtist) styleArtist.textContent = style.artist;
   }

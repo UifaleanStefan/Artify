@@ -17,7 +17,7 @@ Artify must **not** use the Magic Moments database. Use either:
 - **Manual**: Create a **new** PostgreSQL instance on Render (or elsewhere) for Artify only. Copy its connection string and set `DATABASE_URL` in the Artify service environment.
 
 (Do not use the same database as Magic Moments.)
-- **Tables**: The `art_orders` table is created on **first backend startup** by `init_db()` in `main.py`. No migrations to run manually.
+- **Tables**: The `art_orders` table is created on **first backend startup** by `init_db()` in `main.py`. No migrations to run manually. If you already had `art_orders` from before the Masters-pack change, add the new column: `ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS style_image_urls TEXT;`
 
 For manual setup: copy the Artify Postgres Internal URL and set it as `DATABASE_URL` in the Artify service environment (see Backend section below).  
    If the URL uses `postgres://`, the app will rewrite it to `postgresql://` automatically.

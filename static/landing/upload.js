@@ -25,7 +25,8 @@
   var uploadFilename = document.getElementById('upload-filename');
   var createBtn = document.getElementById('create-btn');
   var uploadError = document.getElementById('upload-error');
-  var styleCardPreviews = document.getElementById('style-card-previews');
+  var styleThumbPrev = document.getElementById('style-thumb-prev');
+  var styleThumbNext = document.getElementById('style-thumb-next');
 
   function showError(msg) { if (uploadError) { uploadError.textContent = msg; uploadError.style.display = 'block'; } }
   function hideError() { if (uploadError) { uploadError.textContent = ''; uploadError.style.display = 'none'; } }
@@ -130,13 +131,29 @@
   } else {
     if (createBtn) createBtn.disabled = true;
     if (styleThumb) {
-      var useImage = style.styleImageUrl && style.styleImageUrl.length > 0;
-      styleThumb.className = 'upload-style-thumb ' + (useImage ? 'upload-style-thumb-with-img' : (style.thumbnailClass || ''));
+      var previewUrls = style.previewImageUrls && style.previewImageUrls.length > 0 ? style.previewImageUrls : (style.id === 13 ? ['/static/landing/styles/masters/masters-01.jpg', '/static/landing/styles/masters/masters-02.jpg', '/static/landing/styles/masters/masters-03.jpg', '/static/landing/styles/masters/masters-04.jpg', '/static/landing/styles/masters/masters-05.jpg'] : null);
+      var useHorizontalScroll = previewUrls && previewUrls.length > 0;
+      var useImage = (useHorizontalScroll || (style.styleImageUrl && style.styleImageUrl.length > 0));
+      styleThumb.className = 'upload-style-thumb ' + (useHorizontalScroll ? 'upload-style-thumb-h-scroll' : (useImage ? 'upload-style-thumb-with-img' : (style.thumbnailClass || '')));
       styleThumb.style.backgroundImage = '';
       styleThumb.style.background = useImage ? '#f0ede8' : '';
-      var existingImg = styleThumb.querySelector('img');
-      if (existingImg) existingImg.remove();
-      if (useImage) {
+      styleThumb.innerHTML = '';
+      if (useHorizontalScroll) {
+        previewUrls.forEach(function (url) {
+          var thumbImg = document.createElement('img');
+          thumbImg.src = url;
+          thumbImg.alt = style.title || 'Style';
+          thumbImg.setAttribute('aria-hidden', 'true');
+          thumbImg.onerror = function () { this.style.display = 'none'; };
+          styleThumb.appendChild(thumbImg);
+        });
+        if (styleThumbPrev) { styleThumbPrev.style.display = 'flex'; styleThumbPrev.onclick = function () { styleThumb.scrollBy({ left: -styleThumb.clientWidth, behavior: 'smooth' }); }; }
+        if (styleThumbNext) { styleThumbNext.style.display = 'flex'; styleThumbNext.onclick = function () { styleThumb.scrollBy({ left: styleThumb.clientWidth, behavior: 'smooth' }); }; }
+      } else {
+        if (styleThumbPrev) styleThumbPrev.style.display = 'none';
+        if (styleThumbNext) styleThumbNext.style.display = 'none';
+      }
+      if (!useHorizontalScroll && style.styleImageUrl) {
         var thumbImg = document.createElement('img');
         thumbImg.src = style.styleImageUrl;
         thumbImg.alt = style.title || 'Style';
@@ -153,18 +170,5 @@
     if (styleTitle) styleTitle.textContent = style.title;
     if (styleArtist) styleArtist.textContent = style.artist;
     if (styleDesc) styleDesc.textContent = style.description || '';
-    var previewUrls = style.previewImageUrls && style.previewImageUrls.length > 0 ? style.previewImageUrls : (style.id === 13 ? ['/static/landing/styles/masters/masters-01.jpg', '/static/landing/styles/masters/masters-02.jpg', '/static/landing/styles/masters/masters-03.jpg', '/static/landing/styles/masters/masters-04.jpg', '/static/landing/styles/masters/masters-05.jpg'] : null);
-    if (styleCardPreviews && previewUrls && previewUrls.length > 0) {
-      styleCardPreviews.style.display = 'block';
-      styleCardPreviews.innerHTML = '';
-      previewUrls.forEach(function (url) {
-        var img = document.createElement('img');
-        img.src = url;
-        img.alt = 'Style preview';
-        styleCardPreviews.appendChild(img);
-      });
-    } else if (styleCardPreviews) {
-      styleCardPreviews.style.display = 'none';
-    }
   }
 })();

@@ -40,14 +40,21 @@ class ReplicateClient:
             "Content-Type": "application/json",
         }
 
+    # fofr/style-transfer: structure_image = pose/face to keep, style_image = artistic style
+    STYLE_TRANSFER_VERSION = "fofr/style-transfer:f1023890703bc0a5a3a2c21b5e498833be5f6ef6e70e9daf6b9b3a4fd8309cf0"
+
     def submit_style_transfer(self, image_url: str, style_image_url: str) -> str:
         """Submit a style transfer job. Returns prediction ID."""
         url = f"{self.base_url}/predictions"
         payload = {
-            "version": "a]placeholder_model_version",
+            "version": self.STYLE_TRANSFER_VERSION,
             "input": {
-                "image": image_url,
+                "structure_image": image_url,
                 "style_image": style_image_url,
+                "structure_denoising_strength": 0.65,
+                "output_format": "webp",
+                "output_quality": 80,
+                "number_of_images": 1,
             },
         }
         with httpx.Client(timeout=self.timeout_seconds) as client:
