@@ -19,6 +19,7 @@ import httpx
 from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from clients import ReplicateClient, StyleTransferError, StyleTransferRateLimit, StyleTransferTimeout
@@ -224,6 +225,33 @@ async def get_last_order_results_txt(db: Session = Depends(get_db)):
     if not order or not urls:
         raise HTTPException(status_code=404, detail="No order with result images found")
     return PlainTextResponse("\n".join(urls))
+
+
+@app.post("/api/debug/resend-ready-email/{order_id}")
+async def resend_ready_email(order_id: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Resend ready email for a completed order with result images."""
+    order = db.query(Order).filter(Order.order_id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order.status != OrderStatus.COMPLETED.value:
+        raise HTTPException(status_code=400, detail=f"Order is not completed (status={order.status})")
+    if not order.result_urls:
+        raise HTTPException(status_code=400, detail="Order has no result images")
+    try:
+        urls = json.loads(order.result_urls) if isinstance(order.result_urls, str) else (order.result_urls or [])
+    except Exception:
+        urls = []
+    if not isinstance(urls, list) or not urls:
+        raise HTTPException(status_code=400, detail="Order has no valid result images")
+
+    background_tasks.add_task(
+        EmailService().send_result_ready,
+        order.order_id,
+        order.email,
+        urls,
+        order.style_name,
+    )
+    return {"status": "ok", "message": "Ready email resend queued", "order_id": order_id, "email": order.email}
 
 
 def _last_order_with_result_urls(db: Session):
@@ -538,7 +566,13 @@ async def process_order_style_transfer(order_id: str):
 
 def _run_style_transfer_sync(order_id: str) -> None:
     db = SessionLocal()
+    lock_acquired = False
     try:
+        lock_acquired = _try_acquire_order_lock_sync(db, order_id)
+        if not lock_acquired:
+            logger.info("Order %s is already being processed by another worker; skipping duplicate run", order_id)
+            return
+
         order = db.query(Order).filter(Order.order_id == order_id).first()
         if not order:
             logger.error(f"Order not found for processing: {order_id}")
@@ -574,7 +608,15 @@ def _run_style_transfer_sync(order_id: str) -> None:
                 job_ids = (order.style_transfer_job_id or "").split(",") if order.style_transfer_job_id else []
                 if order.replicate_prediction_details:
                     prediction_details = json.loads(order.replicate_prediction_details) if isinstance(order.replicate_prediction_details, str) else (order.replicate_prediction_details or [])
-                if isinstance(result_urls_list, list) and len(result_urls_list) < len(style_urls):
+                if isinstance(result_urls_list, list):
+                    # Never reset completed/partial results; preserve deterministic ordering.
+                    if len(result_urls_list) >= len(style_urls):
+                        if order.status != OrderStatus.COMPLETED.value:
+                            order.status = OrderStatus.COMPLETED.value
+                            order.completed_at = order.completed_at or datetime.utcnow()
+                            db.commit()
+                        logger.info("Order %s already has all %d results; skipping", order_id, len(style_urls))
+                        return
                     skip = len(result_urls_list)
                     job_ids = [x.strip() for x in job_ids if x.strip()][:skip]
                     prediction_details = prediction_details[:skip] if isinstance(prediction_details, list) else []
@@ -662,7 +704,33 @@ def _run_style_transfer_sync(order_id: str) -> None:
             order.failed_at = datetime.utcnow()
             db.commit()
     finally:
+        if lock_acquired:
+            _release_order_lock_sync(db, order_id)
         db.close()
+
+
+def _try_acquire_order_lock_sync(db: Session, order_id: str) -> bool:
+    """Cross-process lock using PostgreSQL advisory locks."""
+    try:
+        row = db.execute(
+            text("SELECT pg_try_advisory_lock(hashtext(:order_key)) AS locked"),
+            {"order_key": order_id},
+        ).first()
+        return bool(row and row[0])
+    except Exception:
+        # If advisory locks are unavailable, continue with in-process guard only.
+        logger.warning("Could not acquire advisory lock for %s; proceeding without DB lock", order_id)
+        return True
+
+
+def _release_order_lock_sync(db: Session, order_id: str) -> None:
+    try:
+        db.execute(
+            text("SELECT pg_advisory_unlock(hashtext(:order_key))"),
+            {"order_key": order_id},
+        )
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

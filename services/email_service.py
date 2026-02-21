@@ -3,6 +3,7 @@ Email service for order notifications.
 """
 import logging
 import smtplib
+import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Optional
@@ -75,15 +76,36 @@ class EmailService:
         msg["From"] = f"{s.from_name} <{s.from_email}>"
         msg["To"] = to
         msg.attach(MIMEText(html_body, "html"))
-        try:
-            with smtplib.SMTP(s.smtp_host, s.smtp_port) as server:
-                server.starttls()
-                if s.smtp_user and s.smtp_password:
-                    server.login(s.smtp_user, s.smtp_password)
-                server.send_message(msg)
-            logger.info(f"Email sent to {to}")
-        except Exception as e:
-            logger.error(f"SMTP send failed: {e}")
+        max_attempts = 3
+        for attempt in range(1, max_attempts + 1):
+            try:
+                timeout_seconds = 30
+                if int(s.smtp_port) == 465:
+                    with smtplib.SMTP_SSL(s.smtp_host, s.smtp_port, timeout=timeout_seconds) as server:
+                        if s.smtp_user and s.smtp_password:
+                            server.login(s.smtp_user, s.smtp_password)
+                        server.send_message(msg)
+                else:
+                    with smtplib.SMTP(s.smtp_host, s.smtp_port, timeout=timeout_seconds) as server:
+                        server.starttls()
+                        if s.smtp_user and s.smtp_password:
+                            server.login(s.smtp_user, s.smtp_password)
+                        server.send_message(msg)
+                logger.info("Email sent to %s via SMTP (attempt %d/%d, port %s)", to, attempt, max_attempts, s.smtp_port)
+                return
+            except Exception as e:
+                if attempt == max_attempts:
+                    logger.error("SMTP send failed after %d attempts: %s", max_attempts, e)
+                    return
+                backoff = 2 ** attempt
+                logger.warning(
+                    "SMTP send failed (attempt %d/%d): %s. Retrying in %ss",
+                    attempt,
+                    max_attempts,
+                    e,
+                    backoff,
+                )
+                time.sleep(backoff)
 
     def _send_sendgrid(self, to: str, subject: str, html_body: str):
         import httpx
