@@ -2,19 +2,22 @@
 FastAPI application for AI art style transfer.
 """
 import asyncio
+import io
 import json
 import logging
 import sys
 import time
 import uuid
+import zipfile
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import AsyncGenerator, Optional
+from urllib.parse import urlparse
 
 import httpx
 from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
@@ -462,6 +465,40 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
     )
 
 
+@app.get("/api/orders/{order_id}/download-all")
+async def download_all_results(order_id: str, db: Session = Depends(get_db)):
+    """Download all generated images for an order as a zip file."""
+    order = db.query(Order).filter(Order.order_id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if not order.result_urls:
+        raise HTTPException(status_code=404, detail="No result images available yet")
+    try:
+        urls = json.loads(order.result_urls) if isinstance(order.result_urls, str) else (order.result_urls or [])
+    except Exception:
+        urls = []
+    if not isinstance(urls, list) or not urls:
+        raise HTTPException(status_code=404, detail="No result images available yet")
+
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for i, u in enumerate(urls, start=1):
+            try:
+                resp = httpx.get(u, timeout=45)
+                if resp.status_code >= 400:
+                    continue
+                ext = Path(urlparse(u).path).suffix or ".jpg"
+                zf.writestr(f"artify_{order_id}_{i:02d}{ext}", resp.content)
+            except Exception:
+                continue
+    zip_buffer.seek(0)
+    return Response(
+        content=zip_buffer.getvalue(),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{order_id}-artify-images.zip"'},
+    )
+
+
 @app.post("/api/orders/{order_id}/pay")
 async def pay_order(
     order_id: str,
@@ -597,8 +634,7 @@ def _run_style_transfer_sync(order_id: str) -> None:
             order.completed_at = datetime.utcnow()
             db.commit()
 
-            first_result_url = result_urls_list[0] if result_urls_list else None
-            EmailService().send_result_ready(order_id, order.email, first_result_url, order.style_name)
+            EmailService().send_result_ready(order_id, order.email, result_urls_list, order.style_name)
 
         except StyleTransferRateLimit as e:
             order.status = OrderStatus.FAILED.value
