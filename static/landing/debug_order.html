@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Debug Order – Artify</title>
+  <link rel="stylesheet" href="/static/landing/styles.css" />
+  <link rel="stylesheet" href="/static/landing/debug_order.css?v=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="header header-with-border">
+    <a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a>
+    <nav class="nav"><a href="/">Home</a><a href="/styles">Styles</a></nav>
+  </header>
+  <main class="debug-main">
+    <div class="debug-card">
+      <h1 class="debug-title">Debug: View Order Results</h1>
+      <p class="debug-desc">Enter an order ID (e.g. ART-1771678963768-1E071781) or the full order URL to see status and all result images.</p>
+      <div class="debug-form">
+        <input type="text" id="debug-input" placeholder="Order ID or URL (e.g. https://.../order/ART-xxx)" class="debug-input" />
+        <button type="button" id="debug-submit" class="btn btn-primary">View results</button>
+      </div>
+      <div id="debug-error" class="debug-error" style="display:none"></div>
+      <div id="debug-output" class="debug-output" style="display:none">
+        <h2 class="debug-output-title">Order</h2>
+        <p class="debug-order-id" id="debug-order-id">—</p>
+        <p class="debug-status" id="debug-status">—</p>
+        <p id="debug-error-msg" class="debug-error-msg" style="display:none"></p>
+        <div class="debug-results-section" id="debug-results-section" style="display:none">
+          <h3 class="debug-results-title">Result images (<span id="debug-result-count">0</span>)</h3>
+          <div class="debug-gallery" id="debug-gallery"></div>
+        </div>
+        <div class="debug-details-section" id="debug-details-section" style="display:none">
+          <h3 class="debug-details-title">Replicate prediction details</h3>
+          <pre id="debug-details-json" class="debug-details-json"></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="/static/landing/debug_order.js?v=1"></script>
+</body>
+</html>

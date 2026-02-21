@@ -13,6 +13,14 @@
   var styleNameEl = document.getElementById('done-style-name');
   var emailEl = document.getElementById('done-email');
   var copyBtn = document.getElementById('done-copy-btn');
+  var doneTitle = document.getElementById('done-title');
+  var doneSubtitle = document.getElementById('done-subtitle');
+  var doneIcon = document.getElementById('done-icon');
+  var doneMessage = document.getElementById('done-message');
+  var doneMessageText = document.getElementById('done-message-text');
+  var doneFirstResult = document.getElementById('done-first-result');
+  var doneFirstResultLink = document.getElementById('done-first-result-link');
+  var doneFirstResultImg = document.getElementById('done-first-result-img');
 
   if (orderIdEl) orderIdEl.textContent = orderId || '—';
   if (styleNameEl) styleNameEl.textContent = style ? (style.title + ' – ' + style.artist) : '—';
@@ -28,5 +36,33 @@
   if (orderId && viewStatusWrap && viewStatusLink) {
     viewStatusLink.href = '/order/' + encodeURIComponent(orderId);
     viewStatusWrap.style.display = 'block';
+  }
+
+  if (orderId) {
+    fetch('/api/orders/' + encodeURIComponent(orderId) + '/status')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var status = (data.status || '').toLowerCase();
+        var resultUrls = data.result_urls;
+        var urls = [];
+        if (resultUrls) {
+          try { urls = typeof resultUrls === 'string' ? JSON.parse(resultUrls) : (resultUrls || []); } catch (e) {}
+        }
+        if (status === 'completed' && urls.length > 0) {
+          if (doneTitle) doneTitle.textContent = 'Your Artwork is Ready!';
+          if (doneSubtitle) doneSubtitle.textContent = 'Here\'s your first piece.';
+          if (doneIcon) doneIcon.style.display = 'none';
+          if (doneFirstResult && doneFirstResultLink && doneFirstResultImg) {
+            doneFirstResultImg.src = urls[0];
+            doneFirstResultImg.alt = 'Your artwork';
+            doneFirstResultLink.href = urls[0];
+            doneFirstResult.style.display = 'block';
+          }
+          if (doneMessageText) doneMessageText.textContent = 'We\'ve sent the rest of your artwork to your email.';
+        } else if (status === 'failed' && data.error) {
+          if (doneMessageText) doneMessageText.textContent = 'Something went wrong: ' + data.error;
+        }
+      })
+      .catch(function () {});
   }
 })();

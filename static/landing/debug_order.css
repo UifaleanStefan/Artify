@@ -1,0 +1,48 @@
+.debug-main { padding: 2rem 1.5rem; max-width: 900px; margin: 0 auto; }
+.debug-card {
+  background: var(--bg-light);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow);
+}
+.debug-title { margin: 0 0 0.5rem; font-size: 1.5rem; color: var(--primary); }
+.debug-desc { color: var(--text-muted); font-size: 0.9375rem; margin: 0 0 1.5rem; }
+.debug-form { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.debug-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.625rem 1rem;
+  border: 2px solid #e5e0d5;
+  border-radius: var(--radius);
+  font-size: 0.9375rem;
+  font-family: inherit;
+}
+.debug-input:focus { outline: none; border-color: var(--primary); }
+.debug-error { color: var(--warm); font-size: 0.9375rem; margin-bottom: 1rem; }
+.debug-output { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e5e0d5; }
+.debug-output-title { margin: 0 0 0.5rem; font-size: 1.125rem; }
+.debug-order-id { font-family: monospace; font-size: 0.875rem; color: var(--text-muted); margin: 0 0 0.25rem; }
+.debug-status { font-weight: 600; margin: 0 0 0.5rem; }
+.debug-error-msg { color: var(--warm); font-size: 0.9375rem; margin: 0 0 1rem; }
+.debug-results-section { margin: 1.5rem 0; }
+.debug-results-title { margin: 0 0 0.75rem; font-size: 1rem; }
+.debug-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1rem;
+}
+.debug-gallery a { display: block; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.debug-gallery img { display: block; width: 100%; height: auto; object-fit: cover; }
+.debug-details-section { margin-top: 1.5rem; }
+.debug-details-title { margin: 0 0 0.5rem; font-size: 1rem; }
+.debug-details-json {
+  background: var(--primary-dark);
+  color: #e5e7eb;
+  padding: 1rem;
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  overflow: auto;
+  max-height: 400px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

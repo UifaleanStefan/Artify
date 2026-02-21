@@ -14,3 +14,9 @@
 .done-cta { margin-bottom: 1rem; }
 .done-home-link { display: block; font-size: 0.9375rem; color: var(--text-muted); text-decoration: none; }
 .done-home-link:hover { color: var(--primary); text-decoration: underline; }
+
+.done-first-result { margin-bottom: 1.5rem; }
+.done-first-result-label { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin: 0 0 0.5rem; }
+.done-first-result a { display: inline-block; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-lg); }
+.done-first-result img { display: block; max-width: 100%; height: auto; max-height: 320px; object-fit: contain; }
+.done-first-result-rest { font-size: 0.9375rem; color: var(--text-muted); margin: 0.75rem 0 0; }

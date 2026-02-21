@@ -17,16 +17,21 @@
   </header>
   <main class="done-main">
     <div class="done-card">
-      <div class="done-icon">🎨</div>
-      <h1 class="done-title">Your Artwork is Being Created!</h1>
-      <p class="done-subtitle">Our AI is painting your portrait right now. This usually takes 2–5 minutes.</p>
+      <div class="done-icon" id="done-icon">🎨</div>
+      <h1 class="done-title" id="done-title">Your Artwork is Being Created!</h1>
+      <p class="done-subtitle" id="done-subtitle">Our AI is painting your portrait right now. This usually takes 2–5 minutes.</p>
+      <div class="done-first-result" id="done-first-result" style="display:none">
+        <p class="done-first-result-label">Your first artwork</p>
+        <a id="done-first-result-link" href="#" target="_blank" rel="noopener"><img id="done-first-result-img" src="" alt="Your artwork" /></a>
+        <p class="done-first-result-rest">We've sent the rest of your artwork to your email.</p>
+      </div>
       <div class="done-details">
         <div class="done-detail"><span>Order ID</span><span id="done-order-id">—</span><button class="done-copy" id="done-copy-btn" title="Copy">📋</button></div>
         <div class="done-detail"><span>Art Style</span><span id="done-style-name">—</span></div>
         <div class="done-detail"><span>Delivery Email</span><span id="done-email">—</span></div>
       </div>
-      <div class="done-message">
-        <p>We'll email your finished artwork as soon as it's ready. Keep an eye on your inbox!</p>
+      <div class="done-message" id="done-message">
+        <p id="done-message-text">We'll email your finished artwork as soon as it's ready. Keep an eye on your inbox!</p>
         <p id="done-view-status-wrap" style="display:none"><a href="#" id="done-view-status-link">View order status &amp; results →</a></p>
       </div>
       <a href="/styles" class="btn btn-primary btn-lg done-cta">Create Another Portrait</a>

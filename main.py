@@ -126,6 +126,12 @@ async def order_status_page(order_id: str) -> FileResponse:
     return FileResponse(STATIC_DIR / "landing" / "order_status.html", headers=_HTML_HEADERS)
 
 
+@app.get("/debug/order")
+async def debug_order_page() -> FileResponse:
+    """Debug page: enter order ID or URL to view all results and prediction details."""
+    return FileResponse(STATIC_DIR / "landing" / "debug_order.html", headers=_HTML_HEADERS)
+
+
 # ── Upload API ───────────────────────────────────────────────
 
 def _upload_to_litterbox(file_path: str, filename: str) -> str:
