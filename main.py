@@ -338,7 +338,10 @@ async def process_order_style_transfer(order_id: str, db: Session):
         service = get_service()
         result_urls_list = []
         job_ids = []
-        for style_url in style_urls:
+        for i, style_url in enumerate(style_urls):
+            if i > 0:
+                # Space out requests to avoid Replicate rate limit (e.g. 15 predictions/min)
+                await asyncio.sleep(6)
             result_url, job_id = await service.transfer_style(
                 image_url=order.image_url,
                 style_image_url=style_url,

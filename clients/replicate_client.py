@@ -27,12 +27,16 @@ class ReplicateClient:
         timeout_seconds: int = 120,
         polling_timeout_seconds: int = 300,
         polling_interval_seconds: int = 5,
+        rate_limit_retries: int = 4,
+        rate_limit_base_wait: float = 15.0,
     ):
         self.api_token = api_token
         self.base_url = "https://api.replicate.com/v1"
         self.timeout_seconds = timeout_seconds
         self.polling_timeout = polling_timeout_seconds
         self.polling_interval = polling_interval_seconds
+        self.rate_limit_retries = rate_limit_retries
+        self.rate_limit_base_wait = rate_limit_base_wait
 
     def _headers(self) -> dict:
         return {
@@ -61,18 +65,30 @@ class ReplicateClient:
                 "number_of_images": 1,
             },
         }
-        with httpx.Client(timeout=self.timeout_seconds) as client:
-            r = client.post(url, json=payload, headers=self._headers())
-            if r.status_code == 429:
-                raise StyleTransferRateLimit("Rate limit exceeded")
-            if r.status_code >= 400:
-                raise StyleTransferError(f"Replicate API error {r.status_code}: {r.text}")
-            data = r.json()
-            prediction_id = data.get("id")
-            if not prediction_id:
-                raise StyleTransferError("No prediction ID returned")
-            logger.info(f"Style transfer job submitted: {prediction_id}")
-            return prediction_id
+        for attempt in range(self.rate_limit_retries):
+            with httpx.Client(timeout=self.timeout_seconds) as client:
+                r = client.post(url, json=payload, headers=self._headers())
+                if r.status_code == 429:
+                    wait = self.rate_limit_base_wait * (2 ** attempt)
+                    if attempt < self.rate_limit_retries - 1:
+                        logger.warning(
+                            "Replicate rate limit (429), waiting %.0fs before retry %d/%d",
+                            wait,
+                            attempt + 1,
+                            self.rate_limit_retries - 1,
+                        )
+                        time.sleep(wait)
+                        continue
+                    raise StyleTransferRateLimit("Rate limit exceeded after retries")
+                if r.status_code >= 400:
+                    raise StyleTransferError(f"Replicate API error {r.status_code}: {r.text}")
+                data = r.json()
+                prediction_id = data.get("id")
+                if not prediction_id:
+                    raise StyleTransferError("No prediction ID returned")
+                logger.info(f"Style transfer job submitted: {prediction_id}")
+                return prediction_id
+        raise StyleTransferRateLimit("Rate limit exceeded")
 
     def poll_result(self, prediction_id: str) -> str:
         """Poll until prediction completes. Returns output URL."""
