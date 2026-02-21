@@ -120,6 +120,12 @@ async def done_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "landing" / "create_done.html", headers=_HTML_HEADERS)
 
 
+@app.get("/order/{order_id}")
+async def order_status_page(order_id: str) -> FileResponse:
+    """Page where users can view order status and result images (e.g. /order/ART-xxx)."""
+    return FileResponse(STATIC_DIR / "landing" / "order_status.html", headers=_HTML_HEADERS)
+
+
 # ── Upload API ───────────────────────────────────────────────
 
 def _upload_to_litterbox(file_path: str, filename: str) -> str:
@@ -278,6 +284,7 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
         order_id=order.order_id,
         status=order.status,
         result_urls=order.result_urls,
+        replicate_prediction_details=order.replicate_prediction_details,
         error=order.style_transfer_error,
     )
 
@@ -338,9 +345,9 @@ async def process_order_style_transfer(order_id: str, db: Session):
         service = get_service()
         result_urls_list = []
         job_ids = []
+        prediction_details = []
         for i, style_url in enumerate(style_urls):
             if i > 0:
-                # Space out requests to avoid Replicate rate limit (e.g. 15 predictions/min)
                 await asyncio.sleep(6)
             result_url, job_id = await service.transfer_style(
                 image_url=order.image_url,
@@ -348,10 +355,38 @@ async def process_order_style_transfer(order_id: str, db: Session):
             )
             result_urls_list.append(result_url)
             job_ids.append(job_id)
+            # Fetch full prediction from API and store all useful fields
+            try:
+                pred = service.provider.get_prediction(job_id)
+                prediction_details.append({
+                    "id": pred.get("id"),
+                    "status": pred.get("status"),
+                    "error": pred.get("error"),
+                    "metrics": pred.get("metrics"),
+                    "created_at": pred.get("created_at"),
+                    "started_at": pred.get("started_at"),
+                    "completed_at": pred.get("completed_at"),
+                    "result_url": result_url,
+                    "model": pred.get("model"),
+                    "version": pred.get("version"),
+                    "source": pred.get("source"),
+                    "data_removed": pred.get("data_removed"),
+                    "urls": pred.get("urls"),
+                    "logs": (pred.get("logs") or "")[:500] if pred.get("logs") else None,
+                })
+            except Exception:
+                prediction_details.append({
+                    "id": job_id,
+                    "status": "succeeded",
+                    "result_url": result_url,
+                })
+            # Save progress after each transfer so we have partial state if the job is interrupted
+            order.result_urls = json.dumps(result_urls_list)
+            order.style_transfer_job_id = ",".join(job_ids)
+            order.replicate_prediction_details = json.dumps(prediction_details)
+            db.commit()
 
         order.status = OrderStatus.COMPLETED.value
-        order.result_urls = json.dumps(result_urls_list)
-        order.style_transfer_job_id = ",".join(job_ids) if job_ids else None
         order.completed_at = datetime.utcnow()
         db.commit()
 

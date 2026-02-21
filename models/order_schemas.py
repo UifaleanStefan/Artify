@@ -25,6 +25,8 @@ class OrderResponse(BaseModel):
     style_name: Optional[str] = None
     image_url: str
     result_urls: Optional[str] = None
+    style_transfer_job_id: Optional[str] = None
+    replicate_prediction_details: Optional[str] = None
     amount: Optional[float] = None
     created_at: datetime
     completed_at: Optional[datetime] = None
@@ -34,4 +36,5 @@ class OrderStatusResponse(BaseModel):
     order_id: str
     status: str
     result_urls: Optional[str] = None
+    replicate_prediction_details: Optional[str] = None
     error: Optional[str] = None

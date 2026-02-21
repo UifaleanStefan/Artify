@@ -43,6 +43,7 @@ class Order(Base):
 
     style_transfer_job_id = Column(String(100))
     style_transfer_error = Column(Text)
+    replicate_prediction_details = Column(Text)  # JSON array of Replicate prediction objects: id, status, error, metrics, created_at, started_at, completed_at, result_url, model, version, source, urls, logs
 
     amount = Column(Float, default=12.00)
     payment_status = Column(String(20), default="pending")
@@ -86,12 +87,16 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def init_db():
     Base.metadata.create_all(bind=engine)
     # Ensure style_image_urls exists for Masters pack (existing DBs from before this column)
-    try:
-        with engine.connect() as conn:
-            conn.execute(text("ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS style_image_urls TEXT"))
-            conn.commit()
-    except Exception:
-        pass  # Column may already exist or DB may not support IF NOT EXISTS
+    for col_sql in (
+        "ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS style_image_urls TEXT",
+        "ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS replicate_prediction_details TEXT",
+    ):
+        try:
+            with engine.connect() as conn:
+                conn.execute(text(col_sql))
+                conn.commit()
+        except Exception:
+            pass
 
 
 def get_db():

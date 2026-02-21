@@ -3,7 +3,7 @@ Replicate API client for style transfer.
 """
 import logging
 import time
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import httpx
 
@@ -89,6 +89,25 @@ class ReplicateClient:
                 logger.info(f"Style transfer job submitted: {prediction_id}")
                 return prediction_id
         raise StyleTransferRateLimit("Rate limit exceeded")
+
+    def get_prediction(self, prediction_id: str) -> Dict[str, Any]:
+        """Get a single prediction by ID. Returns full API response."""
+        url = f"{self.base_url}/predictions/{prediction_id}"
+        with httpx.Client(timeout=self.timeout_seconds) as client:
+            r = client.get(url, headers=self._headers())
+            if r.status_code >= 400:
+                raise StyleTransferError(f"Get prediction error {r.status_code}: {r.text}")
+            return r.json()
+
+    def list_predictions(self) -> List[Dict[str, Any]]:
+        """List recent predictions (most recent first, 100 per page). Returns list of prediction objects."""
+        url = f"{self.base_url}/predictions"
+        with httpx.Client(timeout=self.timeout_seconds) as client:
+            r = client.get(url, headers=self._headers())
+            if r.status_code >= 400:
+                raise StyleTransferError(f"List predictions error {r.status_code}: {r.text}")
+            data = r.json()
+            return data.get("results", [])
 
     def poll_result(self, prediction_id: str) -> str:
         """Poll until prediction completes. Returns output URL."""

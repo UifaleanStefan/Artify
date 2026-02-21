@@ -23,4 +23,10 @@
       navigator.clipboard.writeText(orderId).then(function () { copyBtn.textContent = '✓'; setTimeout(function () { copyBtn.textContent = '📋'; }, 2000); });
     });
   }
+  var viewStatusWrap = document.getElementById('done-view-status-wrap');
+  var viewStatusLink = document.getElementById('done-view-status-link');
+  if (orderId && viewStatusWrap && viewStatusLink) {
+    viewStatusLink.href = '/order/' + encodeURIComponent(orderId);
+    viewStatusWrap.style.display = 'block';
+  }
 })();
