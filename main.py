@@ -19,6 +19,21 @@ from sqlalchemy.orm import Session
 
 from clients import ReplicateClient, StyleTransferError, StyleTransferRateLimit, StyleTransferTimeout
 from config import get_settings, get_upload_dir
+
+
+def _resolve_style_image_url(style_image_url: Optional[str]) -> Optional[str]:
+    """If style_image_url is relative, make it absolute using PUBLIC_BASE_URL (required for API)."""
+    if not style_image_url or not style_image_url.strip():
+        return style_image_url
+    url = style_image_url.strip()
+    if url.startswith("http://") or url.startswith("https://"):
+        return url
+    if url.startswith("/"):
+        base = (get_settings().public_base_url or "").rstrip("/")
+        return f"{base}{url}" if base else url
+    return url
+
+
 from database import Order, OrderStatus, get_db, init_db
 from models import StyleTransferResponse
 from models.order_schemas import OrderCreateRequest, OrderResponse, OrderStatusResponse
@@ -185,7 +200,7 @@ async def create_order(
         style_id=order_data.style_id,
         style_name=style_data.get("title") if style_data else None,
         image_url=order_data.image_url,
-        style_image_url=style_data.get("styleImageUrl") if style_data else None,
+        style_image_url=_resolve_style_image_url(style_data.get("styleImageUrl") if style_data else None),
         amount=12.00,
         billing_name=order_data.billing_name,
         billing_address=order_data.billing_address,

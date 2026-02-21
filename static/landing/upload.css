@@ -16,6 +16,21 @@
 .upload-section-title { margin: 0 0 1.25rem; font-size: 1.375rem; font-weight: 600; color: var(--text); }
 .upload-subtitle { margin: 0 0 1.25rem; font-size: 0.9375rem; color: var(--text-muted); line-height: 1.5; }
 
+/* Style preview strip (5 images, scroll) */
+.upload-style-previews { margin-bottom: 1.25rem; }
+.upload-style-previews-title { margin: 0 0 0.5rem; font-size: 0.875rem; font-weight: 600; color: var(--text); }
+.upload-style-previews-scroll {
+  display: flex; gap: 0.75rem; overflow-x: auto; overflow-y: hidden;
+  padding: 0.25rem 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+}
+.upload-style-previews-scroll::-webkit-scrollbar { height: 8px; }
+.upload-style-previews-scroll::-webkit-scrollbar-track { background: var(--bg-accent); border-radius: 4px; }
+.upload-style-previews-scroll::-webkit-scrollbar-thumb { background: var(--accent-light); border-radius: 4px; }
+.upload-style-previews-scroll img {
+  flex-shrink: 0; width: 140px; height: 140px; object-fit: cover; border-radius: 8px;
+  scroll-snap-align: start; border: 2px solid #e5e0d5;
+}
+
 /* Left: Selected style card */
 .upload-style-card {
   background: white;
@@ -27,6 +42,10 @@
 .upload-style-thumb {
   width: 100%; aspect-ratio: 9 / 7; border-radius: 8px;
   margin-bottom: 0.75rem; background-size: cover; background-position: center;
+  overflow: hidden; position: relative;
+}
+.upload-style-thumb img {
+  display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 8px;
 }
 .upload-style-tag {
   display: inline-block; padding: 0.2rem 0.6rem; border-radius: 4px;

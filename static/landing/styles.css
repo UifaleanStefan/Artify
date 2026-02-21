@@ -416,6 +416,10 @@ body {
   background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.7) 100%),
     linear-gradient(135deg, #1a3c6e 0%, #c9a96e 50%, #2c3e50 100%);
 }
+.style-masters-placeholder {
+  background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%),
+    linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
+}
 .style-tag {
   position: absolute;
   top: 1rem;
@@ -434,6 +438,7 @@ body {
 .tag-ukiyoe { background: #1a3c6e; }
 .tag-baroque { background: #5c4033; }
 .tag-fauvism { background: #e74c3c; }
+.tag-masters { background: var(--primary); }
 .style-card h3 { margin: 0 0 0.25rem; font-size: 1.25rem; }
 .style-card .style-artist { font-size: 0.875rem; opacity: 0.9; margin: 0; }
 .style-preview { color: white; text-decoration: none; font-size: 0.9375rem; font-weight: 500; }
