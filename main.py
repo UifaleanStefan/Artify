@@ -34,7 +34,7 @@ def _resolve_style_image_url(style_image_url: Optional[str]) -> Optional[str]:
     return url
 
 
-from database import Order, OrderStatus, get_db, init_db, SessionLocal
+from database import Order, OrderStatus, get_db, SessionLocal
 from models import StyleTransferResponse
 from models.order_schemas import OrderCreateRequest, OrderResponse, OrderStatusResponse
 from services import StyleTransferService
@@ -69,8 +69,6 @@ def get_service() -> StyleTransferService:
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Artify service starting")
     get_upload_dir().mkdir(parents=True, exist_ok=True)
-    init_db()
-    logger.info("Database initialized")
     yield
     logger.info("Artify service shutting down")
 
