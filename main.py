@@ -13,7 +13,7 @@ from typing import AsyncGenerator, Optional
 
 import httpx
 from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
@@ -132,6 +132,12 @@ async def debug_order_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "landing" / "debug_order.html", headers=_HTML_HEADERS)
 
 
+@app.get("/debug/last-results")
+async def debug_last_results_page() -> FileResponse:
+    """Debug page: show all result images from the last order that has results."""
+    return FileResponse(STATIC_DIR / "landing" / "debug_last_results.html", headers=_HTML_HEADERS)
+
+
 @app.get("/api/debug/last-order", response_model=OrderStatusResponse)
 async def get_last_order_status(db: Session = Depends(get_db)) -> OrderStatusResponse:
     """Return status and results of the most recent order (by id). For debugging."""
@@ -150,21 +156,9 @@ async def get_last_order_status(db: Session = Depends(get_db)) -> OrderStatusRes
 @app.get("/api/debug/last-order-results")
 async def get_last_order_results(db: Session = Depends(get_db)) -> JSONResponse:
     """Return the 15 (or N) result image URLs from the most recent order that has results. For debugging."""
-    # Last order that has non-empty result_urls
-    order = (
-        db.query(Order)
-        .filter(Order.result_urls.isnot(None), Order.result_urls != "")
-        .order_by(Order.id.desc())
-        .first()
-    )
+    order, urls = _last_order_with_result_urls(db)
     if not order:
         raise HTTPException(status_code=404, detail="No order with result images found")
-    urls = []
-    if order.result_urls:
-        try:
-            urls = json.loads(order.result_urls) if isinstance(order.result_urls, str) else (order.result_urls or [])
-        except Exception:
-            pass
     return JSONResponse(
         content={
             "order_id": order.order_id,
@@ -173,6 +167,32 @@ async def get_last_order_results(db: Session = Depends(get_db)) -> JSONResponse:
             "result_urls": urls,
         }
     )
+
+
+@app.get("/api/debug/last-order-results.txt")
+async def get_last_order_results_txt(db: Session = Depends(get_db)):
+    """Return only the image URLs from the last order with results, one per line (what the API sent back)."""
+    order, urls = _last_order_with_result_urls(db)
+    if not order or not urls:
+        raise HTTPException(status_code=404, detail="No order with result images found")
+    return PlainTextResponse("\n".join(urls))
+
+
+def _last_order_with_result_urls(db: Session):
+    """Return (order, list of result URLs) for the most recent order that has result_urls."""
+    order = (
+        db.query(Order)
+        .filter(Order.result_urls.isnot(None), Order.result_urls != "")
+        .order_by(Order.id.desc())
+        .first()
+    )
+    urls = []
+    if order and order.result_urls:
+        try:
+            urls = json.loads(order.result_urls) if isinstance(order.result_urls, str) else (order.result_urls or [])
+        except Exception:
+            pass
+    return order, urls
 
 
 # ── Upload API ───────────────────────────────────────────────

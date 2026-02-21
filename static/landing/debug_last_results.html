@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Last results – Artify</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 1rem; background: #1a1a1a; color: #eee; }
+    h1 { font-size: 1.25rem; }
+    .error { color: #f87171; }
+    .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .gallery a { display: block; border-radius: 8px; overflow: hidden; }
+    .gallery img { width: 100%; height: auto; display: block; }
+    .urls { margin-top: 1.5rem; font-size: 0.875rem; }
+    .urls h2 { font-size: 1rem; }
+    .urls a { color: #93c5fd; word-break: break-all; }
+    .urls p { margin: 0.25rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Last order results</h1>
+  <p id="msg">Loading…</p>
+  <div class="gallery" id="gallery"></div>
+  <div class="urls" id="urls" style="display:none">
+    <h2>URLs (copy these)</h2>
+    <div id="url-list"></div>
+  </div>
+  <script>
+    fetch('/api/debug/last-order-results')
+      .then(function (r) {
+        if (!r.ok) throw new Error(r.status === 404 ? 'No order with result images found.' : 'Request failed');
+        return r.json();
+      })
+      .then(function (data) {
+        document.getElementById('msg').textContent = 'Order ' + data.order_id + ' — ' + data.count + ' images';
+        var gallery = document.getElementById('gallery');
+        var urlList = document.getElementById('url-list');
+        (data.result_urls || []).forEach(function (url, i) {
+          var a = document.createElement('a');
+          a.href = url;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          var img = document.createElement('img');
+          img.src = url;
+          img.alt = 'Result ' + (i + 1);
+          a.appendChild(img);
+          gallery.appendChild(a);
+          var p = document.createElement('p');
+          var link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.textContent = url;
+          p.appendChild(link);
+          urlList.appendChild(p);
+        });
+        if ((data.result_urls || []).length) document.getElementById('urls').style.display = 'block';
+      })
+      .catch(function (err) {
+        document.getElementById('msg').className = 'error';
+        document.getElementById('msg').textContent = err.message || 'Failed to load.';
+      });
+  </script>
+</body>
+</html>
