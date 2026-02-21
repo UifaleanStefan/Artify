@@ -529,7 +529,9 @@ def _run_style_transfer_sync(order_id: str) -> None:
         job_ids = []
         prediction_details = []
         skip = 0
-        if order.status == OrderStatus.PROCESSING.value and order.result_urls:
+        # Resume from any partial progress, regardless of current state string.
+        # This prevents falling back to 1 image after restarts/retries.
+        if order.result_urls:
             try:
                 result_urls_list = json.loads(order.result_urls) if isinstance(order.result_urls, str) else (order.result_urls or [])
                 job_ids = (order.style_transfer_job_id or "").split(",") if order.style_transfer_job_id else []
@@ -558,7 +560,7 @@ def _run_style_transfer_sync(order_id: str) -> None:
             remaining_style_urls = style_urls[skip:]
             for i, style_url in enumerate(remaining_style_urls):
                 if i > 0:
-                    time.sleep(6)
+                    time.sleep(30)
                 result_url, job_id = service.transfer_style_sync(
                     image_url=order.image_url,
                     style_image_url=style_url,
@@ -604,11 +606,19 @@ def _run_style_transfer_sync(order_id: str) -> None:
             order.failed_at = datetime.utcnow()
             db.commit()
         except (StyleTransferTimeout, StyleTransferError) as e:
+            msg = str(e)
+            # Transient upstream source-url failures (catbox/litterbox 504) should be retried.
+            if ("504" in msg and "Gateway Time-out" in msg) or ("litter.catbox.moe" in msg):
+                logger.warning("Transient source image error for %s, will retry automatically: %s", order_id, msg)
+                order.status = OrderStatus.PROCESSING.value
+                order.style_transfer_error = msg
+                db.commit()
+                return
             order.status = OrderStatus.FAILED.value
-            order.style_transfer_error = str(e)
+            order.style_transfer_error = msg
             order.failed_at = datetime.utcnow()
             db.commit()
-            EmailService().send_order_failed(order_id, order.email, str(e))
+            EmailService().send_order_failed(order_id, order.email, msg)
         except Exception as e:
             logger.exception(f"Unexpected error processing order {order_id}")
             order.status = OrderStatus.FAILED.value
