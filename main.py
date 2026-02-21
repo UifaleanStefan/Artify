@@ -266,25 +266,37 @@ async def _processing_supervisor_loop() -> None:
     """Self-heal stuck orders without external cron.
     Scans paid/processing orders and re-queues unfinished ones.
     """
+    # Let app finish startup before first DB scan.
+    await asyncio.sleep(2)
     while True:
         _start_db_init_once()
-        db = SessionLocal()
         try:
-            orders = db.query(Order).filter(
-                Order.status.in_([OrderStatus.PAID.value, OrderStatus.PROCESSING.value])
-            ).all()
-            for o in orders:
-                if o.order_id in _ACTIVE_ORDER_TASKS:
+            order_ids = await asyncio.to_thread(_get_unfinished_order_ids_sync)
+            for order_id in order_ids:
+                if order_id in _ACTIVE_ORDER_TASKS:
                     continue
-                target = _target_image_count(o)
-                done = _done_image_count(o)
-                if target > 0 and done < target:
-                    asyncio.create_task(process_order_style_transfer(o.order_id))
+                asyncio.create_task(process_order_style_transfer(order_id))
         except Exception as e:
             logger.warning("Supervisor loop temporary DB/error: %s", e)
-        finally:
-            db.close()
         await asyncio.sleep(20)
+
+
+def _get_unfinished_order_ids_sync() -> list[str]:
+    """Blocking DB scan run in thread; returns orders needing work."""
+    db = SessionLocal()
+    try:
+        orders = db.query(Order).filter(
+            Order.status.in_([OrderStatus.PAID.value, OrderStatus.PROCESSING.value])
+        ).all()
+        order_ids = []
+        for o in orders:
+            target = _target_image_count(o)
+            done = _done_image_count(o)
+            if target > 0 and done < target:
+                order_ids.append(o.order_id)
+        return order_ids
+    finally:
+        db.close()
 
 
 # ── Upload API ───────────────────────────────────────────────
