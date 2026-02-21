@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Status – Artify</title>
+  <link rel="stylesheet" href="/static/landing/styles.css" />
+  <link rel="stylesheet" href="/static/landing/order_status.css?v=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="header header-with-border">
+    <a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a>
+    <nav class="nav"><a href="/#how-it-works">How it Works</a><a href="/styles">Styles</a><a href="/#pricing">Pricing</a><a href="/styles" class="btn btn-primary btn-header">Transform Now</a></nav>
+  </header>
+  <main class="order-status-main">
+    <div class="order-status-card">
+      <h1 class="order-status-title">Order Status</h1>
+      <p class="order-status-id" id="order-status-id">—</p>
+      <div id="order-status-state">
+        <p class="order-status-loading">Loading…</p>
+      </div>
+      <div class="order-status-results" id="order-status-results" style="display:none">
+        <h2 class="order-status-results-title">Your artwork is ready</h2>
+        <p class="order-status-results-sub">Click an image to open full size, or save from your email.</p>
+        <div class="order-status-gallery" id="order-status-gallery"></div>
+      </div>
+      <div class="order-status-actions">
+        <a href="/styles" class="btn btn-primary">Create Another Portrait</a>
+        <a href="/" class="order-status-home">← Back to Home</a>
+      </div>
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a><p>Transform any photo into a timeless work of art.</p></div>
+      <div class="footer-links"><h4>Product</h4><a href="/#how-it-works">How it Works</a><a href="/styles">Style Gallery</a><a href="/#pricing">Pricing</a></div>
+      <div class="footer-links"><h4>Support</h4><a href="#">Help Center</a><a href="#">Terms of Service</a><a href="#">Privacy Policy</a></div>
+      <div class="footer-links"><h4>Follow Us</h4><div class="social-icons"><a href="#">📷</a><a href="#">f</a><a href="#">𝕏</a></div></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 Artify. All rights reserved.</span><span>Made with 🎨 for art lovers everywhere.</span></div>
+  </footer>
+  <script src="/static/landing/order_status.js?v=1"></script>
+</body>
+</html>

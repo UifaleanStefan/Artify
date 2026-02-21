@@ -45,6 +45,10 @@ class ReplicateClient:
 
     def submit_style_transfer(self, image_url: str, style_image_url: str) -> str:
         """Submit a style transfer job. Returns prediction ID."""
+        if not image_url.startswith("https://") or not style_image_url.startswith("https://"):
+            raise StyleTransferError(
+                "Image URLs must be public HTTPS URLs (set PUBLIC_BASE_URL on the server that creates orders)."
+            )
         url = f"{self.base_url}/predictions"
         payload = {
             "version": self.STYLE_TRANSFER_VERSION,

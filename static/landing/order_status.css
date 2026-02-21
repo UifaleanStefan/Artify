@@ -1,0 +1,19 @@
+/* Order status page */
+.order-status-main { max-width: 720px; margin: 0 auto; padding: 3rem 2rem; }
+.order-status-card { background: white; border: 1px solid #e5e0d5; border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-lg); }
+.order-status-title { margin: 0 0 0.25rem; font-size: 1.5rem; font-weight: 700; color: var(--text); }
+.order-status-id { margin: 0 0 1.5rem; font-size: 0.875rem; color: var(--text-muted); word-break: break-all; }
+.order-status-loading { margin: 0 0 1.5rem; color: var(--text-muted); }
+.order-status-processing { margin: 0 0 1.5rem; color: var(--text); }
+.order-status-error { margin: 0 0 1.5rem; padding: 1rem; background: #fef2f2; border-radius: var(--radius); color: #b91c1c; font-size: 0.9375rem; }
+.order-status-results { margin-bottom: 1.5rem; }
+.order-status-results-title { margin: 0 0 0.25rem; font-size: 1.25rem; font-weight: 600; color: var(--text); }
+.order-status-results-sub { margin: 0 0 1rem; font-size: 0.9375rem; color: var(--text-muted); }
+.order-status-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+.order-status-gallery a { display: block; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.order-status-gallery a:hover { box-shadow: var(--shadow-lg); }
+.order-status-gallery img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; vertical-align: top; }
+.order-status-actions { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+.order-status-actions .btn { margin: 0; }
+.order-status-home { font-size: 0.9375rem; color: var(--text-muted); text-decoration: none; }
+.order-status-home:hover { color: var(--primary); text-decoration: underline; }
