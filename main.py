@@ -5,6 +5,7 @@ import asyncio
 import json
 import logging
 import sys
+import time
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -34,7 +35,7 @@ def _resolve_style_image_url(style_image_url: Optional[str]) -> Optional[str]:
     return url
 
 
-from database import Order, OrderStatus, get_db, SessionLocal
+from database import Order, OrderStatus, get_db, SessionLocal, init_db
 from models import StyleTransferResponse
 from models.order_schemas import OrderCreateRequest, OrderResponse, OrderStatusResponse
 from services import StyleTransferService
@@ -46,6 +47,9 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger(__name__)
+# Reduce noisy per-request polling logs from httpx/httpcore.
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 STATIC_DIR = Path(__file__).parent / "static"
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
@@ -88,6 +92,11 @@ _HTML_HEADERS = {"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma
 
 
 # ── Page routes ──────────────────────────────────────────────
+
+@app.get("/health")
+async def health() -> JSONResponse:
+    """Lightweight health endpoint for uptime checks."""
+    return JSONResponse({"status": "ok"})
 
 @app.get("/")
 async def index() -> FileResponse:
@@ -395,133 +404,128 @@ async def pay_order(
 
 
 async def process_order_style_transfer(order_id: str):
-    """Run style transfers in background. Uses its own DB session so the task outlives the request."""
+    """Run style transfers in a worker thread so API remains responsive."""
+    await asyncio.to_thread(_run_style_transfer_sync, order_id)
+
+
+def _run_style_transfer_sync(order_id: str) -> None:
     db = SessionLocal()
     try:
-        await _run_style_transfer(order_id, db)
-    finally:
-        db.close()
+        order = db.query(Order).filter(Order.order_id == order_id).first()
+        if not order:
+            logger.error(f"Order not found for processing: {order_id}")
+            return
 
+        style_urls = []
+        if order.style_image_urls:
+            try:
+                style_urls = json.loads(order.style_image_urls) if isinstance(order.style_image_urls, str) else (order.style_image_urls or [])
+            except (json.JSONDecodeError, TypeError):
+                style_urls = []
+        if not style_urls and order.style_image_url:
+            style_urls = [order.style_image_url]
+        if not style_urls:
+            error_msg = "Style reference image missing"
+            order.status = OrderStatus.FAILED.value
+            order.style_transfer_error = error_msg
+            order.failed_at = datetime.utcnow()
+            db.commit()
+            EmailService().send_order_failed(order_id, order.email, error_msg)
+            return
 
-async def _run_style_transfer(order_id: str, db: Session):
-    order = db.query(Order).filter(Order.order_id == order_id).first()
-    if not order:
-        logger.error(f"Order not found for processing: {order_id}")
-        return
-
-    style_urls = []
-    if order.style_image_urls:
-        try:
-            style_urls = json.loads(order.style_image_urls)
-        except (json.JSONDecodeError, TypeError):
-            style_urls = []
-    if not style_urls and order.style_image_url:
-        style_urls = [order.style_image_url]
-    if not style_urls:
-        error_msg = "Style reference image missing"
-        order.status = OrderStatus.FAILED.value
-        order.style_transfer_error = error_msg
-        order.failed_at = datetime.utcnow()
-        db.commit()
-        EmailService().send_order_failed(order_id, order.email, error_msg)
-        return
-
-    # Resume: if already processing with partial results, skip completed ones
-    result_urls_list = []
-    job_ids = []
-    prediction_details = []
-    skip = 0
-    if order.status == OrderStatus.PROCESSING.value and order.result_urls:
-        try:
-            result_urls_list = json.loads(order.result_urls) if isinstance(order.result_urls, str) else (order.result_urls or [])
-            job_ids = (order.style_transfer_job_id or "").split(",") if order.style_transfer_job_id else []
-            if order.replicate_prediction_details:
-                prediction_details = json.loads(order.replicate_prediction_details) if isinstance(order.replicate_prediction_details, str) else (order.replicate_prediction_details or [])
-            if isinstance(result_urls_list, list) and len(result_urls_list) < len(style_urls):
-                skip = len(result_urls_list)
-                job_ids = [x.strip() for x in job_ids if x.strip()][:skip]
-                prediction_details = prediction_details[:skip] if isinstance(prediction_details, list) else []
-                logger.info(f"Resuming order {order_id}: skipping {skip} done, {len(style_urls) - skip} remaining")
-            else:
+        # Resume: if already processing with partial results, skip completed ones
+        result_urls_list = []
+        job_ids = []
+        prediction_details = []
+        skip = 0
+        if order.status == OrderStatus.PROCESSING.value and order.result_urls:
+            try:
+                result_urls_list = json.loads(order.result_urls) if isinstance(order.result_urls, str) else (order.result_urls or [])
+                job_ids = (order.style_transfer_job_id or "").split(",") if order.style_transfer_job_id else []
+                if order.replicate_prediction_details:
+                    prediction_details = json.loads(order.replicate_prediction_details) if isinstance(order.replicate_prediction_details, str) else (order.replicate_prediction_details or [])
+                if isinstance(result_urls_list, list) and len(result_urls_list) < len(style_urls):
+                    skip = len(result_urls_list)
+                    job_ids = [x.strip() for x in job_ids if x.strip()][:skip]
+                    prediction_details = prediction_details[:skip] if isinstance(prediction_details, list) else []
+                    logger.info(f"Resuming order {order_id}: skipping {skip} done, {len(style_urls) - skip} remaining")
+                else:
+                    result_urls_list = []
+                    job_ids = []
+                    prediction_details = []
+            except (json.JSONDecodeError, TypeError):
                 result_urls_list = []
                 job_ids = []
                 prediction_details = []
-        except (json.JSONDecodeError, TypeError):
-            result_urls_list = []
-            job_ids = []
-            prediction_details = []
-            skip = 0
+                skip = 0
 
-    try:
-        order.status = OrderStatus.PROCESSING.value
-        db.commit()
-
-        service = get_service()
-        remaining_style_urls = style_urls[skip:]
-        for i, style_url in enumerate(remaining_style_urls):
-            if i > 0:
-                await asyncio.sleep(6)
-            result_url, job_id = await service.transfer_style(
-                image_url=order.image_url,
-                style_image_url=style_url,
-            )
-            result_urls_list.append(result_url)
-            job_ids.append(job_id)
-            # Fetch full prediction from API and store all useful fields
-            try:
-                pred = service.provider.get_prediction(job_id)
-                prediction_details.append({
-                    "id": pred.get("id"),
-                    "status": pred.get("status"),
-                    "error": pred.get("error"),
-                    "metrics": pred.get("metrics"),
-                    "created_at": pred.get("created_at"),
-                    "started_at": pred.get("started_at"),
-                    "completed_at": pred.get("completed_at"),
-                    "result_url": result_url,
-                    "model": pred.get("model"),
-                    "version": pred.get("version"),
-                    "source": pred.get("source"),
-                    "data_removed": pred.get("data_removed"),
-                    "urls": pred.get("urls"),
-                    "logs": (pred.get("logs") or "")[:500] if pred.get("logs") else None,
-                })
-            except Exception:
-                prediction_details.append({
-                    "id": job_id,
-                    "status": "succeeded",
-                    "result_url": result_url,
-                })
-            # Save progress after each transfer so we have partial state if the job is interrupted
-            order.result_urls = json.dumps(result_urls_list)
-            order.style_transfer_job_id = ",".join(job_ids)
-            order.replicate_prediction_details = json.dumps(prediction_details)
+        try:
+            order.status = OrderStatus.PROCESSING.value
             db.commit()
 
-        order.status = OrderStatus.COMPLETED.value
-        order.completed_at = datetime.utcnow()
-        db.commit()
+            service = get_service()
+            remaining_style_urls = style_urls[skip:]
+            for i, style_url in enumerate(remaining_style_urls):
+                if i > 0:
+                    time.sleep(6)
+                result_url, job_id = service.transfer_style_sync(
+                    image_url=order.image_url,
+                    style_image_url=style_url,
+                )
+                result_urls_list.append(result_url)
+                job_ids.append(job_id)
+                try:
+                    pred = service.provider.get_prediction(job_id)
+                    prediction_details.append({
+                        "id": pred.get("id"),
+                        "status": pred.get("status"),
+                        "error": pred.get("error"),
+                        "metrics": pred.get("metrics"),
+                        "created_at": pred.get("created_at"),
+                        "started_at": pred.get("started_at"),
+                        "completed_at": pred.get("completed_at"),
+                        "result_url": result_url,
+                        "model": pred.get("model"),
+                        "version": pred.get("version"),
+                        "source": pred.get("source"),
+                        "data_removed": pred.get("data_removed"),
+                        "urls": pred.get("urls"),
+                        "logs": (pred.get("logs") or "")[:500] if pred.get("logs") else None,
+                    })
+                except Exception:
+                    prediction_details.append({"id": job_id, "status": "succeeded", "result_url": result_url})
 
-        first_result_url = result_urls_list[0] if result_urls_list else None
-        EmailService().send_result_ready(order_id, order.email, first_result_url, order.style_name)
+                order.result_urls = json.dumps(result_urls_list)
+                order.style_transfer_job_id = ",".join(job_ids)
+                order.replicate_prediction_details = json.dumps(prediction_details)
+                db.commit()
 
-    except StyleTransferRateLimit as e:
-        order.status = OrderStatus.FAILED.value
-        order.style_transfer_error = f"Rate limit: {e}"
-        order.failed_at = datetime.utcnow()
-        db.commit()
-    except (StyleTransferTimeout, StyleTransferError) as e:
-        order.status = OrderStatus.FAILED.value
-        order.style_transfer_error = str(e)
-        order.failed_at = datetime.utcnow()
-        db.commit()
-        EmailService().send_order_failed(order_id, order.email, str(e))
-    except Exception as e:
-        logger.exception(f"Unexpected error processing order {order_id}")
-        order.status = OrderStatus.FAILED.value
-        order.style_transfer_error = str(e)
-        order.failed_at = datetime.utcnow()
-        db.commit()
+            order.status = OrderStatus.COMPLETED.value
+            order.completed_at = datetime.utcnow()
+            db.commit()
+
+            first_result_url = result_urls_list[0] if result_urls_list else None
+            EmailService().send_result_ready(order_id, order.email, first_result_url, order.style_name)
+
+        except StyleTransferRateLimit as e:
+            order.status = OrderStatus.FAILED.value
+            order.style_transfer_error = f"Rate limit: {e}"
+            order.failed_at = datetime.utcnow()
+            db.commit()
+        except (StyleTransferTimeout, StyleTransferError) as e:
+            order.status = OrderStatus.FAILED.value
+            order.style_transfer_error = str(e)
+            order.failed_at = datetime.utcnow()
+            db.commit()
+            EmailService().send_order_failed(order_id, order.email, str(e))
+        except Exception as e:
+            logger.exception(f"Unexpected error processing order {order_id}")
+            order.status = OrderStatus.FAILED.value
+            order.style_transfer_error = str(e)
+            order.failed_at = datetime.utcnow()
+            db.commit()
+    finally:
+        db.close()
 
 
 if __name__ == "__main__":

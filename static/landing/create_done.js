@@ -39,30 +39,65 @@
   }
 
   if (orderId) {
-    fetch('/api/orders/' + encodeURIComponent(orderId) + '/status')
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        var status = (data.status || '').toLowerCase();
-        var resultUrls = data.result_urls;
-        var urls = [];
-        if (resultUrls) {
-          try { urls = typeof resultUrls === 'string' ? JSON.parse(resultUrls) : (resultUrls || []); } catch (e) {}
-        }
-        if (status === 'completed' && urls.length > 0) {
-          if (doneTitle) doneTitle.textContent = 'Your Artwork is Ready!';
-          if (doneSubtitle) doneSubtitle.textContent = 'Here\'s your first piece.';
-          if (doneIcon) doneIcon.style.display = 'none';
-          if (doneFirstResult && doneFirstResultLink && doneFirstResultImg) {
-            doneFirstResultImg.src = urls[0];
-            doneFirstResultImg.alt = 'Your artwork';
-            doneFirstResultLink.href = urls[0];
-            doneFirstResult.style.display = 'block';
+    var pollTimer = null;
+    var startedAt = Date.now();
+    var maxPollMs = 10 * 60 * 1000; // stop polling after 10 minutes
+
+    function showFirstImage(url) {
+      if (doneTitle) doneTitle.textContent = 'Your Artwork is Ready!';
+      if (doneSubtitle) doneSubtitle.textContent = 'Here\'s your first piece.';
+      if (doneIcon) doneIcon.style.display = 'none';
+      if (doneFirstResult && doneFirstResultLink && doneFirstResultImg) {
+        doneFirstResultImg.src = url;
+        doneFirstResultImg.alt = 'Your artwork';
+        doneFirstResultLink.href = url;
+        doneFirstResult.style.display = 'block';
+      }
+      if (doneMessageText) doneMessageText.textContent = 'We\'ll send the rest of your artwork by email.';
+    }
+
+    function stopPolling() {
+      if (pollTimer) {
+        clearTimeout(pollTimer);
+        pollTimer = null;
+      }
+    }
+
+    function scheduleNextPoll() {
+      if (Date.now() - startedAt > maxPollMs) return;
+      pollTimer = setTimeout(fetchStatus, 8000);
+    }
+
+    function fetchStatus() {
+      fetch('/api/orders/' + encodeURIComponent(orderId) + '/status')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var status = (data.status || '').toLowerCase();
+          var resultUrls = data.result_urls;
+          var urls = [];
+          if (resultUrls) {
+            try { urls = typeof resultUrls === 'string' ? JSON.parse(resultUrls) : (resultUrls || []); } catch (e) {}
           }
-          if (doneMessageText) doneMessageText.textContent = 'We\'ve sent the rest of your artwork to your email.';
-        } else if (status === 'failed' && data.error) {
-          if (doneMessageText) doneMessageText.textContent = 'Something went wrong: ' + data.error;
-        }
-      })
-      .catch(function () {});
+
+          if (urls.length > 0) {
+            showFirstImage(urls[0]);
+            stopPolling();
+            return;
+          }
+
+          if (status === 'failed' && data.error) {
+            if (doneMessageText) doneMessageText.textContent = 'Something went wrong: ' + data.error;
+            stopPolling();
+            return;
+          }
+
+          scheduleNextPoll();
+        })
+        .catch(function () {
+          scheduleNextPoll();
+        });
+    }
+
+    fetchStatus();
   }
 })();
