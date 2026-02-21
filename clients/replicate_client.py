@@ -91,8 +91,12 @@ class ReplicateClient:
                 status = data.get("status", "")
                 if status == "succeeded":
                     output = data.get("output")
-                    if isinstance(output, list):
-                        return output[0]
+                    if isinstance(output, list) and len(output) > 0:
+                        first = output[0]
+                        if isinstance(first, str):
+                            return first
+                        if isinstance(first, dict) and first.get("url"):
+                            return first["url"]
                     if isinstance(output, str):
                         return output
                     raise StyleTransferError(f"Unexpected output format: {output}")

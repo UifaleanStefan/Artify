@@ -5,10 +5,12 @@
 .payment-title { margin: 0 0 0.25rem; font-size: 1.5rem; font-weight: 700; }
 .payment-subtitle { margin: 0 0 1.5rem; font-size: 0.9375rem; color: var(--text-muted); }
 .payment-style-row { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e5e0d5; }
-.payment-thumb-wrap { flex-shrink: 0; position: relative; }
-.payment-style-thumb { width: 64px; height: 64px; border-radius: 8px; flex-shrink: 0; background-size: cover; background-position: center; }
-.payment-style-thumb.style-thumb-h-scroll { width: 100px; min-width: 100px; height: 78px; aspect-ratio: 9/7; }
-.payment-style-thumb.style-thumb-single img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+.payment-thumb-wrap { flex-shrink: 0; position: relative; width: 100px; min-height: 78px; }
+.payment-style-thumb { width: 64px; height: 64px; border-radius: 8px; flex-shrink: 0; background: var(--bg-light); background-size: cover; background-position: center; overflow: hidden; }
+.payment-style-thumb.style-thumb-h-scroll { width: 100px; min-width: 100px; height: 78px; min-height: 78px; display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; background: #f0ede8; }
+.payment-style-thumb.style-thumb-h-scroll img { flex-shrink: 0; width: 100px; min-width: 100px; height: 78px; object-fit: cover; border-radius: 8px; scroll-snap-align: start; display: block; }
+.payment-style-thumb.style-thumb-single { width: 64px; height: 64px; }
+.payment-style-thumb.style-thumb-single img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; }
 .payment-thumb-wrap .style-thumb-arrow { width: 1.75rem; height: 1.75rem; font-size: 1.1rem; }
 .payment-thumb-wrap .style-thumb-prev { left: 0.15rem; }
 .payment-thumb-wrap .style-thumb-next { right: 0.15rem; }

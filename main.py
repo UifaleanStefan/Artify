@@ -211,6 +211,31 @@ async def create_order(
         if not style_image_url:
             style_image_url = _resolve_style_image_url(MASTERS_PACK_PATHS[0])
 
+    # Fail fast if style URLs are not public HTTPS (Replicate requires this)
+    def _must_be_https(name: str, url: Optional[str]) -> None:
+        if not url or not url.strip():
+            return
+        if not url.strip().startswith("https://"):
+            logger.warning(
+                "Style URL not HTTPS at order creation; PUBLIC_BASE_URL may be unset. resolved=%s",
+                (url or "")[:80],
+            )
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    "Server configuration error: PUBLIC_BASE_URL must be set so we can process your artwork. "
+                    "Please try again in a moment or contact support."
+                ),
+            )
+
+    _must_be_https("style_image_url", style_image_url)
+    if order_data.image_url and not order_data.image_url.strip().startswith("https://"):
+        logger.warning("Order image_url not HTTPS: %s", order_data.image_url[:80])
+        raise HTTPException(
+            status_code=400,
+            detail="The uploaded photo URL must be a secure (HTTPS) link. Please upload your photo again.",
+        )
+
     order = Order(
         order_id=order_id,
         status=OrderStatus.PENDING.value,

@@ -19,7 +19,9 @@
   var thumbNext = document.getElementById('payment-thumb-next');
 
   function fillPackThumb(el, s, prevBtn, nextBtn) {
-    var previewUrls = (s.previewImageUrls && s.previewImageUrls.length) ? s.previewImageUrls : (s.id === 13 ? ['/static/landing/styles/masters/masters-01.jpg', '/static/landing/styles/masters/masters-02.jpg', '/static/landing/styles/masters/masters-03.jpg', '/static/landing/styles/masters/masters-04.jpg', '/static/landing/styles/masters/masters-05.jpg'] : null);
+    var isMasters = Number(s.id) === 13;
+    var mastersUrls = ['/static/landing/styles/masters/masters-01.jpg', '/static/landing/styles/masters/masters-02.jpg', '/static/landing/styles/masters/masters-03.jpg', '/static/landing/styles/masters/masters-04.jpg', '/static/landing/styles/masters/masters-05.jpg'];
+    var previewUrls = (s.previewImageUrls && s.previewImageUrls.length) ? s.previewImageUrls : (isMasters ? mastersUrls : null);
     if (previewUrls && previewUrls.length) {
       el.className = 'payment-style-thumb style-thumb-h-scroll';
       el.innerHTML = '';
