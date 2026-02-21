@@ -5,7 +5,30 @@
 .details-section-title { margin: 0 0 1.25rem; font-size: 1.375rem; font-weight: 600; color: var(--text); }
 .details-subtitle { margin: 0 0 1.5rem; font-size: 0.9375rem; color: var(--text-muted); }
 .details-style-card { background: white; border: 1px solid #e5e0d5; border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
-.details-style-thumb { width: 100%; aspect-ratio: 4/3; border-radius: 8px; margin-bottom: 0.75rem; background-size: cover; background-position: center; }
+.details-style-thumb { width: 100%; aspect-ratio: 4/3; border-radius: 8px; margin-bottom: 0; background-size: cover; background-position: center; }
+/* Pack thumb: keep scroll area visible */
+.details-style-card .details-style-thumb.style-thumb-h-scroll {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  aspect-ratio: 9/7;
+  min-height: 160px;
+  background: #f0ede8;
+}
+.details-style-card .details-style-thumb.style-thumb-h-scroll img {
+  flex-shrink: 0;
+  min-width: 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  scroll-snap-align: start;
+}
+.details-style-card .details-style-thumb.style-thumb-single { min-height: 160px; }
+.details-style-card .details-style-thumb.style-thumb-single img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; }
 .details-style-card h3 { margin: 0 0 0.15rem; font-size: 1.125rem; }
 .details-style-artist { margin: 0; font-size: 0.875rem; color: var(--primary); font-weight: 500; }
 .details-photo-card { background: white; border: 1px solid #e5e0d5; border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); }
