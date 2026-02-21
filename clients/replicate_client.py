@@ -59,7 +59,7 @@ class ReplicateClient:
             "input": {
                 "structure_image": image_url,
                 "style_image": style_image_url,
-                "prompt": "Adapt the style of the style image to the structure image, keeping the brush strokes and brush details.",
+                "prompt": "Adapt the style of the style image to the structure image, keeping the brush strokes and brush details while emphasizing the features of the structure image, adapting them to the time period and style of the style image.",
                 "structure_denoising_strength": 1,
                 "output_format": "webp",
                 "output_quality": 80,
