@@ -85,35 +85,39 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
+# Prevent HTML from being cached so users always get latest after deploy
+_HTML_HEADERS = {"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"}
+
+
 # ── Page routes ──────────────────────────────────────────────
 
 @app.get("/")
 async def index() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "index.html")
+    return FileResponse(STATIC_DIR / "landing" / "index.html", headers=_HTML_HEADERS)
 
 @app.get("/styles")
 async def styles_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "styles.html")
+    return FileResponse(STATIC_DIR / "landing" / "styles.html", headers=_HTML_HEADERS)
 
 @app.get("/upload")
 async def upload_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "upload.html")
+    return FileResponse(STATIC_DIR / "landing" / "upload.html", headers=_HTML_HEADERS)
 
 @app.get("/details")
 async def details_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "details.html")
+    return FileResponse(STATIC_DIR / "landing" / "details.html", headers=_HTML_HEADERS)
 
 @app.get("/billing")
 async def billing_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "billing.html")
+    return FileResponse(STATIC_DIR / "landing" / "billing.html", headers=_HTML_HEADERS)
 
 @app.get("/payment")
 async def payment_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "payment.html")
+    return FileResponse(STATIC_DIR / "landing" / "payment.html", headers=_HTML_HEADERS)
 
 @app.get("/create/done")
 async def done_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "create_done.html")
+    return FileResponse(STATIC_DIR / "landing" / "create_done.html", headers=_HTML_HEADERS)
 
 
 # ── Upload API ───────────────────────────────────────────────
