@@ -28,6 +28,9 @@
   var gallery = document.getElementById('debug-gallery');
   var detailsSection = document.getElementById('debug-details-section');
   var detailsJson = document.getElementById('debug-details-json');
+  var refreshBtn = document.getElementById('debug-refresh-inline');
+
+  var lastOrderId = null;
 
   function showError(msg) {
     errorEl.textContent = msg;
@@ -57,7 +60,9 @@
         return r.json();
       })
       .then(function (data) {
+        lastOrderId = orderId;
         output.style.display = 'block';
+        if (refreshBtn) refreshBtn.style.display = 'inline-flex';
         orderIdEl.textContent = data.order_id || orderId;
         statusEl.textContent = 'Status: ' + (data.status || '—');
         statusEl.className = 'debug-status status-' + ((data.status || '').toLowerCase());
@@ -74,10 +79,22 @@
             urls = typeof data.result_urls === 'string' ? JSON.parse(data.result_urls) : (data.result_urls || []);
           } catch (e) {}
         }
+        if (!Array.isArray(urls)) urls = [];
+        if (urls.length === 0 && data.replicate_prediction_details) {
+          var details = data.replicate_prediction_details;
+          try {
+            var arr = typeof details === 'string' ? JSON.parse(details) : details;
+            if (Array.isArray(arr)) {
+              arr.forEach(function (item) {
+                if (item && item.result_url) urls.push(item.result_url);
+              });
+            }
+          } catch (e2) {}
+        }
         resultCountEl.textContent = urls.length;
         gallery.innerHTML = '';
+        resultsSection.style.display = 'block';
         if (urls.length > 0) {
-          resultsSection.style.display = 'block';
           urls.forEach(function (url, i) {
             var a = document.createElement('a');
             a.href = url;
@@ -90,7 +107,10 @@
             gallery.appendChild(a);
           });
         } else {
-          resultsSection.style.display = 'none';
+          var emptyMsg = document.createElement('p');
+          emptyMsg.className = 'debug-no-images';
+          emptyMsg.textContent = 'No result images yet (order may still be processing or no results stored).';
+          gallery.appendChild(emptyMsg);
         }
 
         if (data.replicate_prediction_details) {
@@ -111,4 +131,13 @@
         output.style.display = 'none';
       });
   });
+
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', function () {
+      if (lastOrderId) {
+        input.value = lastOrderId;
+        submit.click();
+      }
+    });
+  }
 })();
