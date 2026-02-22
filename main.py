@@ -471,23 +471,24 @@ IMPRESSION_COLOR_PACK_LABELS: list[tuple[str, str]] = [
     ("Odalisque", "Henri Matisse"),
     ("Drum cu chiparos și stele", "Vincent van Gogh"),
 ]
-# Modern & Abstract pack: (titlu operă, artist) pentru fiecare imagine
+# Modern & Abstract pack: (titlu operă, artist) per imagine, verificate vizual
+# 01–15 = modern-abstract-01.jpg … 13.png … 15.jpg
 MODERN_ABSTRACT_PACK_LABELS: list[tuple[str, str]] = [
-    ("Compoziție abstractă", "Modern și abstract"),
-    ("Portocaliu și galben", "Mark Rothko"),
-    ("Convergență", "Jackson Pollock"),
-    ("Pătratul negru", "Kazimir Malevici"),
-    ("Broadway Boogie Woogie", "Piet Mondrian"),
-    ("Compoziție modernă", "Modern și abstract"),
-    ("Strada, Berlin", "Ernst Ludwig Kirchner"),
-    ("Calul albastru I", "Franz Marc"),
-    ("Scrâșnetul", "Edvard Munch"),
-    ("Compoziție surrealistă", "Modern și abstract"),
-    ("Salvador Dalí", "Dalí"),
-    ("Compoziție", "Modern și abstract"),
-    ("Om cu chitară", "Georges Braque"),
-    ("Fata cu mandolină", "Pablo Picasso"),
-    ("Compoziție", "Modern și abstract"),
+    ("Composition VIII", "Wassily Kandinsky"),           # 01
+    ("Orange and Yellow", "Mark Rothko"),                # 02
+    ("Convergence", "Jackson Pollock"),                   # 03
+    ("Black Square", "Kazimir Malevich"),                 # 04
+    ("Broadway Boogie Woogie", "Piet Mondrian"),          # 05
+    ("Woman I", "Willem de Kooning"),                     # 06
+    ("Street, Berlin", "Ernst Ludwig Kirchner"),          # 07
+    ("Blue Horse I", "Franz Marc"),                       # 08
+    ("The Scream", "Edvard Munch"),                       # 09
+    ("The Lovers", "René Magritte"),                      # 10
+    ("The Elephants", "Salvador Dalí"),                   # 11
+    ("The Persistence of Memory", "Salvador Dalí"),       # 12
+    ("Man with a Guitar", "Georges Braque"),              # 13
+    ("Girl with a Mandolin", "Pablo Picasso"),             # 14
+    ("Les Demoiselles d'Avignon", "Pablo Picasso"),       # 15
 ]
 
 
