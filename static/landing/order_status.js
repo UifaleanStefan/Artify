@@ -5,6 +5,8 @@
   var stateEl = document.getElementById('order-status-state');
   var resultsEl = document.getElementById('order-status-results');
   var galleryEl = document.getElementById('order-status-gallery');
+  var heroWrap = document.getElementById('order-status-hero-wrap');
+  var downloadBtn = document.getElementById('order-status-download');
   var idEl = document.getElementById('order-status-id');
 
   if (idEl) idEl.textContent = orderId || '—';
@@ -35,7 +37,14 @@
         urls = [];
       }
       if (urls.length) {
+        heroWrap.innerHTML = '';
         galleryEl.innerHTML = '';
+        if (urls[0]) {
+          var heroImg = document.createElement('img');
+          heroImg.src = urls[0];
+          heroImg.alt = 'Your artwork';
+          heroWrap.appendChild(heroImg);
+        }
         urls.forEach(function (url, i) {
           var a = document.createElement('a');
           a.href = url;
@@ -49,6 +58,9 @@
           a.appendChild(img);
           galleryEl.appendChild(a);
         });
+        if (downloadBtn && orderId) {
+          downloadBtn.href = '/api/orders/' + encodeURIComponent(orderId) + '/download-all';
+        }
         resultsEl.style.display = 'block';
       }
       return;

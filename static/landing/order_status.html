@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Status – Artify</title>
   <link rel="stylesheet" href="/static/landing/styles.css" />
-  <link rel="stylesheet" href="/static/landing/order_status.css?v=1" />
+  <link rel="stylesheet" href="/static/landing/order_status.css?v=2" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
   <header class="header header-with-border">
@@ -23,9 +23,14 @@
         <p class="order-status-loading">Loading…</p>
       </div>
       <div class="order-status-results" id="order-status-results" style="display:none">
-        <h2 class="order-status-results-title">Your artwork is ready</h2>
-        <p class="order-status-results-sub">Click an image to open full size, or save from your email.</p>
+        <h2 class="order-status-results-title">Your Artify gallery is ready</h2>
+        <p class="order-status-results-sub">Click an image to open full size.</p>
+        <div class="order-status-hero-wrap" id="order-status-hero-wrap"></div>
+        <p class="order-status-preview-label">Preview your set</p>
         <div class="order-status-gallery" id="order-status-gallery"></div>
+        <div class="order-status-download-wrap">
+          <a href="#" class="btn btn-primary order-status-download" id="order-status-download">Download all pictures</a>
+        </div>
       </div>
       <div class="order-status-actions">
         <a href="/styles" class="btn btn-primary">Create Another Portrait</a>
@@ -42,6 +47,6 @@
     </div>
     <div class="footer-bottom"><span>© 2026 Artify. All rights reserved.</span><span>Made with 🎨 for art lovers everywhere.</span></div>
   </footer>
-  <script src="/static/landing/order_status.js?v=1"></script>
+  <script src="/static/landing/order_status.js?v=2"></script>
 </body>
 </html>

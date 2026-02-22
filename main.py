@@ -418,6 +418,12 @@ MASTERS_PACK_PATHS = [
     f"/static/landing/styles/masters/masters-{i:02d}.jpg" for i in range(1, 16)
 ]
 
+# Impression & Color pack: 15 reference images
+STYLE_ID_IMPRESSION_COLOR_PACK = 14
+IMPRESSION_COLOR_PACK_PATHS = [
+    f"/static/landing/styles/impression-color/impression-color-{i:02d}.jpg" for i in range(1, 16)
+]
+
 
 def _load_styles_data() -> list:
     styles_file = Path(__file__).parent / "static" / "landing" / "styles-data.js"
@@ -453,6 +459,10 @@ async def create_order(
         style_image_urls = json.dumps([_resolve_style_image_url(p) for p in MASTERS_PACK_PATHS])
         if not style_image_url:
             style_image_url = _resolve_style_image_url(MASTERS_PACK_PATHS[0])
+    elif order_data.style_id == STYLE_ID_IMPRESSION_COLOR_PACK:
+        style_image_urls = json.dumps([_resolve_style_image_url(p) for p in IMPRESSION_COLOR_PACK_PATHS])
+        if not style_image_url:
+            style_image_url = _resolve_style_image_url(IMPRESSION_COLOR_PACK_PATHS[0])
 
     # Fail fast if style URLs are not public HTTPS (Replicate requires this)
     def _must_be_https(name: str, url: Optional[str]) -> None:

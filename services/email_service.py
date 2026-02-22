@@ -27,23 +27,23 @@ class EmailService:
         hero = result_urls[0] if result_urls else ""
         thumbs = result_urls[:6]
         thumbs_html = "".join(
-            f'<a href="{u}" style="display:inline-block;margin:4px;"><img src="{u}" alt="Artwork" style="width:110px;height:110px;object-fit:cover;border-radius:8px;border:1px solid #e5e7eb;" /></a>'
+            f'<a href="{u}" style="display:inline-block;margin:6px;"><img src="{u}" alt="Artwork" style="width:90px;height:90px;object-fit:cover;border-radius:4px;border:2px solid #e8dcc8;box-shadow:0 2px 8px rgba(0,0,0,0.08);" /></a>'
             for u in thumbs
         )
         body = f"""
-        <div style="font-family:Arial,Helvetica,sans-serif;background:#f7f7fb;padding:24px;color:#111827;">
-          <div style="max-width:680px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;">
-            <div style="padding:24px 24px 8px 24px;">
-              <div style="font-size:24px;font-weight:700;color:#1e3a5f;">🎨 Your Artify gallery is ready</div>
-              <div style="margin-top:8px;color:#4b5563;">Style: <strong>{style_name or 'Master Artist'}</strong></div>
-              <div style="margin-top:4px;color:#6b7280;font-size:14px;">Order ID: {order_id}</div>
+        <div style="font-family:Georgia,'Times New Roman',serif;background:linear-gradient(180deg,#f5f0e6 0%,#ebe5db 100%);padding:32px 20px;color:#2c2419;">
+          <div style="max-width:620px;margin:0 auto;background:#fdfbf7;border:1px solid #ddd6c8;border-radius:4px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.06);">
+            <div style="padding:28px 28px 12px 28px;border-bottom:1px solid #eee8de;">
+              <div style="font-size:26px;font-weight:600;color:#1e3a5f;letter-spacing:0.02em;">Your Artify gallery is ready</div>
+              <div style="margin-top:6px;font-size:15px;color:#6b5d4f;">Style: <strong style="color:#8b7355;">{style_name or 'Master Artist'}</strong></div>
+              <div style="margin-top:2px;font-size:13px;color:#9a8f7f;">Order {order_id}</div>
             </div>
-            {"<div style='padding:0 24px 16px 24px;'><img src='" + hero + "' alt='Main artwork' style='width:100%;max-height:360px;object-fit:contain;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;'></div>" if hero else ""}
-            <div style="padding:0 24px 8px 24px;color:#374151;font-size:14px;">Preview your set:</div>
-            <div style="padding:0 20px 12px 20px;">{thumbs_html}</div>
-            <div style="padding:8px 24px 24px 24px;">
-              <a href="{download_all_link}" style="display:inline-block;padding:12px 18px;background:#1e3a5f;color:#fff;text-decoration:none;border-radius:10px;font-weight:600;margin-right:8px;">Download all pictures (.zip)</a>
-              <a href="{order_link}" style="display:inline-block;padding:12px 18px;background:#ffffff;color:#1e3a5f;text-decoration:none;border-radius:10px;font-weight:600;border:1px solid #cbd5e1;">Open order page</a>
+            {"<div style='padding:20px 28px;background:#f8f5ef;'><div style='border:3px solid #c9a96e;border-radius:2px;padding:8px;background:#fff;box-shadow:inset 0 0 0 1px #e8dcc8;'><img src='" + hero + "' alt='Your artwork' style='width:100%;max-height:340px;object-fit:contain;display:block;' /></div></div>" if hero else ""}
+            <div style="padding:12px 28px 4px 28px;font-size:12px;color:#8b7355;text-transform:uppercase;letter-spacing:0.12em;">Preview your set</div>
+            <div style="padding:8px 24px 20px 24px;text-align:center;">{thumbs_html}</div>
+            <div style="padding:20px 28px 28px 28px;background:#f8f5ef;border-top:1px solid #eee8de;">
+              <a href="{download_all_link}" style="display:inline-block;padding:14px 24px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a8e 100%);color:#fff;text-decoration:none;border-radius:4px;font-weight:600;font-size:15px;margin-right:10px;box-shadow:0 4px 12px rgba(30,58,95,0.25);">Download all pictures</a>
+              <a href="{order_link}" style="display:inline-block;padding:14px 24px;background:#fff;color:#1e3a5f;text-decoration:none;border-radius:4px;font-weight:600;font-size:15px;border:2px solid #c9a96e;">View order page</a>
             </div>
           </div>
         </div>
