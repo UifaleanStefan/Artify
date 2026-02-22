@@ -52,7 +52,7 @@
           '<p class="gallery-card-desc">' + s.description + '</p>' +
           '<div class="gallery-card-footer">' +
             '<span class="gallery-card-rating">★ ' + s.rating + '</span>' +
-            '<span class="gallery-card-select">Select Style →</span>' +
+            '<span class="gallery-card-select">Alege stilul →</span>' +
           '</div>' +
         '</div>';
       grid.appendChild(card);

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Upload Your Photo – Artify</title>
+  <title>Încarcă poza – Artify</title>
   <link rel="stylesheet" href="/static/landing/styles.css?v=3" />
   <link rel="stylesheet" href="/static/landing/upload.css?v=3" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -17,29 +17,29 @@
       <span class="logo-text">Artify</span>
     </a>
     <nav class="nav">
-      <a href="/#how-it-works">How it Works</a>
-      <a href="/styles">Styles</a>
-      <a href="/#pricing">Pricing</a>
-      <a href="/styles" class="btn btn-primary btn-header">Transform Now</a>
+      <a href="/#how-it-works">Cum funcționează</a>
+      <a href="/styles">Stiluri</a>
+      <a href="/#pricing">Prețuri</a>
+      <a href="/styles" class="btn btn-primary btn-header">Transformă acum</a>
     </nav>
   </header>
 
   <main class="upload-main">
     <div class="steps-bar">
-      <div class="step done"><span class="step-check">✓</span><span class="step-label">1 Choose Style</span></div>
+      <div class="step done"><span class="step-check">✓</span><span class="step-label">1 Alege stilul</span></div>
       <div class="step-connector"></div>
-      <div class="step current"><span class="step-num">2</span><span class="step-label">Upload Photo</span></div>
+      <div class="step current"><span class="step-num">2</span><span class="step-label">Încarcă poza</span></div>
       <div class="step-connector"></div>
-      <div class="step"><span class="step-num step-num-inactive">3</span><span class="step-label">Details</span></div>
+      <div class="step"><span class="step-num step-num-inactive">3</span><span class="step-label">Detalii</span></div>
       <div class="step-connector"></div>
-      <div class="step"><span class="step-num step-num-inactive">4</span><span class="step-label">Billing</span></div>
+      <div class="step"><span class="step-num step-num-inactive">4</span><span class="step-label">Facturare</span></div>
       <div class="step-connector"></div>
-      <div class="step"><span class="step-num step-num-inactive">5</span><span class="step-label">Payment</span></div>
+      <div class="step"><span class="step-num step-num-inactive">5</span><span class="step-label">Plată</span></div>
     </div>
 
     <div class="upload-grid">
       <section class="upload-left">
-        <h2 class="upload-section-title">Selected Style</h2>
+        <h2 class="upload-section-title">Stilul ales</h2>
         <div class="upload-style-card" id="style-card">
           <div class="upload-style-thumb-wrap">
             <button type="button" class="upload-thumb-arrow upload-thumb-prev" id="style-thumb-prev" aria-label="Previous image" style="display:none">‹</button>
@@ -50,20 +50,20 @@
           <h3 class="upload-style-title" id="style-title"></h3>
           <p class="upload-style-artist" id="style-artist"></p>
           <p class="upload-style-desc" id="style-desc"></p>
-          <a href="/styles" class="upload-change-link">← Change Style</a>
+          <a href="/styles" class="upload-change-link">← Schimbă stilul</a>
         </div>
       </section>
 
       <section class="upload-right">
-        <h2 class="upload-section-title">Upload Your Photo</h2>
-        <p class="upload-subtitle">We'll transform your face into a work of art.</p>
+        <h2 class="upload-section-title">Încarcă poza</h2>
+        <p class="upload-subtitle">Îți transformăm fața într-o operă de artă.</p>
         <div class="upload-zone" id="upload-zone">
           <input type="file" id="photo-input" accept=".jpg,.jpeg,.png,.webp,.bmp,image/jpeg,image/png,image/webp,image/bmp" />
           <div class="upload-zone-inner" id="upload-zone-inner">
             <span class="upload-zone-icon">↑</span>
-            <p>Drag and drop a photo here</p>
-            <p>or click to browse your files</p>
-            <p class="upload-zone-hint">JPG, PNG UP TO 10MB</p>
+            <p>Trage și plasează o poză aici</p>
+            <p>sau dă click pentru a alege din calculator</p>
+            <p class="upload-zone-hint">JPG, PNG PÂNĂ LA 10 MB</p>
           </div>
           <div class="upload-zone-preview" id="upload-preview" style="display:none">
             <div class="upload-preview-image-wrap">
@@ -77,18 +77,18 @@
         <div class="upload-tips">
           <span class="upload-tips-icon">📷</span>
           <div>
-            <h4 class="upload-tips-title">Tips for Best Art Results</h4>
+            <h4 class="upload-tips-title">Sfaturi pentru cele mai bune rezultate</h4>
             <ul>
-              <li>Clear face visible so the style transfers well</li>
-              <li>One person per photo for portrait styles</li>
-              <li>Good lighting helps keep details sharp in the artwork</li>
-              <li>Higher resolution photos give better final results</li>
+              <li>Fața bine vizibilă pentru un transfer de stil corect</li>
+              <li>O singură persoană per poză pentru portrete</li>
+              <li>Lumină bună păstrează detaliile clare în operă</li>
+              <li>Fotografii cu rezoluție mai mare dau rezultate mai bune</li>
             </ul>
           </div>
         </div>
         <div class="upload-actions">
-          <a href="/styles" class="upload-back-link">← Back to Styles</a>
-          <button type="button" class="btn btn-primary btn-lg" id="create-btn" disabled>Continue</button>
+          <a href="/styles" class="upload-back-link">← Înapoi la stiluri</a>
+          <button type="button" class="btn btn-primary btn-lg" id="create-btn" disabled>Continuă</button>
         </div>
         <p class="upload-error" id="upload-error" style="display:none"></p>
       </section>
@@ -99,13 +99,13 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a>
-        <p>Transform any photo into a timeless work of art.</p>
+        <p>Transformă orice poză într-o operă de artă de durată.</p>
       </div>
-      <div class="footer-links"><h4>Product</h4><a href="/#how-it-works">How it Works</a><a href="/styles">Style Gallery</a><a href="/#pricing">Pricing</a></div>
-      <div class="footer-links"><h4>Support</h4><a href="#">Help Center</a><a href="#">Terms of Service</a><a href="#">Privacy Policy</a></div>
-      <div class="footer-links"><h4>Follow Us</h4><div class="social-icons"><a href="#">📷</a><a href="#">f</a><a href="#">𝕏</a></div></div>
+      <div class="footer-links"><h4>Produs</h4><a href="/#how-it-works">Cum funcționează</a><a href="/styles">Galeria de stiluri</a><a href="/#pricing">Prețuri</a></div>
+      <div class="footer-links"><h4>Suport</h4><a href="#">Centru de ajutor</a><a href="#">Termeni și condiții</a><a href="#">Politica de confidențialitate</a></div>
+      <div class="footer-links"><h4>Urmărește-ne</h4><div class="social-icons"><a href="#">📷</a><a href="#">f</a><a href="#">𝕏</a></div></div>
     </div>
-    <div class="footer-bottom"><span>© 2026 Artify. All rights reserved.</span><span>Made with 🎨 for art lovers everywhere.</span></div>
+    <div class="footer-bottom"><span>© 2026 Artify. Toate drepturile rezervate.</span><span>Făcut cu 🎨 pentru iubitorii de artă.</span></div>
   </footer>
 
   <script src="/static/landing/styles-data.js?v=3"></script>

@@ -44,16 +44,16 @@
     var maxPollMs = 10 * 60 * 1000; // stop polling after 10 minutes
 
     function showFirstImage(url) {
-      if (doneTitle) doneTitle.textContent = 'Your Artwork is Ready!';
-      if (doneSubtitle) doneSubtitle.textContent = 'Here\'s your first piece.';
+      if (doneTitle) doneTitle.textContent = 'Opera ta e gata!';
+      if (doneSubtitle) doneSubtitle.textContent = 'Iată prima ta operă.';
       if (doneIcon) doneIcon.style.display = 'none';
       if (doneFirstResult && doneFirstResultLink && doneFirstResultImg) {
         doneFirstResultImg.src = url;
-        doneFirstResultImg.alt = 'Your artwork';
+        doneFirstResultImg.alt = 'Opera ta';
         doneFirstResultLink.href = url;
         doneFirstResult.style.display = 'block';
       }
-      if (doneMessageText) doneMessageText.textContent = 'We\'ll send the rest of your artwork by email.';
+      if (doneMessageText) doneMessageText.textContent = 'Restul operelor ți le trimitem pe email.';
     }
 
     function stopPolling() {

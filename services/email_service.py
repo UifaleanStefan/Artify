@@ -25,26 +25,28 @@ class EmailService:
         order_link = f"{base}/order/{order_id}" if base else "#"
         download_all_link = f"{base}/api/orders/{order_id}/download-all" if base else "#"
         hero = result_urls[0] if result_urls else ""
-        thumbs = result_urls[:6]
+        thumbs = result_urls[:15]  # show all 15 in a full grid
+        n = len(thumbs)
         thumbs_html = "".join(
-            f'<a href="{u}" style="display:inline-block;margin:6px;"><img src="{u}" alt="Artwork" style="width:90px;height:90px;object-fit:cover;border-radius:4px;border:2px solid #e8dcc8;box-shadow:0 2px 8px rgba(0,0,0,0.08);" /></a>'
+            f'<a href="{u}" style="display:inline-block;margin:4px;"><img src="{u}" alt="Artwork" style="width:88px;height:88px;object-fit:cover;border-radius:4px;border:2px solid #e8dcc8;box-shadow:0 2px 6px rgba(0,0,0,0.06);display:block;" /></a>'
             for u in thumbs
         )
         body = f"""
-        <div style="font-family:Georgia,'Times New Roman',serif;background:linear-gradient(180deg,#f5f0e6 0%,#ebe5db 100%);padding:32px 20px;color:#2c2419;">
-          <div style="max-width:620px;margin:0 auto;background:#fdfbf7;border:1px solid #ddd6c8;border-radius:4px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.06);">
-            <div style="padding:28px 28px 12px 28px;border-bottom:1px solid #eee8de;">
-              <div style="font-size:26px;font-weight:600;color:#1e3a5f;letter-spacing:0.02em;">Your Artify gallery is ready</div>
-              <div style="margin-top:6px;font-size:15px;color:#6b5d4f;">Style: <strong style="color:#8b7355;">{style_name or 'Master Artist'}</strong></div>
-              <div style="margin-top:2px;font-size:13px;color:#9a8f7f;">Order {order_id}</div>
+        <div style="font-family:Georgia,'Times New Roman',serif;background:#e8e2d8;padding:24px 16px;color:#2c2419;">
+          <div style="max-width:560px;margin:0 auto;background:#fdfbf7;border:1px solid #d4cdc0;border-radius:6px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,0.08);">
+            <div style="padding:24px 24px 16px 24px;background:linear-gradient(180deg,#fff 0%,#faf7f2 100%);border-bottom:2px solid #e8dcc8;">
+              <div style="font-size:24px;font-weight:600;color:#1e3a5f;letter-spacing:0.02em;">Your Artify gallery is ready</div>
+              <div style="margin-top:6px;font-size:14px;color:#6b5d4f;">Style: <strong style="color:#8b7355;">{style_name or 'Master Artist'}</strong> · Order {order_id}</div>
             </div>
-            {"<div style='padding:20px 28px;background:#f8f5ef;'><div style='border:3px solid #c9a96e;border-radius:2px;padding:8px;background:#fff;box-shadow:inset 0 0 0 1px #e8dcc8;'><img src='" + hero + "' alt='Your artwork' style='width:100%;max-height:340px;object-fit:contain;display:block;' /></div></div>" if hero else ""}
-            <div style="padding:12px 28px 4px 28px;font-size:12px;color:#8b7355;text-transform:uppercase;letter-spacing:0.12em;">Preview your set</div>
-            <div style="padding:8px 24px 20px 24px;text-align:center;">{thumbs_html}</div>
-            <div style="padding:20px 28px 28px 28px;background:#f8f5ef;border-top:1px solid #eee8de;">
-              <a href="{download_all_link}" style="display:inline-block;padding:14px 24px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a8e 100%);color:#fff;text-decoration:none;border-radius:4px;font-weight:600;font-size:15px;margin-right:10px;box-shadow:0 4px 12px rgba(30,58,95,0.25);">Download all pictures</a>
-              <a href="{order_link}" style="display:inline-block;padding:14px 24px;background:#fff;color:#1e3a5f;text-decoration:none;border-radius:4px;font-weight:600;font-size:15px;border:2px solid #c9a96e;">View order page</a>
+            {"<div style='padding:16px 20px;background:#f5f0e8;'><div style='border:3px solid #c9a96e;border-radius:4px;padding:6px;background:#fff;'><img src='" + hero + "' alt='Your artwork' style='width:100%;max-height:300px;object-fit:contain;display:block;' /></div></div>" if hero else ""}
+            <div style="padding:16px 20px 8px 20px;font-size:11px;color:#8b7355;text-transform:uppercase;letter-spacing:0.1em;">All {n} portraits</div>
+            <div style="padding:8px 16px 16px 16px;text-align:center;line-height:0;">{thumbs_html}</div>
+            <div style="padding:20px 24px;background:#f5f0e8;border-top:1px solid #e8dcc8;">
+              <p style="margin:0 0 14px 0;font-size:14px;color:#6b5d4f;">Save your full set in one click.</p>
+              <a href="{download_all_link}" style="display:inline-block;padding:12px 22px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a8e 100%);color:#fff;text-decoration:none;border-radius:4px;font-weight:600;font-size:14px;margin-right:8px;">Download all</a>
+              <a href="{order_link}" style="display:inline-block;padding:12px 22px;background:#fff;color:#1e3a5f;text-decoration:none;border-radius:4px;font-weight:600;font-size:14px;border:2px solid #c9a96e;">View online</a>
             </div>
+            <div style="padding:12px 24px;text-align:center;font-size:12px;color:#9a8f7f;border-top:1px solid #eee8de;">Thanks for choosing Artify — made with care for art lovers.</div>
           </div>
         </div>
         """

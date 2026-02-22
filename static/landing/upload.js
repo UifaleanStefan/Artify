@@ -42,7 +42,7 @@
       if (photoInput) photoInput.value = '';
       return;
     }
-    if (file.size > MAX_SIZE_BYTES) { showError('File must be under ' + MAX_SIZE_MB + 'MB.'); return; }
+    if (file.size > MAX_SIZE_BYTES) { showError('Fișierul trebuie să aibă maxim ' + MAX_SIZE_MB + ' MB.'); return; }
     var reader = new FileReader();
     reader.onload = function () {
       if (previewImg) previewImg.src = reader.result;
@@ -64,7 +64,7 @@
       uploadZone.classList.remove('dragover');
       var file = e.dataTransfer.files[0];
       if (!file) return;
-      if (file.type.indexOf('image/') !== 0) { showError('Please drop a photo (JPG, PNG, WebP, or BMP).'); return; }
+      if (file.type.indexOf('image/') !== 0) { showError('Adaugă o poză (JPG, PNG, WebP sau BMP).'); return; }
       setPhoto(file);
     });
   }
@@ -73,7 +73,7 @@
       var file = photoInput.files[0];
       if (!file) return;
       if (file.type.indexOf('image/') !== 0) {
-        showError('Please choose a photo (JPG, PNG, WebP, or BMP).');
+        showError('Alege o poză (JPG, PNG, WebP sau BMP).');
         photoInput.value = '';
         return;
       }
@@ -88,7 +88,7 @@
     createBtn.addEventListener('click', function () {
       if (!style) return;
       if (!photoFile) {
-        showError('Please add a photo first.');
+        showError('Adaugă mai întâi o poză.');
         if (uploadZone) {
           uploadZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
           uploadZone.classList.add('upload-zone-pulse');
@@ -98,7 +98,7 @@
       }
       hideError();
       createBtn.disabled = true;
-      createBtn.textContent = 'Continuing…';
+      createBtn.textContent = 'Se continuă…';
       var formData = new FormData();
       formData.append('file', photoFile, photoFile.name || 'photo.jpg');
       fetch('/api/upload-image', { method: 'POST', body: formData })
@@ -114,8 +114,8 @@
         })
         .catch(function (err) {
           createBtn.disabled = false;
-          createBtn.textContent = 'Continue';
-          showError(err && err.message ? err.message : 'Something went wrong.');
+          createBtn.textContent = 'Continuă';
+          showError(err && err.message ? err.message : 'Ceva nu a mers bine.');
         });
     });
   }
@@ -126,7 +126,7 @@
     style = data.find(function (s) { return s.id === id; });
   }
   if (!style) {
-    if (styleCard) styleCard.innerHTML = '<p>No style selected. <a href="/styles">Choose a style</a> first.</p>';
+    if (styleCard) styleCard.innerHTML = '<p>Niciun stil ales. <a href="/styles">Alege un stil</a> mai întâi.</p>';
     if (createBtn) createBtn.disabled = true;
   } else {
     if (createBtn) createBtn.disabled = true;

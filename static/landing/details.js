@@ -50,7 +50,7 @@
     if (artist) artist.textContent = style.artist;
   }
   if (imageUrl && photoPreview) {
-    photoPreview.innerHTML = '<img src="' + imageUrl + '" alt="Your photo" />';
+    photoPreview.innerHTML = '<img src="' + imageUrl + '" alt="Poză ta" />';
   }
   if (backLink) { backLink.href = '/upload?style=' + encodeURIComponent(styleId || ''); }
 
@@ -63,8 +63,8 @@
       var email = (document.getElementById('email').value || '').trim();
       var confirm = (document.getElementById('email-confirm').value || '').trim();
       if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
-      if (!email) { if (errorEl) { errorEl.textContent = 'Email is required.'; errorEl.style.display = 'block'; } return; }
-      if (email !== confirm) { if (errorEl) { errorEl.textContent = 'Emails do not match.'; errorEl.style.display = 'block'; } return; }
+      if (!email) { if (errorEl) { errorEl.textContent = 'Adresa de email este obligatorie.'; errorEl.style.display = 'block'; } return; }
+      if (email !== confirm) { if (errorEl) { errorEl.textContent = 'Adresele de email nu coincid.'; errorEl.style.display = 'block'; } return; }
       var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&email=' + encodeURIComponent(email);
       window.location.href = '/billing' + q;
     });

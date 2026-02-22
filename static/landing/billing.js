@@ -71,7 +71,7 @@
       var zip = document.getElementById('zip').value.trim();
       var country = document.getElementById('country').value.trim();
       if (!fullName || !address1 || !city || !zip || !country) {
-        if (errorEl) { errorEl.textContent = 'Please fill in all required fields.'; errorEl.style.display = 'block'; } return;
+        if (errorEl) { errorEl.textContent = 'Completează toate câmpurile obligatorii.'; errorEl.style.display = 'block'; } return;
       }
       sessionStorage.setItem('billingInfo', JSON.stringify({ fullName: fullName, address1: address1, address2: address2, city: city, state: state, zip: zip, country: country }));
       var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&email=' + encodeURIComponent(email);

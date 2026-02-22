@@ -59,13 +59,13 @@
 
   if (payBtn) {
     payBtn.addEventListener('click', function () {
-      if (!styleId || !imageUrl) { alert('Order data is missing. Please start from the beginning.'); window.location.href = '/styles'; return; }
-      if (!style || !style.styleImageUrl) { alert('Style data is missing. Please contact support.'); return; }
-      if (!email) { alert('Email is required. Please go back to Details.'); return; }
+      if (!styleId || !imageUrl) { alert('Lipsesc datele comenzii. Te rugăm să începi de la început.'); window.location.href = '/styles'; return; }
+      if (!style || !style.styleImageUrl) { alert('Lipsesc datele stilului. Contactează suportul.'); return; }
+      if (!email) { alert('Emailul este obligatoriu. Revino la Detalii.'); return; }
       var billingInfoStr = sessionStorage.getItem('billingInfo');
-      if (!billingInfoStr) { alert('Billing information is missing. Please go back to Billing.'); return; }
+      if (!billingInfoStr) { alert('Lipsesc datele de facturare. Revino la Facturare.'); return; }
       var billingInfo = JSON.parse(billingInfoStr);
-      payBtn.disabled = true; payBtn.textContent = 'Processing…';
+      payBtn.disabled = true; payBtn.textContent = 'Se procesează…';
 
       fetch('/api/orders', {
         method: 'POST',
@@ -84,9 +84,9 @@
       })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, data: d }; }); })
       .then(function (res) {
-        if (!res.ok) throw new Error((res.data && res.data.detail) || 'Failed to create order.');
+        if (!res.ok) throw new Error((res.data && res.data.detail) || 'Crearea comenzii a eșuat.');
         var orderId = res.data && res.data.order_id;
-        if (!orderId) throw new Error('Order created but no order_id returned.');
+        if (!orderId) throw new Error('Comanda a fost creată dar nu s-a returnat order_id.');
         return fetch('/api/orders/' + encodeURIComponent(orderId) + '/pay', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -94,13 +94,13 @@
         }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, data: d, orderId: orderId }; }); });
       })
       .then(function (res) {
-        if (!res.ok) throw new Error((res.data && res.data.detail) || 'Payment failed.');
+        if (!res.ok) throw new Error((res.data && res.data.detail) || 'Plata a eșuat.');
         var q = '?order_id=' + encodeURIComponent(res.orderId) + '&style=' + encodeURIComponent(styleId) + '&email=' + encodeURIComponent(email);
         window.location.href = '/create/done' + q;
       })
       .catch(function (err) {
-        payBtn.disabled = false; payBtn.textContent = 'Pay $12.00';
-        alert(err.message || 'Something went wrong.');
+        payBtn.disabled = false; payBtn.textContent = 'Plătește 12 €';
+        alert(err.message || 'Ceva nu a mers bine.');
       });
     });
   }
