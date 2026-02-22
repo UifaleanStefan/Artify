@@ -255,12 +255,15 @@ async def resend_ready_email(order_id: str, background_tasks: BackgroundTasks, d
     if not isinstance(urls, list) or not urls:
         raise HTTPException(status_code=400, detail="Order has no valid result images")
 
+    styles = _load_styles_data()
+    result_labels = _build_result_labels(order, urls, styles)
     background_tasks.add_task(
         EmailService().send_result_ready,
         order.order_id,
         order.email,
         urls,
         order.style_name,
+        result_labels,
     )
     return {"status": "ok", "message": "Ready email resend queued", "order_id": order_id, "email": order.email}
 
@@ -423,6 +426,60 @@ STYLE_ID_IMPRESSION_COLOR_PACK = 14
 IMPRESSION_COLOR_PACK_PATHS = [
     f"/static/landing/styles/impression-color/impression-color-{i:02d}.jpg" for i in range(1, 16)
 ]
+
+# Per-image (painting title, artist) for email captions.
+# Masters pack: 15 reference images (masters-01.jpg … masters-15.jpg); each result image gets the label at the same index.
+MASTERS_PACK_LABELS: list[tuple[str, str]] = [
+    ("Noapte înstelată", "Vincent van Gogh"),
+    ("Nufări", "Claude Monet"),
+    ("Portret renascentist", "Leonardo da Vinci"),
+    ("Portret cubist", "Pablo Picasso"),
+    ("Portret pop art", "Andy Warhol"),
+    ("Portret auriu", "Gustav Klimt"),
+    ("Stilul autoportretului", "Frida Kahlo"),
+    ("Marea val", "Katsushika Hokusai"),
+    ("Portret clarobscur", "Rembrandt van Rijn"),
+    ("Portret fauvist", "Henri Matisse"),
+    ("Vis surrealist", "Salvador Dalí"),
+    ("Fata cu perlă", "Johannes Vermeer"),
+    ("Flori de floarea-soarelui", "Vincent van Gogh"),
+    ("Sărutul", "Gustav Klimt"),
+    ("Nașterea lui Venus", "Sandro Botticelli"),
+]
+IMPRESSION_COLOR_PACK_LABELS: list[tuple[str, str]] = [
+    ("Nufări", "Claude Monet"),
+    ("Noapte înstelată", "Vincent van Gogh"),
+    ("Portret fauvist", "Henri Matisse"),
+    ("Nufări (detaliu)", "Claude Monet"),
+    ("Impresie, răsărit de soare", "Claude Monet"),
+    ("Portret fauvist", "Henri Matisse"),
+    ("Câmp de grâu cu corbi", "Vincent van Gogh"),
+    ("Femei la tahiche", "Henri Matisse"),
+    ("Podul japonez", "Claude Monet"),
+    ("Autoportret", "Vincent van Gogh"),
+    ("Dans", "Henri Matisse"),
+    ("Irisi", "Vincent van Gogh"),
+    ("Stogul de fân", "Claude Monet"),
+    ("Odalisque", "Henri Matisse"),
+    ("Drum cu chiparos și stele", "Vincent van Gogh"),
+]
+
+
+def _build_result_labels(
+    order: Order, result_urls_list: list[str], styles: list
+) -> list[tuple[str, str]]:
+    """Build (painting_title, artist) for each result image for the ready email."""
+    n = len(result_urls_list)
+    if not n:
+        return []
+    if order.style_id == STYLE_ID_MASTERS_PACK:
+        return MASTERS_PACK_LABELS[:n]
+    if order.style_id == STYLE_ID_IMPRESSION_COLOR_PACK:
+        return IMPRESSION_COLOR_PACK_LABELS[:n]
+    style_data = next((s for s in styles if s.get("id") == order.style_id), None)
+    title = order.style_name or (style_data.get("title") if style_data else "Stil")
+    artist = style_data.get("artist", "Artist") if style_data else "Artist"
+    return [(title, artist)] * n
 
 
 def _load_styles_data() -> list:
@@ -719,7 +776,11 @@ def _run_style_transfer_sync(order_id: str) -> None:
             order.completed_at = datetime.utcnow()
             db.commit()
 
-            EmailService().send_result_ready(order_id, order.email, result_urls_list, order.style_name)
+            styles = _load_styles_data()
+            result_labels = _build_result_labels(order, result_urls_list, styles)
+            EmailService().send_result_ready(
+                order_id, order.email, result_urls_list, order.style_name, result_labels=result_labels
+            )
 
         except StyleTransferRateLimit as e:
             order.status = OrderStatus.FAILED.value
