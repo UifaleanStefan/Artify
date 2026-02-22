@@ -555,6 +555,10 @@ a.style-card:hover { opacity: 0.95; }
   background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.75) 100%),
     url("/static/landing/styles/impression-color/impression-color-01.jpg") center/cover no-repeat;
 }
+.style-card-bg--modern {
+  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.75) 100%),
+    url("/static/landing/styles/modern-abstract/modern-abstract-01.jpg") center/cover no-repeat;
+}
 .style-tag {
   position: absolute;
   top: 1rem;

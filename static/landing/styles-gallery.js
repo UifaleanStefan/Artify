@@ -19,6 +19,7 @@
       'Baroque': 'tag-baroque',
       'Fauvism': 'tag-fauvism',
       'Masters': 'tag-masters',
+      'Modern': 'tag-modern',
     };
     return map[cat] || 'tag-impressionism';
   }

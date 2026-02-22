@@ -427,6 +427,14 @@ IMPRESSION_COLOR_PACK_PATHS = [
     f"/static/landing/styles/impression-color/impression-color-{i:02d}.jpg" for i in range(1, 16)
 ]
 
+# Modern & Abstract pack: 15 reference images (modern-abstract-01.jpg … 13.png … 15.jpg)
+STYLE_ID_MODERN_ABSTRACT_PACK = 15
+MODERN_ABSTRACT_PACK_PATHS = [
+    *[f"/static/landing/styles/modern-abstract/modern-abstract-{i:02d}.jpg" for i in range(1, 13)],
+    "/static/landing/styles/modern-abstract/modern-abstract-13.png",
+    *[f"/static/landing/styles/modern-abstract/modern-abstract-{i:02d}.jpg" for i in range(14, 16)],
+]
+
 # Per-image (painting title, artist) for email captions.
 # Masters pack: 15 reference images (masters-01.jpg … masters-15.jpg); each result image gets the label at the same index.
 MASTERS_PACK_LABELS: list[tuple[str, str]] = [
@@ -463,6 +471,24 @@ IMPRESSION_COLOR_PACK_LABELS: list[tuple[str, str]] = [
     ("Odalisque", "Henri Matisse"),
     ("Drum cu chiparos și stele", "Vincent van Gogh"),
 ]
+# Modern & Abstract pack: (titlu operă, artist) pentru fiecare imagine
+MODERN_ABSTRACT_PACK_LABELS: list[tuple[str, str]] = [
+    ("Compoziție abstractă", "Modern și abstract"),
+    ("Portocaliu și galben", "Mark Rothko"),
+    ("Convergență", "Jackson Pollock"),
+    ("Pătratul negru", "Kazimir Malevici"),
+    ("Broadway Boogie Woogie", "Piet Mondrian"),
+    ("Compoziție modernă", "Modern și abstract"),
+    ("Strada, Berlin", "Ernst Ludwig Kirchner"),
+    ("Calul albastru I", "Franz Marc"),
+    ("Scrâșnetul", "Edvard Munch"),
+    ("Compoziție surrealistă", "Modern și abstract"),
+    ("Salvador Dalí", "Dalí"),
+    ("Compoziție", "Modern și abstract"),
+    ("Om cu chitară", "Georges Braque"),
+    ("Fata cu mandolină", "Pablo Picasso"),
+    ("Compoziție", "Modern și abstract"),
+]
 
 
 def _build_result_labels(
@@ -476,6 +502,8 @@ def _build_result_labels(
         return MASTERS_PACK_LABELS[:n]
     if order.style_id == STYLE_ID_IMPRESSION_COLOR_PACK:
         return IMPRESSION_COLOR_PACK_LABELS[:n]
+    if order.style_id == STYLE_ID_MODERN_ABSTRACT_PACK:
+        return MODERN_ABSTRACT_PACK_LABELS[:n]
     style_data = next((s for s in styles if s.get("id") == order.style_id), None)
     title = order.style_name or (style_data.get("title") if style_data else "Stil")
     artist = style_data.get("artist", "Artist") if style_data else "Artist"
@@ -520,6 +548,10 @@ async def create_order(
         style_image_urls = json.dumps([_resolve_style_image_url(p) for p in IMPRESSION_COLOR_PACK_PATHS])
         if not style_image_url:
             style_image_url = _resolve_style_image_url(IMPRESSION_COLOR_PACK_PATHS[0])
+    elif order_data.style_id == STYLE_ID_MODERN_ABSTRACT_PACK:
+        style_image_urls = json.dumps([_resolve_style_image_url(p) for p in MODERN_ABSTRACT_PACK_PATHS])
+        if not style_image_url:
+            style_image_url = _resolve_style_image_url(MODERN_ABSTRACT_PACK_PATHS[0])
 
     # Fail fast if style URLs are not public HTTPS (Replicate requires this)
     def _must_be_https(name: str, url: Optional[str]) -> None:
