@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Status comandă – Artify</title>
   <link rel="stylesheet" href="/static/landing/styles.css" />
-  <link rel="stylesheet" href="/static/landing/order_status.css?v=2" />
+  <link rel="stylesheet" href="/static/landing/order_status.css?v=3" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -17,18 +17,25 @@
   </header>
   <main class="order-status-main">
     <div class="order-status-card">
-      <h1 class="order-status-title">Status comandă</h1>
-      <p class="order-status-id" id="order-status-id">—</p>
+      <div class="order-status-head">
+        <h1 class="order-status-title">Status comandă</h1>
+        <p class="order-status-id" id="order-status-id">—</p>
+      </div>
       <div id="order-status-state">
         <p class="order-status-loading">Se încarcă…</p>
       </div>
       <div class="order-status-results" id="order-status-results" style="display:none">
-        <h2 class="order-status-results-title">Galeria ta Artify e gata</h2>
-        <p class="order-status-results-sub">Apasă pe o imagine pentru mărime întreagă.</p>
+        <div class="order-status-results-head">
+          <span class="order-status-badge">✨ Gata</span>
+          <h2 class="order-status-results-title">Galeria ta Artify e gata</h2>
+          <p class="order-status-results-sub">Apasă pe o imagine pentru mărime întreagă.</p>
+        </div>
         <div class="order-status-hero-wrap" id="order-status-hero-wrap"></div>
-        <p class="order-status-preview-label">Previzualizează setul</p>
-        <div class="order-status-gallery" id="order-status-gallery"></div>
-        <div class="order-status-download-wrap">
+        <div class="order-status-preview-row">
+          <p class="order-status-preview-label">Previzualizează setul</p>
+          <div class="order-status-gallery" id="order-status-gallery"></div>
+        </div>
+        <div class="order-status-cta-row">
           <a href="#" class="btn btn-primary order-status-download" id="order-status-download">Descarcă toate imaginile</a>
         </div>
       </div>

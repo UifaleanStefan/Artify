@@ -1,116 +1,166 @@
-/* Order status page – artsy gallery theme */
+/* Order status page – gallery-style reveal */
 .order-status-main {
-  max-width: 780px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 3rem 2rem;
-  font-family: "Cormorant Garamond", Georgia, serif;
+  padding: 3rem 1.5rem 4rem;
+  font-family: "DM Sans", -apple-system, sans-serif;
+  background: linear-gradient(180deg, #f0edeb 0%, #e8e4e0 50%, #f5f3f0 100%);
+  min-height: 60vh;
 }
 
 .order-status-card {
-  background: linear-gradient(180deg, #fdfbf7 0%, #f8f5ef 100%);
-  border: 1px solid #ddd6c8;
-  border-radius: 6px;
-  padding: 2.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(201, 169, 110, 0.1);
+  background: #fdfcf9;
+  border-radius: 16px;
+  padding: 2.5rem 2rem 2.75rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(201, 169, 110, 0.08);
+  border: 1px solid rgba(201, 169, 110, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.order-status-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #c9a96e 0%, #d4b87a 50%, #c9a96e 100%);
+  opacity: 0.9;
+}
+
+.order-status-head {
+  margin-bottom: 1rem;
 }
 
 .order-status-title {
-  margin: 0 0 0.25rem;
-  font-size: 1.5rem;
-  font-weight: 700;
+  margin: 0 0 0.35rem;
+  font-size: 1.125rem;
+  font-weight: 600;
   color: var(--primary);
   letter-spacing: 0.02em;
+  font-family: "DM Sans", sans-serif;
 }
 
 .order-status-id {
-  margin: 0 0 1.5rem;
-  font-size: 0.9rem;
+  margin: 0;
+  font-size: 0.8125rem;
   color: var(--text-muted);
   word-break: break-all;
   font-family: "DM Sans", sans-serif;
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 6px;
 }
 
 .order-status-loading,
 .order-status-processing {
   margin: 0 0 1.5rem;
   color: var(--text-muted);
-  font-family: "DM Sans", sans-serif;
+  font-size: 0.9375rem;
 }
 
 .order-status-error {
   margin: 0 0 1.5rem;
   padding: 1rem 1.25rem;
   background: #fef2f2;
-  border-radius: 6px;
+  border-radius: 10px;
   color: #b91c1c;
   font-size: 0.9375rem;
-  font-family: "DM Sans", sans-serif;
+  border: 1px solid rgba(185, 28, 28, 0.15);
 }
 
+/* Results block */
 .order-status-results {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
+}
+
+.order-status-results-head {
+  text-align: center;
+  margin-bottom: 1.75rem;
+}
+
+.order-status-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #8b7355;
+  background: linear-gradient(135deg, rgba(201, 169, 110, 0.2) 0%, rgba(201, 169, 110, 0.08) 100%);
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  margin-bottom: 0.75rem;
 }
 
 .order-status-results-title {
-  margin: 0 0 0.25rem;
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--primary);
-  letter-spacing: 0.02em;
+  margin: 0 0 0.4rem;
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  letter-spacing: -0.02em;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  line-height: 1.2;
 }
 
 .order-status-results-sub {
-  margin: 0 0 1.25rem;
-  font-size: 0.95rem;
+  margin: 0;
+  font-size: 0.9375rem;
   color: var(--text-muted);
-  font-family: "DM Sans", sans-serif;
 }
 
+/* Hero image – gallery frame */
 .order-status-hero-wrap {
-  margin-bottom: 1.5rem;
-  padding: 12px;
-  background: #f8f5ef;
-  border-radius: 4px;
-  border: 3px solid var(--accent);
-  box-shadow: inset 0 0 0 1px rgba(201, 169, 110, 0.2);
+  margin-bottom: 2rem;
+  padding: 14px;
+  background: linear-gradient(145deg, #f5f0e8 0%, #ebe5dc 100%);
+  border-radius: 12px;
+  border: 2px solid #d4c4a8;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .order-status-hero-wrap img {
   width: 100%;
-  max-height: 400px;
+  max-height: 420px;
   object-fit: contain;
   display: block;
-  border-radius: 2px;
+  border-radius: 6px;
+}
+
+/* Preview set */
+.order-status-preview-row {
+  margin-bottom: 1.75rem;
 }
 
 .order-status-preview-label {
-  margin: 0 0 0.75rem;
-  font-size: 0.75rem;
-  color: var(--accent);
+  margin: 0 0 0.85rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #8b7355;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-family: "DM Sans", sans-serif;
+  letter-spacing: 0.14em;
 }
 
 .order-status-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 0.65rem;
 }
 
 .order-status-gallery a {
   display: block;
-  border-radius: 4px;
+  border-radius: 10px;
   overflow: hidden;
-  border: 2px solid #e8dcc8;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  border: 2px solid #e8e0d4;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, border-color 0.2s, box-shadow 0.2s;
 }
 
 .order-status-gallery a:hover {
-  border-color: var(--accent);
-  box-shadow: 0 4px 16px rgba(201, 169, 110, 0.2);
+  transform: translateY(-2px);
+  border-color: #c9a96e;
+  box-shadow: 0 8px 24px rgba(201, 169, 110, 0.22);
 }
 
 .order-status-gallery img {
@@ -121,21 +171,34 @@
   vertical-align: top;
 }
 
-.order-status-download-wrap {
-  margin-bottom: 1.5rem;
+/* CTA */
+.order-status-cta-row {
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 .order-status-download {
-  padding: 0.875rem 1.5rem;
-  font-family: "DM Sans", sans-serif;
-  font-size: 0.95rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+.order-status-download:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+}
+
+/* Actions below card */
 .order-status-actions {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  gap: 1rem 1.5rem;
+  margin-top: 1.5rem;
 }
 
 .order-status-actions .btn {
@@ -146,10 +209,22 @@
   font-size: 0.9375rem;
   color: var(--text-muted);
   text-decoration: none;
-  font-family: "DM Sans", sans-serif;
+  transition: color 0.15s ease;
 }
 
 .order-status-home:hover {
   color: var(--primary);
-  text-decoration: underline;
+}
+
+@media (min-width: 640px) {
+  .order-status-card {
+    padding: 3rem 2.5rem 3rem;
+  }
+  .order-status-results-title {
+    font-size: 2.125rem;
+  }
+  .order-status-gallery {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.75rem;
+  }
 }
