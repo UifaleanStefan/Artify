@@ -80,6 +80,15 @@ def get_service() -> StyleTransferService:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Artify service starting")
+    s = get_settings()
+    if s.resend_api_key:
+        logger.info("Email: Resend (RESEND_API_KEY set)")
+    elif s.sendgrid_api_key:
+        logger.info("Email: SendGrid (SENDGRID_API_KEY set)")
+    elif s.smtp_host:
+        logger.info("Email: SMTP (%s:%s)", s.smtp_host, s.smtp_port)
+    else:
+        logger.warning("Email: No provider configured (set RESEND_API_KEY in Render env)")
     get_upload_dir().mkdir(parents=True, exist_ok=True)
     _start_db_init_once()
     supervisor_task = asyncio.create_task(_processing_supervisor_loop())

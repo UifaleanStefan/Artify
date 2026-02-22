@@ -62,12 +62,14 @@ class EmailService:
 
     def _send(self, to: str, subject: str, html_body: str):
         settings = self.settings
-        if settings.sendgrid_api_key:
+        if settings.resend_api_key:
+            self._send_resend(to, subject, html_body)
+        elif settings.sendgrid_api_key:
             self._send_sendgrid(to, subject, html_body)
         elif settings.smtp_host:
             self._send_smtp(to, subject, html_body)
         else:
-            logger.warning(f"No email provider configured. Would send to {to}: {subject}")
+            logger.warning("No email provider configured. Set RESEND_API_KEY or SENDGRID_API_KEY (HTTP APIs work on Render; SMTP is blocked).")
 
     def _send_smtp(self, to: str, subject: str, html_body: str):
         s = self.settings
@@ -106,6 +108,30 @@ class EmailService:
                     backoff,
                 )
                 time.sleep(backoff)
+
+    def _send_resend(self, to: str, subject: str, html_body: str):
+        """Resend.com – free 100 emails/day, HTTP API (works on Render)."""
+        import httpx
+        s = self.settings
+        payload = {
+            "from": f"{s.from_name} <{s.from_email}>",
+            "to": [to],
+            "subject": subject,
+            "html": html_body,
+        }
+        try:
+            r = httpx.post(
+                "https://api.resend.com/emails",
+                json=payload,
+                headers={"Authorization": f"Bearer {s.resend_api_key}"},
+                timeout=30,
+            )
+            if r.status_code < 300:
+                logger.info("Email sent to %s via Resend", to)
+            else:
+                logger.error("Resend error %s: %s", r.status_code, r.text)
+        except Exception as e:
+            logger.error("Resend send failed: %s", e)
 
     def _send_sendgrid(self, to: str, subject: str, html_body: str):
         import httpx

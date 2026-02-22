@@ -36,8 +36,9 @@ class Settings(BaseSettings):
     # Database
     database_url: Optional[str] = None
 
-    # Email
-    sendgrid_api_key: Optional[str] = None
+    # Email (use HTTP APIs first – SMTP often blocked on Render)
+    resend_api_key: Optional[str] = None  # Free: 100/day @ resend.com
+    sendgrid_api_key: Optional[str] = None  # Free: 100/day @ sendgrid.com
     smtp_host: Optional[str] = None
     smtp_port: int = 587
     smtp_user: Optional[str] = None
