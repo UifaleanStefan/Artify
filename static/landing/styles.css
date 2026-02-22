@@ -687,6 +687,8 @@ a.style-card:hover { opacity: 0.95; }
 
 /* Pricing */
 .pricing-section { position: relative; background: linear-gradient(180deg, var(--bg-accent) 0%, rgba(236, 72, 153, 0.06) 100%); }
+.pricing-section .section-title { color: var(--text); }
+.pricing-section .section-subtitle { color: #475569; }
 .pricing-bg { position: absolute; inset: 0; background: inherit; pointer-events: none; }
 .pricing-cards {
   display: grid;
@@ -694,6 +696,9 @@ a.style-card:hover { opacity: 0.95; }
   gap: 1.5rem;
   align-items: start;
 }
+.pricing-cards--single { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
+.pricing-card--single { text-align: center; }
+.pricing-old { font-size: 1.25rem; font-weight: 500; color: var(--text-muted); text-decoration: line-through; margin-right: 0.5rem; -webkit-text-fill-color: var(--text-muted); }
 .pricing-card {
   position: relative;
   background: white;
