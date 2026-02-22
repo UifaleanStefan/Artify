@@ -68,6 +68,8 @@ def get_provider() -> ReplicateClient:
         timeout_seconds=settings.api_timeout_seconds,
         polling_timeout_seconds=settings.polling_timeout_seconds,
         polling_interval_seconds=settings.polling_interval_seconds,
+        rate_limit_retries=settings.replicate_rate_limit_retries,
+        rate_limit_base_wait=float(settings.replicate_rate_limit_base_wait_seconds),
     )
 
 
@@ -346,6 +348,27 @@ def _upload_to_litterbox(file_path: str, filename: str) -> str:
     raise HTTPException(status_code=502, detail="Failed to upload to temporary hosting")
 
 
+def _build_public_upload_url(upload_id: str, ext: str) -> str:
+    base = (get_settings().public_base_url or "").rstrip("/")
+    if not base:
+        return ""
+    return f"{base}/api/uploads/{upload_id}/photo{ext}"
+
+
+@app.get("/api/uploads/{upload_id}/{filename}")
+async def get_uploaded_image(upload_id: str, filename: str):
+    """Serve uploaded source images via this backend domain."""
+    if Path(filename).name != filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    ext = Path(filename).suffix.lower()
+    if ext not in IMAGE_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Unsupported format")
+    file_path = get_upload_dir() / upload_id / filename
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path)
+
+
 @app.post("/api/upload-image")
 async def upload_image(file: UploadFile = File(...)) -> JSONResponse:
     """Upload a face photo. Returns public image_url."""
@@ -370,7 +393,8 @@ async def upload_image(file: UploadFile = File(...)) -> JSONResponse:
 
     settings = get_settings()
     if settings.public_base_url:
-        image_url = _upload_to_litterbox(str(file_path), f"photo{ext}")
+        # Prefer self-hosted HTTPS URL for reliability; avoids litterbox outages/expiry.
+        image_url = _build_public_upload_url(upload_id, ext)
     else:
         image_url = _upload_to_litterbox(str(file_path), f"photo{ext}")
 

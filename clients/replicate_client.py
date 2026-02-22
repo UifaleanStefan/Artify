@@ -67,20 +67,24 @@ class ReplicateClient:
             },
         }
         for attempt in range(self.rate_limit_retries):
-            with httpx.Client(timeout=self.timeout_seconds) as client:
-                r = client.post(url, json=payload, headers=self._headers())
-                if r.status_code == 429:
+            try:
+                with httpx.Client(timeout=self.timeout_seconds) as client:
+                    r = client.post(url, json=payload, headers=self._headers())
+                if r.status_code in (429, 500, 502, 503, 504):
                     wait = self.rate_limit_base_wait * (2 ** attempt)
                     if attempt < self.rate_limit_retries - 1:
                         logger.warning(
-                            "Replicate rate limit (429), waiting %.0fs before retry %d/%d",
+                            "Replicate transient error (%s), waiting %.0fs before retry %d/%d",
+                            r.status_code,
                             wait,
                             attempt + 1,
-                            self.rate_limit_retries - 1,
+                            self.rate_limit_retries,
                         )
                         time.sleep(wait)
                         continue
-                    raise StyleTransferRateLimit("Rate limit exceeded after retries")
+                    if r.status_code == 429:
+                        raise StyleTransferRateLimit("Rate limit exceeded after retries")
+                    raise StyleTransferError(f"Replicate transient error {r.status_code} after retries: {r.text}")
                 if r.status_code >= 400:
                     raise StyleTransferError(f"Replicate API error {r.status_code}: {r.text}")
                 data = r.json()
@@ -89,6 +93,19 @@ class ReplicateClient:
                     raise StyleTransferError("No prediction ID returned")
                 logger.info(f"Style transfer job submitted: {prediction_id}")
                 return prediction_id
+            except httpx.RequestError as e:
+                wait = self.rate_limit_base_wait * (2 ** attempt)
+                if attempt < self.rate_limit_retries - 1:
+                    logger.warning(
+                        "Replicate network error, waiting %.0fs before retry %d/%d: %s",
+                        wait,
+                        attempt + 1,
+                        self.rate_limit_retries,
+                        e,
+                    )
+                    time.sleep(wait)
+                    continue
+                raise StyleTransferError(f"Replicate request failed after retries: {e}")
         raise StyleTransferRateLimit("Rate limit exceeded")
 
     def get_prediction(self, prediction_id: str) -> Dict[str, Any]:
@@ -120,7 +137,20 @@ class ReplicateClient:
                     raise StyleTransferTimeout(
                         f"Polling timed out after {self.polling_timeout}s"
                     )
-                r = client.get(url, headers=self._headers())
+                try:
+                    r = client.get(url, headers=self._headers())
+                except httpx.RequestError as e:
+                    logger.warning("Replicate poll request error for %s: %s; retrying", prediction_id, e)
+                    time.sleep(self.polling_interval)
+                    continue
+                if r.status_code in (429, 500, 502, 503, 504):
+                    logger.warning(
+                        "Replicate poll transient status %s for %s; retrying",
+                        r.status_code,
+                        prediction_id,
+                    )
+                    time.sleep(self.polling_interval)
+                    continue
                 if r.status_code >= 400:
                     raise StyleTransferError(f"Poll error {r.status_code}: {r.text}")
                 data = r.json()

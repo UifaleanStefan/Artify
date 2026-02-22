@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     polling_timeout_seconds: int = 300
     polling_interval_seconds: int = 5
     max_retries: int = 3
+    replicate_rate_limit_retries: int = 8
+    replicate_rate_limit_base_wait_seconds: int = 15
 
     # File upload
     upload_dir: Optional[str] = None
