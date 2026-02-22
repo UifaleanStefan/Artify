@@ -412,8 +412,11 @@ body {
 .styles-header .section-subtitle { margin-bottom: 0; }
 .style-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
+}
+@media (max-width: 768px) {
+  .style-cards { grid-template-columns: 1fr; }
 }
 .style-card {
   position: relative;
@@ -486,6 +489,14 @@ a.style-card:hover { opacity: 0.95; }
 .style-masters-placeholder {
   background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%),
     linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
+}
+.style-card-bg--masters {
+  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.75) 100%),
+    url("/static/landing/styles/masters/masters-01.jpg") center/cover no-repeat;
+}
+.style-card-bg--impression {
+  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.75) 100%),
+    url("/static/landing/styles/impression-color/impression-color-01.jpg") center/cover no-repeat;
 }
 .style-tag {
   position: absolute;
