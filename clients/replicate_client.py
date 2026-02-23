@@ -60,7 +60,7 @@ class ReplicateClient:
                 "structure_image": image_url,
                 "style_image": style_image_url,
                 "prompt": "Adapt the style of the style image to the structure image, keeping the brush strokes and brush details while emphasizing the features of the structure image, adapting them to the time period and style of the style image. Very important to keep the features in the structure image, so people are recognizable.",
-                "structure_denoising_strength": 0.8,
+                "structure_denoising_strength": 0.7,
                 "output_format": "jpg",
                 "output_quality": 80,
                 "number_of_images": 1,
