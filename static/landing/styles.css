@@ -55,6 +55,8 @@ body {
 .nav a { color: var(--text-muted); text-decoration: none; font-weight: 500; }
 .nav a:hover { color: var(--text); }
 .nav a.active { color: var(--primary); }
+.nav a.btn-primary { color: #fff; }
+.nav a.btn-primary:hover { color: #fff; }
 
 .btn {
   display: inline-flex;
@@ -468,14 +470,22 @@ body {
 .styles-header .section-subtitle { text-align: left; }
 .styles-header .section-subtitle { margin-bottom: 0; }
 .style-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-wrap: nowrap;
   gap: 1.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  padding-bottom: 0.5rem;
+  -webkit-overflow-scrolling: touch;
 }
-@media (max-width: 768px) {
-  .style-cards { grid-template-columns: 1fr; }
-}
+.style-cards::-webkit-scrollbar { height: 6px; }
+.style-cards::-webkit-scrollbar-track { background: rgba(0,0,0,0.06); border-radius: 3px; }
+.style-cards::-webkit-scrollbar-thumb { background: rgba(37, 99, 235, 0.35); border-radius: 3px; }
 .style-card {
+  flex: 0 0 auto;
+  width: min(320px, 85vw);
+  min-width: 260px;
   position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -600,7 +610,31 @@ a.style-card:hover { opacity: 0.95; }
 .quote-left { left: 0; top: 50%; transform: translateY(-50%); }
 .quote-right { right: 0; top: 50%; transform: translateY(-50%); }
 
-.testimonial-scroll-wrap { position: relative; width: 100%; }
+.testimonial-scroll-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+/* Edge fades: left and right for horizontal scroll */
+.testimonial-scroll-wrap::before,
+.testimonial-scroll-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  max-width: 15%;
+  pointer-events: none;
+  z-index: 2;
+}
+.testimonial-scroll-wrap::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg) 0%, transparent 100%);
+}
+.testimonial-scroll-wrap::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg) 0%, transparent 100%);
+}
 .testimonial-track { width: 100%; }
 .testimonial-track--vertical { display: none; }
 
@@ -641,6 +675,12 @@ a.style-card:hover { opacity: 0.95; }
   display: flex;
   flex-direction: column;
   border: 1px solid rgba(245, 158, 11, 0.12);
+  opacity: 1;
+  animation: testimonial-fade-in 0.6s ease-out;
+}
+@keyframes testimonial-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .testimonial-stars { color: var(--accent); font-size: 1rem; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
 .testimonial-quote { margin: 0 0 0.75rem; color: var(--text); font-size: 0.9375rem; line-height: 1.4; flex: 1; }
@@ -658,14 +698,38 @@ a.style-card:hover { opacity: 0.95; }
 .testimonial-author strong { display: block; font-size: 0.875rem; }
 .author-role { font-size: 0.75rem; color: var(--primary); }
 
-/* Mobile: vertical treadmill */
+/* Mobile: vertical treadmill with top/bottom fades */
 @media (max-width: 768px) {
+  .testimonial-scroll-wrap::before,
+  .testimonial-scroll-wrap::after {
+    width: 0;
+    display: none;
+  }
   .testimonial-track--horizontal { display: none; }
   .testimonial-track--vertical {
     display: block;
     height: 320px;
     overflow: hidden;
     padding: 0 1rem;
+    position: relative;
+  }
+  .testimonial-track--vertical::before,
+  .testimonial-track--vertical::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 48px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .testimonial-track--vertical::before {
+    top: 0;
+    background: linear-gradient(to bottom, var(--bg) 0%, transparent 100%);
+  }
+  .testimonial-track--vertical::after {
+    bottom: 0;
+    background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
   }
   .testimonial-treadmill {
     display: flex;
@@ -691,8 +755,8 @@ a.style-card:hover { opacity: 0.95; }
 
 /* Pricing */
 .pricing-section { position: relative; background: linear-gradient(180deg, var(--bg-accent) 0%, rgba(236, 72, 153, 0.06) 100%); }
-.pricing-section .section-title { color: var(--text); }
-.pricing-section .section-subtitle { color: #475569; }
+.pricing-section .section-title { color: #1e293b; font-weight: 700; }
+.pricing-section .section-subtitle { color: #334155; font-weight: 500; }
 .pricing-bg { position: absolute; inset: 0; background: inherit; pointer-events: none; }
 .pricing-cards {
   display: grid;

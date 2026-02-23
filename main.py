@@ -5,12 +5,13 @@ import asyncio
 import io
 import json
 import logging
+import shutil
 import sys
 import time
 import uuid
 import zipfile
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import AsyncGenerator, Optional
 from urllib.parse import urlparse
@@ -23,7 +24,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from clients import ReplicateClient, StyleTransferError, StyleTransferRateLimit, StyleTransferTimeout
-from config import get_settings, get_upload_dir
+from config import get_settings, get_upload_dir, get_order_results_dir
 
 
 def _resolve_style_image_url(style_image_url: Optional[str]) -> Optional[str]:
@@ -37,6 +38,45 @@ def _resolve_style_image_url(style_image_url: Optional[str]) -> Optional[str]:
         base = (get_settings().public_base_url or "").rstrip("/")
         return f"{base}{url}" if base else url
     return url
+
+
+def _persist_result_images(order_id: str, result_urls: list[str]) -> list[str]:
+    """
+    Download each result image from Replicate (or any URL) and save to disk.
+    Returns list of permanent URLs (our server) so they don't expire. On failure, returns original URLs.
+    """
+    base_url = (get_settings().public_base_url or "").rstrip("/")
+    if not base_url:
+        logger.warning("PUBLIC_BASE_URL not set; cannot create permanent result URLs")
+        return result_urls
+    try:
+        results_dir = get_order_results_dir() / order_id
+        results_dir.mkdir(parents=True, exist_ok=True)
+        permanent = []
+        for i, url in enumerate(result_urls, start=1):
+            try:
+                with httpx.Client(timeout=45) as client:
+                    r = client.get(url)
+                if r.status_code >= 400:
+                    logger.warning("Failed to fetch result image %s for %s: %s", i, order_id, r.status_code)
+                    permanent.append(url)
+                    continue
+                ext = "jpg"
+                suf = Path(urlparse(url).path).suffix.lower()
+                if suf in (".png", ".webp", ".gif"):
+                    ext = suf.lstrip(".")
+                path = results_dir / f"{i}.{ext}"
+                path.write_bytes(r.content)
+                permanent.append(f"{base_url}/api/orders/{order_id}/result/{i}")
+            except Exception as e:
+                logger.warning("Persist result image %s for %s failed: %s", i, order_id, e)
+                permanent.append(url)
+        if len(permanent) == len(result_urls):
+            logger.info("Persisted %d result images for order %s", len(permanent), order_id)
+            return permanent
+    except Exception as e:
+        logger.warning("Persist result images for %s failed: %s", order_id, e)
+    return result_urls
 
 
 from database import Order, OrderStatus, get_db, SessionLocal, init_db
@@ -59,6 +99,9 @@ STATIC_DIR = Path(__file__).parent / "static"
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
 _ACTIVE_ORDER_TASKS: set[str] = set()
 _DB_INIT_STARTED = False
+
+# Orders older than this are deleted by the TTL cleanup job
+ORDER_TTL_DAYS = 14
 
 
 def get_provider() -> ReplicateClient:
@@ -92,10 +135,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     get_upload_dir().mkdir(parents=True, exist_ok=True)
     _start_db_init_once()
     supervisor_task = asyncio.create_task(_processing_supervisor_loop())
+    cleanup_task = asyncio.create_task(_ttl_cleanup_loop())
     yield
     supervisor_task.cancel()
+    cleanup_task.cancel()
     try:
         await supervisor_task
+    except asyncio.CancelledError:
+        pass
+    try:
+        await cleanup_task
     except asyncio.CancelledError:
         pass
     logger.info("Artify service shutting down")
@@ -166,6 +215,11 @@ async def payment_page() -> FileResponse:
 @app.get("/create/done")
 async def done_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "landing" / "create_done.html", headers=_HTML_HEADERS)
+
+
+@app.get("/help")
+async def help_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "landing" / "help.html", headers=_HTML_HEADERS)
 
 
 @app.get("/order/{order_id}")
@@ -342,6 +396,48 @@ def _get_unfinished_order_ids_sync() -> list[str]:
         return order_ids
     finally:
         db.close()
+
+
+def _cleanup_expired_orders_sync() -> int:
+    """Delete orders older than ORDER_TTL_DAYS and their persisted result images. Returns count deleted."""
+    db = SessionLocal()
+    try:
+        cutoff = datetime.utcnow() - timedelta(days=ORDER_TTL_DAYS)
+        expired = db.query(Order).filter(Order.created_at < cutoff).all()
+        deleted = 0
+        results_dir = get_order_results_dir()
+        for order in expired:
+            try:
+                order_dir = results_dir / order.order_id
+                if order_dir.exists() and order_dir.is_dir():
+                    shutil.rmtree(order_dir, ignore_errors=True)
+            except Exception as e:
+                logger.warning("TTL cleanup: failed to remove result dir for %s: %s", order.order_id, e)
+            db.delete(order)
+            deleted += 1
+        if deleted:
+            db.commit()
+            logger.info("TTL cleanup: deleted %d order(s) older than %d days", deleted, ORDER_TTL_DAYS)
+        return deleted
+    except Exception as e:
+        logger.warning("TTL cleanup failed: %s", e)
+        db.rollback()
+        return 0
+    finally:
+        db.close()
+
+
+async def _ttl_cleanup_loop() -> None:
+    """Run TTL cleanup at startup (after delay) and then every 24 hours."""
+    await asyncio.sleep(120)
+    while True:
+        try:
+            await asyncio.to_thread(_cleanup_expired_orders_sync)
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            logger.warning("TTL cleanup loop error: %s", e)
+        await asyncio.sleep(24 * 3600)
 
 
 # ── Upload API ───────────────────────────────────────────────
@@ -626,6 +722,22 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
     )
 
 
+@app.get("/api/orders/{order_id}/result/{index}")
+async def get_order_result_image(order_id: str, index: int):
+    """Serve a persisted result image so links don't expire (Replicate URLs are temporary)."""
+    if index < 1 or index > 20:
+        raise HTTPException(status_code=400, detail="Invalid index")
+    # Prevent path traversal (order_id is e.g. ART-123-ABC)
+    if "/" in order_id or "\\" in order_id or order_id in (".", ".."):
+        raise HTTPException(status_code=400, detail="Invalid order id")
+    results_dir = get_order_results_dir() / order_id
+    for ext in ("jpg", "jpeg", "png", "webp"):
+        path = results_dir / f"{index}.{ext}"
+        if path.exists():
+            return FileResponse(path, media_type=f"image/{ext}" if ext != "jpg" else "image/jpeg")
+    raise HTTPException(status_code=404, detail="Image not available")
+
+
 @app.get("/api/orders/{order_id}/download-all")
 async def download_all_results(order_id: str, db: Session = Depends(get_db)):
     """Download all generated images for an order as a zip file."""
@@ -804,6 +916,11 @@ def _run_style_transfer_sync(order_id: str) -> None:
                 order.style_transfer_job_id = ",".join(job_ids)
                 order.replicate_prediction_details = json.dumps(prediction_details)
                 db.commit()
+
+            # Persist images to our storage so URLs don't expire (Replicate links are temporary)
+            result_urls_list = _persist_result_images(order_id, result_urls_list)
+            order.result_urls = json.dumps(result_urls_list)
+            db.commit()
 
             order.status = OrderStatus.COMPLETED.value
             order.completed_at = datetime.utcnow()

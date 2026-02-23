@@ -60,3 +60,14 @@ def get_upload_dir() -> Path:
         p = Path(tempfile.gettempdir()) / "artify_uploads"
     p.mkdir(parents=True, exist_ok=True)
     return p
+
+
+def get_order_results_dir() -> Path:
+    """Directory for persisting order result images (so Replicate temp URLs are not relied on)."""
+    try:
+        base = get_upload_dir().parent
+    except Exception:
+        base = Path(tempfile.gettempdir())
+    p = base / "artify_order_results"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
