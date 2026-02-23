@@ -544,13 +544,15 @@ MODERN_ABSTRACT_PACK_PATHS = [
 # Ancient Worlds pack: 15 reference images (oldest in Downloads = 01, newest = 15)
 STYLE_ID_ANCIENT_WORLDS_PACK = 16
 ANCIENT_WORLDS_PACK_PATHS = [
-    f"/static/landing/styles/ancient-worlds/ancient-worlds-{i:02d}.jpg" for i in range(1, 16)
+    f"/static/landing/styles/ancient-worlds/ancient-worlds-{i:02d}.jpg" if i != 4 else "/static/landing/styles/ancient-worlds/ancient-worlds-04.png"
+    for i in range(1, 16)
 ]
 
 # Evolution of Portraits pack: 15 reference images (oldest in Downloads = 01, newest = 15)
 STYLE_ID_EVOLUTION_PORTRAITS_PACK = 17
 EVOLUTION_PORTRAITS_PACK_PATHS = [
-    f"/static/landing/styles/evolution-portraits/evolution-portraits-{i:02d}.jpg" for i in range(1, 16)
+    f"/static/landing/styles/evolution-portraits/evolution-portraits-{i:02d}.jpg" if i != 4 else "/static/landing/styles/evolution-portraits/evolution-portraits-04.png"
+    for i in range(1, 16)
 ]
 
 # Per-image (painting title, artist) for email captions.

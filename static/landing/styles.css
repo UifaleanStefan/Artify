@@ -596,7 +596,7 @@ a.style-card:hover { opacity: 0.95; }
 }
 .style-card-bg--evolution {
   background: linear-gradient(180deg, transparent 20%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.85) 100%),
-    url("/static/landing/styles/evolution-portraits/evolution-portraits-01.jpg") center/cover no-repeat;
+    url("/static/landing/styles/evolution-portraits/evolution-portraits-08.jpg") center/cover no-repeat;
 }
 .style-tag {
   position: absolute;
