@@ -495,12 +495,12 @@ body {
 .style-cards::-webkit-scrollbar-thumb { background: rgba(37, 99, 235, 0.35); border-radius: 3px; }
 .style-card {
   flex: 0 0 auto;
-  width: min(380px, 90vw);
-  min-width: 300px;
+  width: min(320px, 85vw);
+  min-width: 260px;
   position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  min-height: 320px;
+  min-height: 280px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -766,21 +766,29 @@ a.style-card:hover { opacity: 0.95; }
 
 /* Pricing */
 .pricing-section { position: relative; background: linear-gradient(180deg, var(--bg-accent) 0%, rgba(236, 72, 153, 0.06) 100%); }
+.pricing-bg { position: absolute; inset: 0; background: inherit; pointer-events: none; z-index: 0; }
 #pricing.section .section-title,
 .pricing-section .section-title {
-  color: #0f172a !important;
-  -webkit-text-fill-color: #0f172a !important;
+  position: relative;
+  z-index: 1;
+  color: #0a0a0a !important;
+  -webkit-text-fill-color: #0a0a0a !important;
   font-weight: 700;
   opacity: 1 !important;
 }
 #pricing.section .section-subtitle,
 .pricing-section .section-subtitle {
-  color: #1e293b !important;
-  -webkit-text-fill-color: #1e293b !important;
+  position: relative;
+  z-index: 1;
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
   font-weight: 500;
   opacity: 1 !important;
 }
-.pricing-bg { position: absolute; inset: 0; background: inherit; pointer-events: none; }
+.pricing-section .pricing-cards {
+  position: relative;
+  z-index: 1;
+}
 .pricing-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
