@@ -826,8 +826,8 @@ a.style-card:hover { opacity: 0.95; }
 }
 .pricing-discount-badge {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: -0.5rem;
+  right: 1.25rem;
   background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%);
   color: #fff;
   padding: 0.4rem 0.85rem;
