@@ -21,6 +21,57 @@
 
   if (idEl) idEl.textContent = orderId || '—';
   
+  var shareWrapEl = document.getElementById('museum-share-wrap');
+  var shareBtn = document.getElementById('museum-share-btn');
+  
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async function(e) {
+      e.preventDefault();
+      var imgUrl = globalUrls[currentIndex];
+      if (!imgUrl) return;
+
+      var tTitle = globalLabels.length > currentIndex && globalLabels[currentIndex][0] ? globalLabels[currentIndex][0] : 'Portretul meu Artify';
+      var oldHtml = shareBtn.innerHTML;
+
+      try {
+        shareBtn.innerHTML = 'Se pregătește...';
+        shareBtn.disabled = true;
+
+        var response = await fetch(imgUrl);
+        var blob = await response.blob();
+        
+        var ext = 'jpg';
+        if (blob.type === 'image/png') ext = 'png';
+        else if (blob.type === 'image/webp') ext = 'webp';
+        
+        var file = new File([blob], 'artify-portret.' + ext, { type: blob.type });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: tTitle,
+            text: 'Priviți noul meu portret artistic creat cu Artify! 🎨'
+          });
+        } else {
+          // Fallback: trigger download
+          var a = document.createElement('a');
+          a.href = window.URL.createObjectURL(blob);
+          a.download = 'artify-portret.' + ext;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error sharing', err);
+        }
+      } finally {
+        shareBtn.innerHTML = oldHtml;
+        shareBtn.disabled = false;
+      }
+    });
+  }
+
   function triggerAnimation(el) {
     el.classList.remove('fade-enter');
     void el.offsetWidth; // force reflow
@@ -130,8 +181,9 @@
     thumbs.forEach(function(thumb, i) {
       if (i === currentIndex) {
         thumb.classList.add('active');
-        // Scroll thumbnail into view smoothly if needed
-        thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        // Safely scroll thumbnail into view without affecting body
+        var scrollLeftTarget = thumb.offsetLeft - (filmstripEl.clientWidth / 2) + (thumb.clientWidth / 2);
+        filmstripEl.scrollTo({ left: scrollLeftTarget, behavior: 'smooth' });
       } else {
         thumb.classList.remove('active');
       }
@@ -215,6 +267,10 @@
         // Initialize first image
         currentIndex = 0;
         showImage(0);
+
+        if (shareWrapEl) {
+          shareWrapEl.style.display = 'block';
+        }
 
         if (downloadBtn && orderId) {
           downloadBtn.href = '/api/orders/' + encodeURIComponent(orderId) + '/download-all';

@@ -291,9 +291,10 @@ body.museum-mode .footer-brand .logo-text {
   left: calc(var(--compare-pct) * 1%);
   top: 0;
   bottom: 0;
-  width: 20px;
-  margin-left: -10px;
-  background: transparent;
+  width: 4px;
+  margin-left: -2px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
   cursor: col-resize;
   z-index: 10;
   display: flex;
@@ -314,12 +315,57 @@ body.museum-mode .footer-brand .logo-text {
   color: var(--primary);
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .museum-hero-caption {
   text-align: center;
   margin: 1.5rem auto 0;
   max-width: 600px;
+}
+
+/* Share Button */
+.museum-share-wrap {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.btn-share {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.08);
+  color: #f8fafc;
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 0.6rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font);
+}
+
+.btn-share:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+}
+
+.btn-share:active {
+  transform: translateY(1px);
+}
+
+.btn-share svg {
+  opacity: 0.8;
+}
+
+.btn-share:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .museum-caption-title {
