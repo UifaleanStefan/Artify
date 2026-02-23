@@ -28,8 +28,8 @@
   });
 
   // Desktop: auto horizontal scroll (infinite loop)
-  var scrollSpeed = 1;
-  var scrollDelay = 30;
+  var scrollSpeed = 2;
+  var scrollDelay = 16;
   var rowWidth = originalRow.offsetWidth;
 
   function scrollHorizontal() {
