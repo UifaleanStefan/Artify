@@ -76,12 +76,12 @@
    MUSEUM THEME (COMPLETED STATE)
    ==================================================== */
 body.museum-mode {
-  background-color: #050505;
+  background-color: #020617; /* Slate 950 */
   color: #f8fafc;
 }
 
 body.museum-mode .header {
-  background: rgba(5, 5, 5, 0.9);
+  background: rgba(2, 6, 23, 0.9);
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
@@ -97,7 +97,7 @@ body.museum-mode .order-status-main {
 }
 
 body.museum-mode .footer {
-  background-color: #0a0a0a;
+  background-color: #020617;
   border-top: 1px solid rgba(255,255,255,0.05);
   color: #94a3b8;
 }
@@ -116,7 +116,7 @@ body.museum-mode .footer-brand .logo-text {
 /* Typography & Layout */
 .museum-header {
   text-align: center;
-  margin-bottom: 4rem;
+  margin-bottom: 3rem;
   animation: fadeIn 1s ease forwards;
 }
 
@@ -126,8 +126,9 @@ body.museum-mode .footer-brand .logo-text {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: #d4af37; /* Gold accent */
-  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: var(--primary-light);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+  background: rgba(37, 99, 235, 0.1);
   padding: 0.4rem 1rem;
   border-radius: 9999px;
   margin-bottom: 1rem;
@@ -150,16 +151,60 @@ body.museum-mode .footer-brand .logo-text {
   font-weight: 300;
 }
 
-/* Hero Section */
-.museum-hero {
-  max-width: 800px;
+/* Exhibition Slider Section */
+.museum-exhibition-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  max-width: 900px;
   margin: 0 auto;
+  position: relative;
+  animation: floatUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.exhibition-arrow {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 50%;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.exhibition-arrow:hover:not(:disabled) {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.exhibition-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.museum-hero-container {
+  flex-grow: 1;
+  max-width: 700px;
+  width: 100%;
+  position: relative;
+}
+
+.museum-hero {
   position: relative;
   border-radius: 4px;
   padding: 1.5rem;
-  background: #111;
+  background: #0f172a; /* Slate 900 */
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255,255,255,0.05);
-  animation: floatUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: flex;
+  justify-content: center;
 }
 
 .museum-hero::before {
@@ -170,14 +215,14 @@ body.museum-mode .footer-brand .logo-text {
   transform: translateX(-50%);
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 60%);
   z-index: -1;
   pointer-events: none;
 }
 
 .museum-hero-img {
   width: 100%;
-  max-height: 65vh;
+  max-height: 60vh;
   object-fit: contain;
   display: block;
   border-radius: 2px;
@@ -186,10 +231,8 @@ body.museum-mode .footer-brand .logo-text {
 
 .museum-hero-caption {
   text-align: center;
-  margin: 2rem auto 6rem;
+  margin: 1.5rem auto 0;
   max-width: 600px;
-  animation: fadeIn 1.5s ease 0.5s forwards;
-  opacity: 0;
 }
 
 .museum-caption-title {
@@ -205,106 +248,98 @@ body.museum-mode .footer-brand .logo-text {
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: #94a3b8;
+  color: var(--primary-light);
 }
 
-/* Gallery Section */
-.museum-gallery-section {
-  padding-top: 4rem;
-  border-top: 1px solid rgba(255,255,255,0.05);
+/* Animations for slide switch */
+.fade-enter {
+  animation: fadeInSoft 0.6s ease-out forwards;
+}
+
+@keyframes fadeInSoft {
+  0% { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* Filmstrip Section */
+.museum-filmstrip-section {
+  padding-top: 3rem;
   margin-bottom: 4rem;
   animation: fadeIn 1s ease 0.8s forwards;
   opacity: 0;
+  text-align: center;
 }
 
-.museum-gallery-title {
-  text-align: center;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 2rem;
-  color: #ffffff;
-  margin: 0 0 0.5rem;
-  font-weight: 400;
-}
-
-.museum-gallery-subtitle {
-  text-align: center;
+.museum-filmstrip-label {
   font-family: var(--font);
-  font-size: 0.9375rem;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
   color: #64748b;
-  margin: 0 0 3rem;
+  margin: 0 0 1rem;
 }
 
-.museum-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1.5rem;
+.museum-filmstrip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.5rem 1rem 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
 }
 
-.museum-grid-item {
-  position: relative;
-  display: block;
+.museum-filmstrip::-webkit-scrollbar {
+  height: 6px;
+}
+.museum-filmstrip::-webkit-scrollbar-track {
+  background: transparent;
+}
+.museum-filmstrip::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 10px;
+}
+
+.filmstrip-item {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  border: 2px solid transparent;
+  background: transparent;
   border-radius: 4px;
+  cursor: pointer;
   overflow: hidden;
-  background: #111;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  transition: all 0.2s ease;
+  opacity: 0.6;
 }
 
-.museum-grid-item:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.3);
-  z-index: 2;
-}
-
-.museum-grid-item img {
+.filmstrip-item img {
   width: 100%;
-  aspect-ratio: 4/5;
+  height: 100%;
   object-fit: cover;
   display: block;
-  transition: filter 0.4s ease;
 }
 
-.museum-grid-item:hover img {
-  filter: brightness(0.85);
+.filmstrip-item:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
 }
 
-.museum-grid-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 2rem 1rem 1rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  text-align: center;
-}
-
-.museum-grid-item:hover .museum-grid-overlay {
+.filmstrip-item.active {
   opacity: 1;
-}
-
-.museum-grid-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem;
-  color: #fff;
-  font-style: italic;
-  margin-bottom: 0.15rem;
-  line-height: 1.2;
-}
-
-.museum-grid-artist {
-  font-family: var(--font);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #cbd5e1;
+  border-color: var(--primary);
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+  transform: scale(1.05);
 }
 
 /* Actions */
 .museum-actions {
   text-align: center;
   padding-top: 3rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
   animation: fadeIn 1s ease 1s forwards;
   opacity: 0;
 }
@@ -312,18 +347,18 @@ body.museum-mode .footer-brand .logo-text {
 .btn-museum {
   padding: 1.25rem 2.5rem;
   font-size: 1.1rem;
-  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
-  color: #000 !important;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white !important;
   font-weight: 600;
-  box-shadow: 0 10px 25px rgba(212,175,55,0.2);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
   border: none;
   transition: all 0.3s ease;
 }
 
 .btn-museum:hover {
   transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(212,175,55,0.3);
-  background: linear-gradient(135deg, #e5c158 0%, #c99718 100%);
+  box-shadow: 0 15px 35px rgba(37, 99, 235, 0.3);
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
 }
 
 .museum-actions-hint {
@@ -381,8 +416,17 @@ body.museum-mode .footer-brand .logo-text {
   .museum-subtitle {
     font-size: 1.15rem;
   }
-  .museum-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .museum-exhibition-wrap {
+    flex-wrap: wrap;
+  }
+  .exhibition-arrow {
+    display: none; /* Hide side arrows on small screens, rely on filmstrip */
+  }
+  .filmstrip-item {
+    width: 64px;
+    height: 64px;
   }
 }

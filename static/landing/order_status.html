@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Status comandă – Artify</title>
   <link rel="stylesheet" href="/static/landing/styles.css" />
-  <link rel="stylesheet" href="/static/landing/order_status.css?v=4" />
+  <link rel="stylesheet" href="/static/landing/order_status.css?v=5" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -35,20 +35,30 @@
         <p class="museum-subtitle">O călătorie vizuală creată special pentru tine.</p>
       </div>
 
-      <div class="museum-hero" id="museum-hero">
-        <!-- Hero image injected here -->
-      </div>
-      
-      <div class="museum-hero-caption" id="museum-hero-caption">
-        <!-- Hero Title and Artist -->
+      <div class="museum-exhibition-wrap">
+        <button class="exhibition-arrow exhibition-prev" id="exhibition-prev" aria-label="Înapoi">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        
+        <div class="museum-hero-container">
+          <div class="museum-hero fade-enter" id="museum-hero">
+            <!-- Hero image injected here -->
+          </div>
+          
+          <div class="museum-hero-caption fade-enter" id="museum-hero-caption">
+            <!-- Hero Title and Artist -->
+          </div>
+        </div>
+
+        <button class="exhibition-arrow exhibition-next" id="exhibition-next" aria-label="Înainte">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
       </div>
 
-      <div class="museum-gallery-section">
-        <h3 class="museum-gallery-title">Întreaga Colecție</h3>
-        <p class="museum-gallery-subtitle">Explorează fiecare portret din setul tău. Apasă pentru a vizualiza detaliile.</p>
-        
-        <div class="museum-grid" id="museum-grid">
-          <!-- Gallery thumbnails injected here -->
+      <div class="museum-filmstrip-section">
+        <p class="museum-filmstrip-label">Explorează galeria</p>
+        <div class="museum-filmstrip" id="museum-filmstrip">
+          <!-- Filmstrip thumbnails injected here -->
         </div>
       </div>
 
@@ -72,6 +82,6 @@
     </div>
     <div class="footer-bottom"><span>© 2026 Artify. Toate drepturile rezervate.</span><span>Făcut cu 🎨 pentru iubitorii de artă.</span></div>
   </footer>
-  <script src="/static/landing/order_status.js?v=3"></script>
+  <script src="/static/landing/order_status.js?v=4"></script>
 </body>
 </html>

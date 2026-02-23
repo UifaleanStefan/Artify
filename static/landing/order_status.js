@@ -4,14 +4,77 @@
   var orderId = path || null;
   var stateEl = document.getElementById('order-status-state');
   var resultsEl = document.getElementById('order-status-results');
-  var gridEl = document.getElementById('museum-grid');
+  var filmstripEl = document.getElementById('museum-filmstrip');
   var heroWrap = document.getElementById('museum-hero');
   var heroCaptionWrap = document.getElementById('museum-hero-caption');
   var downloadBtn = document.getElementById('order-status-download');
   var idEl = document.getElementById('order-status-id');
   var infoCardEl = document.getElementById('order-status-card-info');
+  
+  var prevBtn = document.getElementById('exhibition-prev');
+  var nextBtn = document.getElementById('exhibition-next');
+  
+  var globalUrls = [];
+  var globalLabels = [];
+  var currentIndex = 0;
 
   if (idEl) idEl.textContent = orderId || '—';
+  
+  function triggerAnimation(el) {
+    el.classList.remove('fade-enter');
+    void el.offsetWidth; // force reflow
+    el.classList.add('fade-enter');
+  }
+
+  function showImage(index) {
+    if (index < 0 || index >= globalUrls.length) return;
+    currentIndex = index;
+    
+    // Update hero image
+    var imgUrl = globalUrls[currentIndex];
+    heroWrap.innerHTML = '<img src="' + imgUrl + '" class="museum-hero-img" alt="Operă" />';
+    
+    // Update caption
+    var tTitle = globalLabels.length > currentIndex && globalLabels[currentIndex][0] ? globalLabels[currentIndex][0] : ('Opera ' + (currentIndex + 1));
+    var tArtist = globalLabels.length > currentIndex && globalLabels[currentIndex][1] ? globalLabels[currentIndex][1] : 'Artify';
+    
+    heroCaptionWrap.innerHTML = 
+      '<div class="museum-caption-title">' + tTitle + '</div>' +
+      '<div class="museum-caption-artist">' + tArtist + '</div>';
+      
+    triggerAnimation(heroWrap);
+    triggerAnimation(heroCaptionWrap);
+    
+    // Update active state on filmstrip
+    var thumbs = filmstripEl.querySelectorAll('.filmstrip-item');
+    thumbs.forEach(function(thumb, i) {
+      if (i === currentIndex) {
+        thumb.classList.add('active');
+        // Scroll thumbnail into view smoothly if needed
+        thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      } else {
+        thumb.classList.remove('active');
+      }
+    });
+    
+    // Update arrow states
+    if (prevBtn) prevBtn.disabled = (currentIndex === 0);
+    if (nextBtn) nextBtn.disabled = (currentIndex === globalUrls.length - 1);
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (currentIndex > 0) showImage(currentIndex - 1);
+    });
+  }
+  
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (currentIndex < globalUrls.length - 1) showImage(currentIndex + 1);
+    });
+  }
 
   function render(state, data) {
     if (!stateEl) return;
@@ -37,80 +100,36 @@
       return;
     }
     if (state === 'completed' && data.result_urls) {
-      infoCardEl.style.display = 'none'; // Hide the white info card
-      document.body.classList.add('museum-mode'); // Enable dark, immersive theme
+      infoCardEl.style.display = 'none';
+      document.body.classList.add('museum-mode');
 
-      var urls = [];
       try {
-        urls = typeof data.result_urls === 'string' ? JSON.parse(data.result_urls) : (data.result_urls || []);
+        globalUrls = typeof data.result_urls === 'string' ? JSON.parse(data.result_urls) : (data.result_urls || []);
       } catch (e) {
-        urls = [];
+        globalUrls = [];
       }
-      var labels = data.result_labels || [];
+      globalLabels = data.result_labels || [];
 
-      if (urls.length) {
-        heroWrap.innerHTML = '';
-        heroCaptionWrap.innerHTML = '';
-        gridEl.innerHTML = '';
-
-        // Render Hero Image
-        if (urls[0]) {
-          var heroImg = document.createElement('img');
-          heroImg.src = urls[0];
-          heroImg.alt = 'Opera Principală';
-          heroImg.className = 'museum-hero-img';
-          heroWrap.appendChild(heroImg);
-
-          // Hero Caption (Title & Artist)
-          var heroTitle = labels.length > 0 && labels[0][0] ? labels[0][0] : 'Capodoperă';
-          var heroArtist = labels.length > 0 && labels[0][1] ? labels[0][1] : 'Artist Necunoscut';
-
-          var titleEl = document.createElement('div');
-          titleEl.className = 'museum-caption-title';
-          titleEl.textContent = heroTitle;
-
-          var artistEl = document.createElement('div');
-          artistEl.className = 'museum-caption-artist';
-          artistEl.textContent = heroArtist;
-
-          heroCaptionWrap.appendChild(titleEl);
-          heroCaptionWrap.appendChild(artistEl);
-        }
-
-        // Render Rest of Gallery Grid
-        urls.forEach(function (url, i) {
-          var tTitle = labels.length > i && labels[i][0] ? labels[i][0] : ('Opera ' + (i + 1));
-          var tArtist = labels.length > i && labels[i][1] ? labels[i][1] : 'Artify';
-
-          var a = document.createElement('a');
-          a.href = url;
-          a.target = '_blank';
-          a.rel = 'noopener';
-          a.className = 'museum-grid-item';
-
+      if (globalUrls.length) {
+        filmstripEl.innerHTML = '';
+        
+        globalUrls.forEach(function (url, i) {
+          var btn = document.createElement('button');
+          btn.className = 'filmstrip-item';
+          btn.onclick = function() { showImage(i); };
+          
           var img = document.createElement('img');
           img.src = url;
-          img.alt = tTitle;
+          img.alt = 'Thumbnail ' + (i + 1);
           img.loading = 'lazy';
-
-          var overlay = document.createElement('div');
-          overlay.className = 'museum-grid-overlay';
-
-          var itemTitle = document.createElement('div');
-          itemTitle.className = 'museum-grid-title';
-          itemTitle.textContent = tTitle;
-
-          var itemArtist = document.createElement('div');
-          itemArtist.className = 'museum-grid-artist';
-          itemArtist.textContent = tArtist;
-
-          overlay.appendChild(itemTitle);
-          overlay.appendChild(itemArtist);
-
-          a.appendChild(img);
-          a.appendChild(overlay);
-          gridEl.appendChild(a);
+          
+          btn.appendChild(img);
+          filmstripEl.appendChild(btn);
         });
+
+        // Initialize first image
+        currentIndex = 0;
+        showImage(0);
 
         if (downloadBtn && orderId) {
           downloadBtn.href = '/api/orders/' + encodeURIComponent(orderId) + '/download-all';
