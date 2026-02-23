@@ -20,6 +20,7 @@
       'Fauvism': 'tag-fauvism',
       'Masters': 'tag-masters',
       'Ancient': 'tag-ancient',
+      'Portraits': 'tag-evolution',
     };
     return map[cat] || 'tag-impressionism';
   }

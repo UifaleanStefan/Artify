@@ -547,6 +547,12 @@ ANCIENT_WORLDS_PACK_PATHS = [
     f"/static/landing/styles/ancient-worlds/ancient-worlds-{i:02d}.jpg" for i in range(1, 16)
 ]
 
+# Evolution of Portraits pack: 15 reference images (oldest in Downloads = 01, newest = 15)
+STYLE_ID_EVOLUTION_PORTRAITS_PACK = 17
+EVOLUTION_PORTRAITS_PACK_PATHS = [
+    f"/static/landing/styles/evolution-portraits/evolution-portraits-{i:02d}.jpg" for i in range(1, 16)
+]
+
 # Per-image (painting title, artist) for email captions.
 # Masters pack: 15 reference images (masters-01.jpg … masters-15.jpg); each result image gets the label at the same index.
 MASTERS_PACK_LABELS: list[tuple[str, str]] = [
@@ -620,6 +626,24 @@ ANCIENT_WORLDS_PACK_LABELS: list[tuple[str, str]] = [
     ("Ajanta Cave Paintings", "India"),                             # 14
     ("Han Dynasty Silk Paintings", "Ancient China"),                # 15
 ]
+# Evolution of Portraits pack: 01 = first downloaded … 15 = last downloaded (see setup_evolution_portraits_pack.py)
+EVOLUTION_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
+    ("Fayum Mummy Portraits", "Roman Egypt"),                           # 01
+    ("Nefertari in the Tomb of Nefertari", "Egypt"),                     # 02
+    ("Portrait of a Young Woman", "Medieval"),                           # 03
+    ("Christ Pantocrator", "Byzantine"),                                 # 04
+    ("Mona Lisa", "Leonardo da Vinci"),                                  # 05
+    ("Portrait of Baldassare Castiglione", "Raphael"),                   # 06
+    ("Self-Portrait", "Albrecht Dürer"),                                  # 07
+    ("Girl with a Pearl Earring", "Johannes Vermeer"),                   # 08
+    ("Self-Portrait with Two Circles", "Rembrandt"),                     # 09
+    ("Portrait of Madame X", "John Singer Sargent"),                     # 10
+    ("Self-Portrait with Bandaged Ear", "Vincent van Gogh"),             # 11
+    ("Les Demoiselles d'Avignon", "Pablo Picasso"),                      # 12
+    ("Portrait of Dora Maar", "Pablo Picasso"),                          # 13
+    ("Self-Portrait with Thorn Necklace and Hummingbird", "Frida Kahlo"), # 14
+    ("Marilyn Diptych", "Andy Warhol"),                                  # 15
+]
 
 
 def _build_result_labels(
@@ -637,6 +661,8 @@ def _build_result_labels(
         return MODERN_ABSTRACT_PACK_LABELS[:n]
     if order.style_id == STYLE_ID_ANCIENT_WORLDS_PACK:
         return ANCIENT_WORLDS_PACK_LABELS[:n]
+    if order.style_id == STYLE_ID_EVOLUTION_PORTRAITS_PACK:
+        return EVOLUTION_PORTRAITS_PACK_LABELS[:n]
     style_data = next((s for s in styles if s.get("id") == order.style_id), None)
     title = order.style_name or (style_data.get("title") if style_data else "Stil")
     artist = style_data.get("artist", "Artist") if style_data else "Artist"
@@ -689,6 +715,10 @@ async def create_order(
         style_image_urls = json.dumps([_resolve_style_image_url(p) for p in ANCIENT_WORLDS_PACK_PATHS])
         if not style_image_url:
             style_image_url = _resolve_style_image_url(ANCIENT_WORLDS_PACK_PATHS[0])
+    elif order_data.style_id == STYLE_ID_EVOLUTION_PORTRAITS_PACK:
+        style_image_urls = json.dumps([_resolve_style_image_url(p) for p in EVOLUTION_PORTRAITS_PACK_PATHS])
+        if not style_image_url:
+            style_image_url = _resolve_style_image_url(EVOLUTION_PORTRAITS_PACK_PATHS[0])
 
     # Fail fast if style URLs are not public HTTPS (Replicate requires this)
     def _must_be_https(name: str, url: Optional[str]) -> None:
