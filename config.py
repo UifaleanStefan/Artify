@@ -35,6 +35,7 @@ class Settings(BaseSettings):
 
     # Database
     database_url: Optional[str] = None
+    result_image_ttl_days: int = 14  # Delete result image blobs from DB after this many days
 
     # Email (use HTTP APIs first – SMTP often blocked on Render)
     resend_api_key: Optional[str] = None  # Free: 100/day @ resend.com

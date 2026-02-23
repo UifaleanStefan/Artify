@@ -42,8 +42,8 @@ def _resolve_style_image_url(style_image_url: Optional[str]) -> Optional[str]:
 
 def _persist_result_images(order_id: str, result_urls: list[str]) -> list[str]:
     """
-    Download each result image from Replicate (or any URL) and save to disk.
-    Returns list of permanent URLs (our server) so they don't expire. On failure, returns original URLs.
+    Download each result image from Replicate (or any URL), save to DB (survives redeploys)
+    and optionally to disk. Returns list of permanent URLs. Images in DB are subject to TTL (e.g. 14 days).
     """
     base_url = (get_settings().public_base_url or "").rstrip("/")
     if not base_url:
@@ -53,33 +53,52 @@ def _persist_result_images(order_id: str, result_urls: list[str]) -> list[str]:
         results_dir = get_order_results_dir() / order_id
         results_dir.mkdir(parents=True, exist_ok=True)
         permanent = []
-        for i, url in enumerate(result_urls, start=1):
-            try:
-                with httpx.Client(timeout=45) as client:
-                    r = client.get(url)
-                if r.status_code >= 400:
-                    logger.warning("Failed to fetch result image %s for %s: %s", i, order_id, r.status_code)
+        db = SessionLocal()
+        try:
+            for i, url in enumerate(result_urls, start=1):
+                try:
+                    with httpx.Client(timeout=45) as client:
+                        r = client.get(url)
+                    if r.status_code >= 400:
+                        logger.warning("Failed to fetch result image %s for %s: %s", i, order_id, r.status_code)
+                        permanent.append(url)
+                        continue
+                    content = r.content
+                    content_type = r.headers.get("content-type", "image/jpeg").split(";")[0].strip()
+                    if content_type not in ("image/jpeg", "image/png", "image/webp"):
+                        content_type = "image/jpeg"
+                    # Store in DB (survives redeploy)
+                    row = OrderResultImage(
+                        order_id=order_id,
+                        image_index=i,
+                        content_type=content_type,
+                        data=content,
+                    )
+                    db.merge(row)
+                    # Also write to disk for backward compat and redundancy
+                    ext = "jpg"
+                    suf = Path(urlparse(url).path).suffix.lower()
+                    if suf in (".png", ".webp", ".gif"):
+                        ext = suf.lstrip(".")
+                    path = results_dir / f"{i}.{ext}"
+                    path.write_bytes(content)
+                    permanent.append(f"{base_url}/api/orders/{order_id}/result/{i}")
+                except Exception as e:
+                    logger.warning("Persist result image %s for %s failed: %s", i, order_id, e)
                     permanent.append(url)
-                    continue
-                ext = "jpg"
-                suf = Path(urlparse(url).path).suffix.lower()
-                if suf in (".png", ".webp", ".gif"):
-                    ext = suf.lstrip(".")
-                path = results_dir / f"{i}.{ext}"
-                path.write_bytes(r.content)
-                permanent.append(f"{base_url}/api/orders/{order_id}/result/{i}")
-            except Exception as e:
-                logger.warning("Persist result image %s for %s failed: %s", i, order_id, e)
-                permanent.append(url)
-        if len(permanent) == len(result_urls):
-            logger.info("Persisted %d result images for order %s", len(permanent), order_id)
-            return permanent
+            if len(permanent) == len(result_urls):
+                db.commit()
+                logger.info("Persisted %d result images for order %s (DB + disk)", len(permanent), order_id)
+                return permanent
+            db.rollback()
+        finally:
+            db.close()
     except Exception as e:
         logger.warning("Persist result images for %s failed: %s", order_id, e)
     return result_urls
 
 
-from database import Order, OrderStatus, get_db, SessionLocal, init_db
+from database import Order, OrderResultImage, OrderStatus, get_db, SessionLocal, init_db
 from models import StyleTransferResponse
 from models.order_schemas import OrderCreateRequest, OrderResponse, OrderStatusResponse
 from services import StyleTransferService
@@ -423,6 +442,7 @@ def _cleanup_expired_orders_sync() -> int:
                     shutil.rmtree(order_dir, ignore_errors=True)
             except Exception as e:
                 logger.warning("TTL cleanup: failed to remove result dir for %s: %s", order.order_id, e)
+            db.query(OrderResultImage).filter(OrderResultImage.order_id == order.order_id).delete()
             db.delete(order)
             deleted += 1
         if deleted:
@@ -437,12 +457,37 @@ def _cleanup_expired_orders_sync() -> int:
         db.close()
 
 
+def _cleanup_expired_result_images_sync() -> int:
+    """Delete OrderResultImage rows older than result_image_ttl_days. Returns count deleted."""
+    db = SessionLocal()
+    try:
+        ttl_days = get_settings().result_image_ttl_days
+        cutoff = datetime.utcnow() - timedelta(days=ttl_days)
+        deleted = db.query(OrderResultImage).filter(OrderResultImage.created_at < cutoff).delete()
+        if deleted:
+            db.commit()
+            logger.info("TTL cleanup: deleted %d result image blob(s) older than %d days", deleted, ttl_days)
+        return deleted
+    except Exception as e:
+        logger.warning("Result images TTL cleanup failed: %s", e)
+        db.rollback()
+        return 0
+    finally:
+        db.close()
+
+
+def _run_ttl_cleanup_sync() -> None:
+    """Run both order and result-image TTL cleanups."""
+    _cleanup_expired_orders_sync()
+    _cleanup_expired_result_images_sync()
+
+
 async def _ttl_cleanup_loop() -> None:
     """Run TTL cleanup at startup (after delay) and then every 24 hours."""
     await asyncio.sleep(120)
     while True:
         try:
-            await asyncio.to_thread(_cleanup_expired_orders_sync)
+            await asyncio.to_thread(_run_ttl_cleanup_sync)
         except asyncio.CancelledError:
             break
         except Exception as e:
@@ -816,6 +861,7 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
         raise HTTPException(status_code=404, detail="Order not found")
         
     labels = None
+    style_name = order.style_name
     if order.status == "completed" and order.result_urls:
         try:
             urls = json.loads(order.result_urls)
@@ -823,6 +869,10 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
                 styles = _load_styles_data()
                 labels_tuples = _build_result_labels(order, urls, styles)
                 labels = [[t[0], t[1]] for t in labels_tuples]
+                if not style_name and order.style_id and styles:
+                    style_data = next((s for s in styles if s.get("id") == order.style_id), None)
+                    if style_data:
+                        style_name = style_data.get("title")
         except Exception:
             pass
 
@@ -832,6 +882,7 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
         result_urls=order.result_urls,
         result_labels=labels,
         style_id=order.style_id,
+        style_name=style_name,
         initial_image_url=order.image_url,
         style_image_urls=order.style_image_urls,
         replicate_prediction_details=order.replicate_prediction_details,
@@ -840,13 +891,20 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
 
 
 @app.get("/api/orders/{order_id}/result/{index}")
-async def get_order_result_image(order_id: str, index: int):
-    """Serve a persisted result image so links don't expire (Replicate URLs are temporary)."""
+async def get_order_result_image(order_id: str, index: int, db: Session = Depends(get_db)):
+    """Single entry point for result images: DB first (14-day access, survives redeploy), then disk fallback."""
     if index < 1 or index > 20:
         raise HTTPException(status_code=400, detail="Invalid index")
-    # Prevent path traversal (order_id is e.g. ART-123-ABC)
     if "/" in order_id or "\\" in order_id or order_id in (".", ".."):
         raise HTTPException(status_code=400, detail="Invalid order id")
+    # Prefer DB (survives redeploy)
+    row = db.query(OrderResultImage).filter(
+        OrderResultImage.order_id == order_id,
+        OrderResultImage.image_index == index,
+    ).first()
+    if row:
+        return Response(content=row.data, media_type=row.content_type)
+    # Fallback: disk (legacy or if DB was cleared by TTL)
     results_dir = get_order_results_dir() / order_id
     for ext in ("jpg", "jpeg", "png", "webp"):
         path = results_dir / f"{index}.{ext}"
@@ -857,7 +915,7 @@ async def get_order_result_image(order_id: str, index: int):
 
 @app.get("/api/orders/{order_id}/download-all")
 async def download_all_results(order_id: str, db: Session = Depends(get_db)):
-    """Download all generated images for an order as a zip file."""
+    """Download all generated images for an order as a zip file. Reads from DB first (14-day TTL)."""
     order = db.query(Order).filter(Order.order_id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -872,8 +930,21 @@ async def download_all_results(order_id: str, db: Session = Depends(get_db)):
 
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", compression=zipfile.ZIP_DEFLATED) as zf:
-        for i, u in enumerate(urls, start=1):
+        for i in range(1, len(urls) + 1):
             try:
+                # Prefer DB (same source as /result/{index}; 14-day access)
+                row = db.query(OrderResultImage).filter(
+                    OrderResultImage.order_id == order_id,
+                    OrderResultImage.image_index == i,
+                ).first()
+                if row:
+                    ext = ".jpg" if "jpeg" in row.content_type else ".png" if "png" in row.content_type else ".webp" if "webp" in row.content_type else ".jpg"
+                    zf.writestr(f"artify_{order_id}_{i:02d}{ext}", row.data)
+                    continue
+                # Fallback: fetch from URL (legacy or after TTL)
+                u = urls[i - 1] if i <= len(urls) else None
+                if not u:
+                    continue
                 resp = httpx.get(u, timeout=45)
                 if resp.status_code >= 400:
                     continue

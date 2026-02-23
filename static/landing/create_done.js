@@ -25,6 +25,8 @@
   if (orderIdEl) orderIdEl.textContent = orderId || '—';
   if (styleNameEl) styleNameEl.textContent = style ? (style.title + ' – ' + style.artist) : '—';
   if (emailEl) emailEl.textContent = email || '—';
+  var emailHighlight = document.getElementById('done-email-highlight');
+  if (emailHighlight) emailHighlight.textContent = email || '—';
 
   if (copyBtn && orderId) {
     copyBtn.addEventListener('click', function () {
@@ -53,7 +55,7 @@
         doneFirstResultLink.href = url;
         doneFirstResult.style.display = 'block';
       }
-      if (doneMessageText) doneMessageText.textContent = 'Restul operelor ți le trimitem pe email.';
+      if (doneMessageText) doneMessageText.textContent = 'Toate portretele le vei primi pe email. Verifică inbox-ul (și Spam) – acolo e și linkul către galerie.';
     }
 
     function stopPolling() {

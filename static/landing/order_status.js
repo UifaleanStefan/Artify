@@ -248,6 +248,16 @@
       globalLabels = data.result_labels || [];
 
       if (globalUrls.length) {
+        var packNameEl = document.getElementById('museum-pack-name');
+        if (packNameEl) {
+          if (data.style_name) {
+            packNameEl.textContent = data.style_name;
+            packNameEl.style.display = '';
+          } else {
+            packNameEl.style.display = 'none';
+          }
+        }
+
         filmstripEl.innerHTML = '';
         
         globalUrls.forEach(function (url, i) {
