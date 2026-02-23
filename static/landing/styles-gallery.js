@@ -21,6 +21,7 @@
       'Masters': 'tag-masters',
       'Ancient': 'tag-ancient',
       'Portraits': 'tag-evolution',
+      'Royalty': 'tag-royalty',
     };
     return map[cat] || 'tag-impressionism';
   }

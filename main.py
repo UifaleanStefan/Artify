@@ -554,6 +554,12 @@ EVOLUTION_PORTRAITS_PACK_PATHS = [
     for i in range(1, 16)
 ]
 
+# Royalty & Power Portraits pack: 15 reference images (oldest in Downloads = 01, newest = 15)
+STYLE_ID_ROYALTY_PORTRAITS_PACK = 18
+ROYALTY_PORTRAITS_PACK_PATHS = [
+    f"/static/landing/styles/royalty-portraits/royalty-portraits-{i:02d}.jpg" for i in range(1, 16)
+]
+
 # Per-image (painting title, artist) for email captions.
 # Masters pack: 15 reference images (masters-01.jpg … masters-15.jpg); each result image gets the label at the same index.
 MASTERS_PACK_LABELS: list[tuple[str, str]] = [
@@ -645,6 +651,24 @@ EVOLUTION_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
     ("Self-Portrait with Thorn Necklace and Hummingbird", "Frida Kahlo"), # 14
     ("Marilyn Diptych", "Andy Warhol"),                                  # 15
 ]
+# Royalty & Power Portraits pack: 01 = first downloaded … 15 = last downloaded (see setup_royalty_portraits_pack.py)
+ROYALTY_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
+    ("Napoleon Crossing the Alps", "Jacques-Louis David"),                    # 01
+    ("Portrait of Louis XIV", "Hyacinthe Rigaud"),                             # 02
+    ("Portrait of Henry VIII", "Hans Holbein the Younger"),                    # 03
+    ("Queen Elizabeth I Armada Portrait", "George Gower"),                     # 04
+    ("Equestrian Portrait of Charles I", "Anthony van Dyck"),                  # 05
+    ("Portrait of Pope Innocent X", "Diego Velázquez"),                         # 06
+    ("Philip IV in Brown and Silver", "Diego Velázquez"),                       # 07
+    ("Portrait of Madame de Pompadour", "François Boucher"),                    # 08
+    ("The Blue Boy", "Thomas Gainsborough"),                                   # 09
+    ("Portrait of the Duke of Wellington", "Francisco Goya"),                    # 10
+    ("Self-Portrait as a Nobleman", "Lorenzo Lippi"),                           # 11
+    ("Portrait of Emperor Rudolf II as Vertumnus", "Giuseppe Arcimboldo"),        # 12
+    ("Emperor Qianlong in Court Dress", "Giuseppe Castiglione"),                 # 13
+    ("Shah Jahan on a Terrace", "Mughal School"),                                # 14
+    ("Portrait of Empress Catherine II", "Fyodor Rokotov"),                      # 15
+]
 
 
 def _build_result_labels(
@@ -664,6 +688,8 @@ def _build_result_labels(
         return ANCIENT_WORLDS_PACK_LABELS[:n]
     if order.style_id == STYLE_ID_EVOLUTION_PORTRAITS_PACK:
         return EVOLUTION_PORTRAITS_PACK_LABELS[:n]
+    if order.style_id == STYLE_ID_ROYALTY_PORTRAITS_PACK:
+        return ROYALTY_PORTRAITS_PACK_LABELS[:n]
     style_data = next((s for s in styles if s.get("id") == order.style_id), None)
     title = order.style_name or (style_data.get("title") if style_data else "Stil")
     artist = style_data.get("artist", "Artist") if style_data else "Artist"
@@ -720,6 +746,10 @@ async def create_order(
         style_image_urls = json.dumps([_resolve_style_image_url(p) for p in EVOLUTION_PORTRAITS_PACK_PATHS])
         if not style_image_url:
             style_image_url = _resolve_style_image_url(EVOLUTION_PORTRAITS_PACK_PATHS[0])
+    elif order_data.style_id == STYLE_ID_ROYALTY_PORTRAITS_PACK:
+        style_image_urls = json.dumps([_resolve_style_image_url(p) for p in ROYALTY_PORTRAITS_PACK_PATHS])
+        if not style_image_url:
+            style_image_url = _resolve_style_image_url(ROYALTY_PORTRAITS_PACK_PATHS[0])
 
     # Fail fast if style URLs are not public HTTPS (Replicate requires this)
     def _must_be_https(name: str, url: Optional[str]) -> None:
