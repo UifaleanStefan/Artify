@@ -6,6 +6,7 @@
   font-family: var(--font);
   background: var(--bg);
   min-height: 60vh;
+  transition: all 0.5s ease;
 }
 
 .order-status-card {
@@ -71,174 +72,317 @@
   border: 1px solid rgba(185, 28, 28, 0.15);
 }
 
-/* Results block */
-.order-status-results {
-  margin-bottom: 0;
+/* ====================================================
+   MUSEUM THEME (COMPLETED STATE)
+   ==================================================== */
+body.museum-mode {
+  background-color: #050505;
+  color: #f8fafc;
 }
 
-.order-status-results-head {
+body.museum-mode .header {
+  background: rgba(5, 5, 5, 0.9);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+body.museum-mode .header .logo-text,
+body.museum-mode .nav a {
+  color: #f1f5f9;
+}
+
+body.museum-mode .order-status-main {
+  max-width: 1200px;
+  background: transparent;
+  padding: 4rem 1.5rem 6rem;
+}
+
+body.museum-mode .footer {
+  background-color: #0a0a0a;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  color: #94a3b8;
+}
+body.museum-mode .footer-brand p,
+body.museum-mode .footer-links a,
+body.museum-mode .footer-bottom span {
+  color: #94a3b8;
+}
+body.museum-mode .footer-links a:hover {
+  color: #ffffff;
+}
+body.museum-mode .footer-brand .logo-text {
+  color: #f8fafc;
+}
+
+/* Typography & Layout */
+.museum-header {
   text-align: center;
-  margin-bottom: 1.75rem;
+  margin-bottom: 4rem;
+  animation: fadeIn 1s ease forwards;
 }
 
-.order-status-badge {
+.museum-badge {
   display: inline-block;
   font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: white;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-  padding: 0.35rem 0.75rem;
+  letter-spacing: 0.2em;
+  color: #d4af37; /* Gold accent */
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 0.4rem 1rem;
   border-radius: 9999px;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
-.order-status-results-title {
-  margin: 0 0 0.4rem;
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.02em;
+.museum-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: #ffffff;
+  margin: 0 0 0.5rem;
+  letter-spacing: 0.02em;
+}
+
+.museum-subtitle {
   font-family: var(--font);
-  line-height: 1.2;
-}
-
-.order-status-results-sub {
+  font-size: 1rem;
+  color: #94a3b8;
   margin: 0;
-  font-size: 0.9375rem;
-  color: var(--text-muted);
+  font-weight: 300;
 }
 
-/* Hero image – gallery frame */
-.order-status-hero-wrap {
-  margin-bottom: 2rem;
-  padding: 14px;
-  background: var(--bg-light);
-  border-radius: var(--radius);
-  border: 2px solid rgba(37, 99, 235, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+/* Hero Section */
+.museum-hero {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  border-radius: 4px;
+  padding: 1.5rem;
+  background: #111;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255,255,255,0.05);
+  animation: floatUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.order-status-hero-wrap img {
+.museum-hero::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 60%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.museum-hero-img {
   width: 100%;
-  max-height: 420px;
+  max-height: 65vh;
   object-fit: contain;
   display: block;
-  border-radius: 8px;
+  border-radius: 2px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* Preview set */
-.order-status-preview-row {
-  margin-bottom: 1.75rem;
+.museum-hero-caption {
+  text-align: center;
+  margin: 2rem auto 6rem;
+  max-width: 600px;
+  animation: fadeIn 1.5s ease 0.5s forwards;
+  opacity: 0;
 }
 
-.order-status-preview-label {
-  margin: 0 0 0.85rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--text-muted);
+.museum-caption-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.75rem;
+  font-style: italic;
+  color: #f8fafc;
+  margin-bottom: 0.25rem;
+}
+
+.museum-caption-artist {
+  font-family: var(--font);
+  font-size: 0.875rem;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.15em;
+  color: #94a3b8;
 }
 
-.order-status-gallery {
+/* Gallery Section */
+.museum-gallery-section {
+  padding-top: 4rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  margin-bottom: 4rem;
+  animation: fadeIn 1s ease 0.8s forwards;
+  opacity: 0;
+}
+
+.museum-gallery-title {
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  color: #ffffff;
+  margin: 0 0 0.5rem;
+  font-weight: 400;
+}
+
+.museum-gallery-subtitle {
+  text-align: center;
+  font-family: var(--font);
+  font-size: 0.9375rem;
+  color: #64748b;
+  margin: 0 0 3rem;
+}
+
+.museum-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
 }
 
-.order-status-gallery a {
+.museum-grid-item {
+  position: relative;
   display: block;
-  border-radius: var(--radius);
+  border-radius: 4px;
   overflow: hidden;
-  border: 2px solid var(--bg-light);
-  box-shadow: var(--shadow);
-  transition: transform 0.2s ease, border-color 0.2s, box-shadow 0.2s;
+  background: #111;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
 }
 
-.order-status-gallery a:hover {
-  transform: translateY(-2px);
-  border-color: var(--primary-light);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.2);
+.museum-grid-item:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.3);
+  z-index: 2;
 }
 
-.order-status-gallery img {
+.museum-grid-item img {
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 4/5;
   object-fit: cover;
   display: block;
-  vertical-align: top;
+  transition: filter 0.4s ease;
 }
 
-/* CTA */
-.order-status-cta-row {
-  margin-bottom: 2rem;
+.museum-grid-item:hover img {
+  filter: brightness(0.85);
+}
+
+.museum-grid-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rem 1rem 1rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
   text-align: center;
 }
 
-.order-status-download {
-  padding: 1rem 2rem;
-  font-size: 1rem;
+.museum-grid-item:hover .museum-grid-overlay {
+  opacity: 1;
+}
+
+.museum-grid-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  color: #fff;
+  font-style: italic;
+  margin-bottom: 0.15rem;
+  line-height: 1.2;
+}
+
+.museum-grid-artist {
+  font-family: var(--font);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #cbd5e1;
+}
+
+/* Actions */
+.museum-actions {
+  text-align: center;
+  padding-top: 3rem;
+  animation: fadeIn 1s ease 1s forwards;
+  opacity: 0;
+}
+
+.btn-museum {
+  padding: 1.25rem 2.5rem;
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+  color: #000 !important;
   font-weight: 600;
-  border-radius: var(--radius);
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 10px 25px rgba(212,175,55,0.2);
+  border: none;
+  transition: all 0.3s ease;
 }
 
-.order-status-download:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+.btn-museum:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(212,175,55,0.3);
+  background: linear-gradient(135deg, #e5c158 0%, #c99718 100%);
 }
 
-/* Actions below card */
-.order-status-actions {
+.museum-actions-hint {
+  margin: 1rem 0 2.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.museum-secondary-actions {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 1rem 1.5rem;
-  margin-top: 1.5rem;
+  gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
-.order-status-actions .btn {
-  margin: 0;
+.btn-museum-outline {
+  border-color: rgba(255,255,255,0.2);
+  color: #cbd5e1;
+  background: transparent;
 }
 
-.order-status-home {
-  font-size: 0.9375rem;
-  color: var(--text-muted);
+.btn-museum-outline:hover {
+  border-color: #fff;
+  color: #fff;
+  background: rgba(255,255,255,0.05);
+}
+
+.museum-home-link {
+  color: #64748b;
   text-decoration: none;
-  transition: color 0.15s ease;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
 }
 
-.order-status-home:hover {
-  color: var(--primary);
+.museum-home-link:hover {
+  color: #f8fafc;
 }
 
-/* Any dynamic captions / labels under thumbnails – ensure readable */
-.order-status-gallery figcaption,
-.order-status-hero-wrap figcaption,
-[class*="order-status"] .caption,
-[class*="order-status"] .label {
-  color: var(--text);
-  font-size: 0.8125rem;
-  font-weight: 500;
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-[class*="order-status"] .label-muted {
-  color: var(--text-muted);
-  font-size: 0.75rem;
+
+@keyframes floatUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (min-width: 640px) {
-  .order-status-card {
-    padding: 3rem 2.5rem 3rem;
+  .museum-title {
+    font-size: 3.5rem;
   }
-  .order-status-results-title {
-    font-size: 2.125rem;
+  .museum-subtitle {
+    font-size: 1.15rem;
   }
-  .order-status-gallery {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 0.75rem;
+  .museum-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 2rem;
   }
 }

@@ -145,3 +145,61 @@
 .upload-back-link { font-size: 0.9375rem; color: var(--text-muted); font-weight: 500; text-decoration: none; }
 .upload-back-link:hover { color: var(--primary); text-decoration: underline; }
 .upload-error { margin-top: 1rem; font-size: 0.875rem; color: #dc2626; }
+
+/* Upload page – mobile */
+@media (max-width: 768px) {
+  .upload-main { padding: 1.5rem 1rem; }
+  .upload-grid { gap: 2rem; }
+  .upload-section-title { font-size: 1.25rem; margin-bottom: 1rem; }
+  .upload-subtitle { font-size: 0.9375rem; margin-bottom: 1rem; }
+  .upload-style-card { padding: 1rem; }
+  .upload-style-thumb { min-height: 140px; }
+  .upload-zone {
+    min-height: 200px;
+    margin-left: 0;
+    margin-right: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .upload-zone-inner {
+    padding: 1.75rem 1.25rem;
+  }
+  .upload-zone-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .upload-zone-inner p { font-size: 0.9375rem; }
+  .upload-zone-hint { font-size: 0.75rem !important; }
+  .upload-zone.has-file {
+    height: auto;
+    min-height: 280px;
+    padding: 1rem;
+  }
+  .upload-preview-image-wrap {
+    max-height: 260px;
+  }
+  .upload-preview-image-wrap img { max-height: 260px; }
+  .upload-remove {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+  .upload-filename { max-width: 100%; }
+  .upload-tips { flex-direction: column; padding: 1rem; gap: 0.75rem; }
+  .upload-tips-title { font-size: 0.875rem; }
+  .upload-tips ul { font-size: 0.8125rem; padding-left: 1rem; }
+  .upload-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .upload-actions .btn { width: 100%; min-height: 48px; }
+  .upload-back-link { text-align: center; }
+}
+@media (max-width: 480px) {
+  .upload-main { padding: 1rem; }
+  .upload-zone-inner { padding: 1.5rem 1rem; }
+  .upload-zone-inner p { font-size: 0.875rem; }
+  .upload-zone.has-file { min-height: 240px; }
+  .upload-preview-image-wrap { max-height: 220px; }
+  .upload-preview-image-wrap img { max-height: 220px; }
+}

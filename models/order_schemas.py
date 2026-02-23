@@ -36,5 +36,7 @@ class OrderStatusResponse(BaseModel):
     order_id: str
     status: str
     result_urls: Optional[str] = None
+    result_labels: Optional[list[list[str]]] = None
+    style_id: Optional[int] = None
     replicate_prediction_details: Optional[str] = None
     error: Optional[str] = None

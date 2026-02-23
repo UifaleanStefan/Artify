@@ -44,93 +44,44 @@ class EmailService:
         order_link = f"{base}/order/{order_id}" if base else "#"
         download_all_link = f"{base}/api/orders/{order_id}/download-all" if base else "#"
         hero = ensure_absolute(result_urls[0]) if result_urls else ""
-        thumbs = [ensure_absolute(u) for u in (result_urls[:15] or [])]
-        n = len(thumbs)
+        n = len(result_urls) if result_urls else 0
         labels = result_labels[:n] if result_labels and len(result_labels) >= n else None
         if labels and len(labels) != n:
             labels = None
         hero_title, hero_artist = (labels[0][0], labels[0][1]) if labels and labels else ("", "")
-        # Use table layout so each thumbnail + caption stays in its own cell (email-client safe)
-        COLS = 3
-        CELL_WIDTH_PX = 120
-        if labels:
-            rows_html = []
-            for i in range(0, n, COLS):
-                cells = []
-                for j in range(COLS):
-                    idx = i + j
-                    if idx < n:
-                        u, (title, artist) = thumbs[idx], labels[idx]
-                        cells.append(
-                            f'<td style="width:{CELL_WIDTH_PX}px;max-width:{CELL_WIDTH_PX}px;padding:10px 6px;vertical-align:top;text-align:center;">'
-                            f'<a href="{u}" style="display:block;text-decoration:none;"><img src="{u}" alt="{_escape_html(title)}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:2px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,0.08);display:block;margin:0 auto;" /></a>'
-                            f'<div style="margin-top:8px;font-size:11px;color:#1e293b;line-height:1.4;width:90px;margin-left:auto;margin-right:auto;word-wrap:break-word;">{_escape_html(title)}<br/><span style="color:#64748b;font-style:italic;">{_escape_html(artist)}</span></div>'
-                            f'</td>'
-                        )
-                    else:
-                        cells.append(f'<td style="width:{CELL_WIDTH_PX}px;padding:10px 6px;"></td>')
-                rows_html.append(f'<tr>{"".join(cells)}</tr>')
-            thumbs_html = f'<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;border-collapse:collapse;"><tbody>{"".join(rows_html)}</tbody></table>'
-        else:
-            rows_html = []
-            for i in range(0, n, COLS):
-                cells = []
-                for j in range(COLS):
-                    idx = i + j
-                    if idx < n:
-                        u = thumbs[idx]
-                        cells.append(
-                            f'<td style="width:{CELL_WIDTH_PX}px;padding:10px 6px;vertical-align:top;text-align:center;">'
-                            f'<a href="{u}"><img src="{u}" alt="Operă" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:2px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,0.08);display:block;margin:0 auto;" /></a>'
-                            f'</td>'
-                        )
-                    else:
-                        cells.append(f'<td style="width:{CELL_WIDTH_PX}px;padding:10px 6px;"></td>')
-                rows_html.append(f'<tr>{"".join(cells)}</tr>')
-            thumbs_html = f'<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;border-collapse:collapse;"><tbody>{"".join(rows_html)}</tbody></table>'
+
+        # Flow: one hero image (first portrait) + clear link back to site. No thumbnail grid in email.
         hero_block = ""
         if hero:
-            hero_caption = f'<div style="margin-top:10px;font-size:13px;color:#64748b;"><span style="font-weight:600;color:#1e293b;">{_escape_html(hero_title)}</span><br/><span style="font-style:italic;color:#64748b;">{_escape_html(hero_artist)}</span></div>' if (hero_title or hero_artist) else ""
+            hero_caption = f'<div style="margin-top:12px;font-size:14px;color:#64748b;text-align:center;"><span style="font-weight:600;color:#1e293b;">{_escape_html(hero_title)}</span><br/><span style="font-style:italic;color:#64748b;">{_escape_html(hero_artist)}</span></div>' if (hero_title or hero_artist) else ""
             hero_block = f"""
-            <div style="padding:28px 24px 24px 24px;background:#f8fafc;">
-              <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.12em;color:#64748b;margin-bottom:12px;">Primul tău portret</div>
-              <div style="border:2px solid #e2e8f0;border-radius:12px;padding:8px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.08);">
-                <img src="{hero}" alt="Portretul tău" style="width:100%;max-height:320px;object-fit:contain;display:block;" />
+            <div style="padding:24px 20px 28px 20px;background:#f8fafc;">
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:#64748b;margin-bottom:14px;text-align:center;">Primul tău portret</div>
+              <div style="border:1px solid #e2e8f0;border-radius:16px;padding:12px;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.1);max-width:100%;">
+                <img src="{hero}" alt="Portretul tău" style="width:100%;max-height:380px;object-fit:contain;display:block;border-radius:8px;" />
               </div>
               {hero_caption}
             </div>"""
+
         body = f"""
         <div style="font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:#f1f5f9;padding:32px 16px;color:#1e293b;">
-          <div style="max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.08);">
-            <div style="padding:32px 28px 24px 28px;background:#fff;border-bottom:3px solid #2563eb;">
+          <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.08);">
+            <div style="padding:28px 24px 20px 24px;background:#fff;border-bottom:3px solid #2563eb;">
               <div style="text-align:center;">
-                <div style="font-size:28px;font-weight:700;color:#1e293b;letter-spacing:-0.01em;line-height:1.2;">Galeria ta e gata</div>
-                <div style="margin-top:8px;font-size:16px;color:#64748b;">Tu, pictat în stilul <strong style="color:#2563eb;">{_escape_html(style_name or 'Maeștri')}</strong></div>
-                <div style="margin-top:12px;font-size:12px;color:#94a3b8;">Comandă {_escape_html(order_id)}</div>
+                <div style="font-size:26px;font-weight:700;color:#1e293b;letter-spacing:-0.01em;line-height:1.2;">Galeria ta e gata</div>
+                <div style="margin-top:6px;font-size:15px;color:#64748b;">Tu, pictat în stilul <strong style="color:#2563eb;">{_escape_html(style_name or 'Maeștri')}</strong></div>
+                <div style="margin-top:10px;font-size:11px;color:#94a3b8;">Comandă {_escape_html(order_id)}</div>
               </div>
             </div>
             {hero_block}
-            <div style="padding:24px 24px 12px 24px;">
-              <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.1em;color:#64748b;margin-bottom:16px;font-weight:600;">Toate cele {n} portrete din galeria ta</div>
-              <div style="padding:8px 0 8px 0;">{thumbs_html}</div>
+            <div style="padding:28px 24px 32px 24px;background:#fff;text-align:center;">
+              <p style="margin:0 0 8px 0;font-size:15px;color:#64748b;line-height:1.5;">Descoperă toate cele {n} portrete și povestea lor pe site.</p>
+              <p style="margin:0 0 20px 0;font-size:14px;color:#94a3b8;">Un singur click — galeria completă te așteaptă.</p>
+              <a href="{order_link}" style="display:inline-block;padding:16px 32px;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);color:#ffffff !important;text-decoration:none;border-radius:12px;font-weight:600;font-size:16px;box-shadow:0 4px 14px rgba(37,99,235,0.35);-webkit-text-fill-color:#ffffff;">Vezi galeria pe site</a>
+              <p style="margin:20px 0 0 0;font-size:13px;"><a href="{download_all_link}" style="color:#2563eb;text-decoration:none;font-weight:500;">Descarcă toate imaginile (ZIP)</a></p>
             </div>
-            <div style="padding:28px 28px 32px 28px;background:#f8fafc;border-top:2px solid #e2e8f0;">
-              <p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#1e293b;">Salvează galeria completă</p>
-              <p style="margin:0 0 24px 0;font-size:14px;color:#64748b;line-height:1.5;">Un singur clic — toate cele {n} imagini în rezoluție mare, gata de print sau de partajat.</p>
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:400px;">
-                <tr>
-                  <td style="padding-right:12px;vertical-align:middle;width:1%;white-space:nowrap;">
-                    <a href="{download_all_link}" style="display:inline-block;padding:14px 24px;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);color:#ffffff !important;text-decoration:none;border-radius:12px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(37,99,235,0.35);-webkit-text-fill-color:#ffffff;">Descarcă toate</a>
-                  </td>
-                  <td style="vertical-align:middle;">
-                    <a href="{order_link}" style="display:inline-block;padding:14px 24px;background:#ffffff;color:#2563eb;text-decoration:none;border-radius:12px;font-weight:600;font-size:15px;border:2px solid #2563eb;box-shadow:0 2px 8px rgba(0,0,0,0.06);">Vezi galeria online</a>
-                  </td>
-                </tr>
-              </table>
-            </div>
-            <div style="padding:20px 28px;text-align:center;font-size:13px;color:#64748b;border-top:1px solid #e2e8f0;background:#f1f5f9;">
-              Mulțumim că ai ales Artify.<br/>
-              <span style="color:#94a3b8;">Făcut cu drag pentru iubitorii de artă.</span>
+            <div style="padding:18px 24px;text-align:center;font-size:12px;color:#64748b;border-top:1px solid #e2e8f0;background:#f1f5f9;">
+              Mulțumim că ai ales Artify. Făcut cu drag pentru iubitorii de artă.
             </div>
           </div>
         </div>

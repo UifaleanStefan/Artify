@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Status comandă – Artify</title>
   <link rel="stylesheet" href="/static/landing/styles.css" />
-  <link rel="stylesheet" href="/static/landing/order_status.css?v=3" />
+  <link rel="stylesheet" href="/static/landing/order_status.css?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -15,8 +15,9 @@
     <a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a>
     <nav class="nav"><a href="/#how-it-works">Cum funcționează</a><a href="/styles">Stiluri</a><a href="/#pricing">Prețuri</a><a href="/styles" class="btn btn-primary btn-header">Transformă acum</a></nav>
   </header>
-  <main class="order-status-main">
-    <div class="order-status-card">
+  <main class="order-status-main" id="order-status-main">
+    <!-- Loading / Processing / Error states (light theme card) -->
+    <div class="order-status-card" id="order-status-card-info">
       <div class="order-status-head">
         <h1 class="order-status-title">Status comandă</h1>
         <p class="order-status-id" id="order-status-id">—</p>
@@ -24,24 +25,41 @@
       <div id="order-status-state">
         <p class="order-status-loading">Se încarcă…</p>
       </div>
-      <div class="order-status-results" id="order-status-results" style="display:none">
-        <div class="order-status-results-head">
-          <span class="order-status-badge">✨ Gata</span>
-          <h2 class="order-status-results-title">Galeria ta Artify e gata</h2>
-          <p class="order-status-results-sub">Apasă pe o imagine pentru mărime întreagă.</p>
-        </div>
-        <div class="order-status-hero-wrap" id="order-status-hero-wrap"></div>
-        <div class="order-status-preview-row">
-          <p class="order-status-preview-label">Previzualizează setul</p>
-          <div class="order-status-gallery" id="order-status-gallery"></div>
-        </div>
-        <div class="order-status-cta-row">
-          <a href="#" class="btn btn-primary order-status-download" id="order-status-download">Descarcă toate imaginile</a>
+    </div>
+
+    <!-- Results state (Museum / Gallery theme) -->
+    <div class="order-status-results" id="order-status-results" style="display:none">
+      <div class="museum-header">
+        <span class="museum-badge">Colecția ta privată</span>
+        <h2 class="museum-title">Capodoperele au fost finalizate</h2>
+        <p class="museum-subtitle">O călătorie vizuală creată special pentru tine.</p>
+      </div>
+
+      <div class="museum-hero" id="museum-hero">
+        <!-- Hero image injected here -->
+      </div>
+      
+      <div class="museum-hero-caption" id="museum-hero-caption">
+        <!-- Hero Title and Artist -->
+      </div>
+
+      <div class="museum-gallery-section">
+        <h3 class="museum-gallery-title">Întreaga Colecție</h3>
+        <p class="museum-gallery-subtitle">Explorează fiecare portret din setul tău. Apasă pentru a vizualiza detaliile.</p>
+        
+        <div class="museum-grid" id="museum-grid">
+          <!-- Gallery thumbnails injected here -->
         </div>
       </div>
-      <div class="order-status-actions">
-        <a href="/styles" class="btn btn-primary">Creează alt portret</a>
-        <a href="/" class="order-status-home">← Înapoi la pagină principală</a>
+
+      <div class="museum-actions">
+        <a href="#" class="btn btn-primary btn-museum" id="order-status-download">Descarcă Întreaga Colecție (ZIP)</a>
+        <p class="museum-actions-hint">Imaginile sunt la rezoluție înaltă, perfecte pentru print și social media.</p>
+        
+        <div class="museum-secondary-actions">
+          <a href="/styles" class="btn btn-outline btn-museum-outline">Creează alt portret</a>
+          <a href="/" class="museum-home-link">← Înapoi la prima pagină</a>
+        </div>
       </div>
     </div>
   </main>
@@ -54,6 +72,6 @@
     </div>
     <div class="footer-bottom"><span>© 2026 Artify. Toate drepturile rezervate.</span><span>Făcut cu 🎨 pentru iubitorii de artă.</span></div>
   </footer>
-  <script src="/static/landing/order_status.js?v=2"></script>
+  <script src="/static/landing/order_status.js?v=3"></script>
 </body>
 </html>

@@ -814,10 +814,24 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
     order = db.query(Order).filter(Order.order_id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
+        
+    labels = None
+    if order.status == "completed" and order.result_urls:
+        try:
+            urls = json.loads(order.result_urls)
+            if urls:
+                styles = _load_styles_data()
+                labels_tuples = _build_result_labels(order, urls, styles)
+                labels = [[t[0], t[1]] for t in labels_tuples]
+        except Exception:
+            pass
+
     return OrderStatusResponse(
         order_id=order.order_id,
         status=order.status,
         result_urls=order.result_urls,
+        result_labels=labels,
+        style_id=order.style_id,
         replicate_prediction_details=order.replicate_prediction_details,
         error=order.style_transfer_error,
     )
