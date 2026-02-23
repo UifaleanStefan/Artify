@@ -30,7 +30,9 @@ body {
   color: var(--text);
   background: var(--bg);
   line-height: 1.6;
+  overflow-x: hidden;
 }
+img { max-width: 100%; height: auto; }
 
 .header {
   display: flex;
@@ -99,6 +101,10 @@ body {
 .btn-header { padding: 0.5rem 1rem; }
 .btn-lg { padding: 0.875rem 1.75rem; font-size: 1rem; }
 .btn-block { width: 100%; }
+@media (max-width: 768px) {
+  .btn { min-height: 44px; padding: 0.75rem 1.25rem; }
+  .btn-lg { min-height: 48px; padding: 0.875rem 1.5rem; }
+}
 
 /* Pack style thumb (scroll + arrows – used on details, billing, payment) */
 .style-thumb-wrap { position: relative; margin-bottom: 0.75rem; }
@@ -344,9 +350,27 @@ body {
 }
 .section-subtitle .section-subtitle-accent { color: var(--primary); font-weight: 500; }
 
+/* Section divider line (same look as hero-line) */
+.section-line {
+  width: 100%;
+  max-width: 280px;
+  height: 4px;
+  margin: 0 auto 2rem;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--accent), var(--accent-3));
+  opacity: 0.85;
+}
+.section-line--top {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
 /* How it works */
 .how-section {
-  background: linear-gradient(180deg, rgba(37, 99, 235, 0.04) 0%, transparent 30%);
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.05) 0%, rgba(248, 250, 252, 0.8) 50%, rgba(248, 250, 252, 0.6) 100%);
+  border: 1px solid rgba(37, 99, 235, 0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.04);
 }
 .how-section .section-subtitle { margin-bottom: 3rem; }
 .steps {
@@ -1052,14 +1076,46 @@ a.style-card:hover { opacity: 0.95; }
 }
 
 @media (max-width: 768px) {
-  .header { padding: 1rem; }
-  .nav { gap: 1rem; }
-  .nav a:not(.btn) { display: none; }
-  .hero { padding: 2rem 1rem; }
+  .header { padding: 1rem; flex-wrap: wrap; gap: 0.75rem; }
+  .header .nav { gap: 0.75rem; flex-wrap: wrap; }
+  .nav a:not(.btn) { font-size: 0.875rem; }
+  .nav a.btn-primary { min-height: 44px; }
+  .hero { padding: 2rem 1rem; min-height: auto; }
+  .hero-cta { flex-direction: column; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; }
+  .hero-cta .btn { width: 100%; }
+  .review-summary-box { flex-wrap: wrap; justify-content: center; padding: 0.5rem 1rem; }
   .section { padding: 3rem 1rem; }
-  .styles-header { flex-direction: column; }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .section-title { font-size: clamp(1.5rem, 5vw, 2rem); }
+  .section-line { margin-bottom: 1.5rem; }
+  .how-section { border-radius: 12px; }
+  .steps { grid-template-columns: 1fr; gap: 1.25rem; }
+  .step-card { padding: 1.5rem; }
+  .styles-header { flex-direction: column; align-items: stretch; text-align: center; }
+  .styles-header .section-title,
+  .styles-header .section-subtitle { text-align: center; }
+  .styles-header .btn { align-self: center; }
+  .style-card { width: min(320px, 90vw); min-width: 240px; min-height: 240px; padding: 1.25rem; }
+  .pricing-section .pricing-cards { max-width: 100%; }
+  .pricing-card { padding: 1.5rem; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem 1rem; }
   .demo-flow { flex-direction: column; gap: 1.5rem; }
   .demo-connector { transform: rotate(90deg); }
+  .compare-handle { min-width: 44px; min-height: 44px; }
 }
-@media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr; } }
+@media (max-width: 600px) {
+  .nav a:not(.btn) { display: none; }
+}
+@media (max-width: 480px) {
+  .header { padding: 0.75rem 1rem; }
+  .logo-text { font-size: 1.125rem; }
+  .hero { padding: 1.5rem 1rem; }
+  .hero-title { font-size: clamp(1.75rem, 8vw, 2.5rem); }
+  .section { padding: 2rem 1rem; }
+  .review-summary-box { font-size: 0.8125rem; }
+  .review-summary-rating { font-size: 0.9375rem; }
+  .footer-grid { grid-template-columns: 1fr; text-align: center; }
+  .footer-brand p { margin-left: auto; margin-right: auto; }
+  .pricing-discount-badge,
+  .pricing-coming-soon-badge { font-size: 0.75rem; padding: 0.35rem 0.75rem; right: 0.75rem; }
+  .pricing-price { font-size: 1.75rem; }
+}
