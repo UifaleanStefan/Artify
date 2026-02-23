@@ -495,7 +495,7 @@ body {
 .style-cards::-webkit-scrollbar-thumb { background: rgba(37, 99, 235, 0.35); border-radius: 3px; }
 .style-card {
   flex: 0 0 auto;
-  width: min(340px, 85vw);
+  width: min(360px, 85vw);
   min-width: 260px;
   position: relative;
   border-radius: var(--radius-lg);
