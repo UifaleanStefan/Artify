@@ -15,6 +15,7 @@
   var nextBtn = document.getElementById('exhibition-next');
   
   var globalUrls = [];
+  var globalStyleUrls = [];
   var globalLabels = [];
   var currentIndex = 0;
 
@@ -26,13 +27,92 @@
     el.classList.add('fade-enter');
   }
 
+  function initSlider(wrap) {
+    var divider = wrap.querySelector('.museum-compare-divider');
+    if (!divider) return;
+
+    var minPct = 5;
+    var maxPct = 95;
+
+    function setPct(pct) {
+      pct = Math.max(minPct, Math.min(maxPct, pct));
+      wrap.style.setProperty('--compare-pct', String(pct));
+    }
+
+    function onMove(e) {
+      var rect = wrap.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      setPct((x / rect.width) * 100);
+    }
+
+    function stopDrag() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', stopDrag);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+
+    divider.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', stopDrag);
+      onMove(e);
+    });
+
+    wrap.addEventListener('touchstart', function (e) {
+      if (e.target !== divider && !divider.contains(e.target)) return;
+      e.preventDefault();
+      var touch = e.touches[0];
+      function touchMove(ev) {
+        var t = ev.touches[0];
+        var rect = wrap.getBoundingClientRect();
+        var x = t.clientX - rect.left;
+        setPct((x / rect.width) * 100);
+      }
+      function touchEnd() {
+        wrap.removeEventListener('touchmove', touchMove);
+        wrap.removeEventListener('touchend', touchEnd);
+      }
+      wrap.addEventListener('touchmove', touchMove, { passive: false });
+      wrap.addEventListener('touchend', touchEnd);
+      var rect = wrap.getBoundingClientRect();
+      setPct(((touch.clientX - rect.left) / rect.width) * 100);
+    }, { passive: false });
+  }
+
   function showImage(index) {
     if (index < 0 || index >= globalUrls.length) return;
     currentIndex = index;
     
-    // Update hero image
     var imgUrl = globalUrls[currentIndex];
-    heroWrap.innerHTML = '<img src="' + imgUrl + '" class="museum-hero-img" alt="Operă" />';
+    var styleImgUrl = null;
+    
+    if (globalStyleUrls && globalStyleUrls.length > 0) {
+      styleImgUrl = globalStyleUrls.length > currentIndex ? globalStyleUrls[currentIndex] : globalStyleUrls[0];
+    }
+    
+    if (styleImgUrl) {
+      heroWrap.innerHTML = 
+        '<div class="museum-compare-wrap" id="museum-compare-wrap">' +
+          '<div class="museum-compare-before">' +
+            '<img src="' + styleImgUrl + '" alt="Pictura originală" />' +
+            '<span class="museum-compare-label museum-compare-label-right">Original</span>' +
+          '</div>' +
+          '<div class="museum-compare-after">' +
+            '<img src="' + imgUrl + '" alt="Portretul tău" />' +
+            '<span class="museum-compare-label museum-compare-label-left">Tu</span>' +
+          '</div>' +
+          '<div class="museum-compare-divider" id="museum-compare-divider">' +
+            '<span class="museum-compare-handle">‖</span>' +
+          '</div>' +
+        '</div>';
+      
+      initSlider(document.getElementById('museum-compare-wrap'));
+    } else {
+      heroWrap.innerHTML = '<img src="' + imgUrl + '" class="museum-hero-img" alt="Operă" />';
+    }
     
     // Update caption
     var tTitle = globalLabels.length > currentIndex && globalLabels[currentIndex][0] ? globalLabels[currentIndex][0] : ('Opera ' + (currentIndex + 1));
@@ -107,6 +187,11 @@
         globalUrls = typeof data.result_urls === 'string' ? JSON.parse(data.result_urls) : (data.result_urls || []);
       } catch (e) {
         globalUrls = [];
+      }
+      try {
+        globalStyleUrls = typeof data.style_image_urls === 'string' ? JSON.parse(data.style_image_urls) : (data.style_image_urls || []);
+      } catch (e) {
+        globalStyleUrls = [];
       }
       globalLabels = data.result_labels || [];
 

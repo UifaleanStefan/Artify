@@ -832,6 +832,8 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
         result_urls=order.result_urls,
         result_labels=labels,
         style_id=order.style_id,
+        initial_image_url=order.image_url,
+        style_image_urls=order.style_image_urls,
         replicate_prediction_details=order.replicate_prediction_details,
         error=order.style_transfer_error,
     )
