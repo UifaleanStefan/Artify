@@ -105,17 +105,23 @@ class EmailService:
               <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.1em;color:#8b7355;margin-bottom:16px;font-weight:600;">Toate cele {n} portrete din galeria ta</div>
               <div style="padding:8px 0 8px 0;">{thumbs_html}</div>
             </div>
-            <div style="padding:28px 28px 32px 28px;background:linear-gradient(180deg,#f5f0e8 0%,#ebe5dc 100%);border-top:2px solid #e8dcc8;">
-              <p style="margin:0 0 8px 0;font-size:15px;font-weight:600;color:#4a4035;">Salvează galeria completă</p>
-              <p style="margin:0 0 20px 0;font-size:14px;color:#6b5d4f;line-height:1.5;">Un singur clic — toate cele {n} imagini în rezoluție mare, gata de print sau de partajat.</p>
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>
-                <td style="padding-right:12px;"><a href="{download_all_link}" style="display:inline-block;padding:14px 28px;background:linear-gradient(135deg,#1e3a5f 0%,#2d5a8e 100%);color:#fff !important;text-decoration:none;border-radius:8px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(30,58,95,0.35);">Descarcă toate</a></td>
-                <td><a href="{order_link}" style="display:inline-block;padding:14px 28px;background:#fff;color:#1e3a5f;text-decoration:none;border-radius:8px;font-weight:600;font-size:15px;border:2px solid #c9a96e;">Vezi galeria online</a></td>
-              </tr></table>
+            <div style="padding:28px 28px 32px 28px;background:#f8fafc;border-top:2px solid rgba(37,99,235,0.15);">
+              <p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#1e293b;">Salvează galeria completă</p>
+              <p style="margin:0 0 24px 0;font-size:14px;color:#64748b;line-height:1.5;">Un singur clic — toate cele {n} imagini în rezoluție mare, gata de print sau de partajat.</p>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:400px;">
+                <tr>
+                  <td style="padding-right:12px;vertical-align:middle;width:1%;white-space:nowrap;">
+                    <a href="{download_all_link}" style="display:inline-block;padding:14px 24px;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);color:#ffffff !important;text-decoration:none;border-radius:12px;font-weight:600;font-size:15px;box-shadow:0 4px 14px rgba(37,99,235,0.35);-webkit-text-fill-color:#ffffff;">Descarcă toate</a>
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <a href="{order_link}" style="display:inline-block;padding:14px 24px;background:#ffffff;color:#2563eb;text-decoration:none;border-radius:12px;font-weight:600;font-size:15px;border:2px solid #2563eb;box-shadow:0 2px 8px rgba(0,0,0,0.06);">Vezi galeria online</a>
+                  </td>
+                </tr>
+              </table>
             </div>
-            <div style="padding:20px 28px;text-align:center;font-size:13px;color:#9a8f7f;border-top:1px solid #eee8de;background:#faf7f2;">
+            <div style="padding:20px 28px;text-align:center;font-size:13px;color:#64748b;border-top:1px solid #e2e8f0;background:#f1f5f9;">
               Mulțumim că ai ales Artify.<br/>
-              <span style="color:#b5a898;">Făcut cu drag pentru iubitorii de artă.</span>
+              <span style="color:#94a3b8;">Făcut cu drag pentru iubitorii de artă.</span>
             </div>
           </div>
         </div>

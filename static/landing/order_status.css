@@ -1,19 +1,19 @@
-/* Order status page – gallery-style reveal */
+/* Order status page – uses site color palette (styles.css :root) */
 .order-status-main {
   max-width: 800px;
   margin: 0 auto;
   padding: 3rem 1.5rem 4rem;
-  font-family: "DM Sans", -apple-system, sans-serif;
-  background: linear-gradient(180deg, #f0edeb 0%, #e8e4e0 50%, #f5f3f0 100%);
+  font-family: var(--font);
+  background: var(--bg);
   min-height: 60vh;
 }
 
 .order-status-card {
-  background: #fdfcf9;
-  border-radius: 16px;
+  background: white;
+  border-radius: var(--radius-lg);
   padding: 2.5rem 2rem 2.75rem;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(201, 169, 110, 0.08);
-  border: 1px solid rgba(201, 169, 110, 0.2);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(37, 99, 235, 0.1);
   position: relative;
   overflow: hidden;
 }
@@ -25,8 +25,8 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #c9a96e 0%, #d4b87a 50%, #c9a96e 100%);
-  opacity: 0.9;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 50%, var(--primary) 100%);
+  opacity: 0.95;
 }
 
 .order-status-head {
@@ -39,7 +39,7 @@
   font-weight: 600;
   color: var(--primary);
   letter-spacing: 0.02em;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font);
 }
 
 .order-status-id {
@@ -47,10 +47,10 @@
   font-size: 0.8125rem;
   color: var(--text-muted);
   word-break: break-all;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font);
   display: inline-block;
   padding: 0.25rem 0.6rem;
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--bg-light);
   border-radius: 6px;
 }
 
@@ -65,7 +65,7 @@
   margin: 0 0 1.5rem;
   padding: 1rem 1.25rem;
   background: #fef2f2;
-  border-radius: 10px;
+  border-radius: var(--radius);
   color: #b91c1c;
   font-size: 0.9375rem;
   border: 1px solid rgba(185, 28, 28, 0.15);
@@ -87,8 +87,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: #8b7355;
-  background: linear-gradient(135deg, rgba(201, 169, 110, 0.2) 0%, rgba(201, 169, 110, 0.08) 100%);
+  color: white;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   padding: 0.35rem 0.75rem;
   border-radius: 9999px;
   margin-bottom: 0.75rem;
@@ -98,9 +98,9 @@
   margin: 0 0 0.4rem;
   font-size: 1.875rem;
   font-weight: 700;
-  color: #1e3a5f;
+  color: var(--text);
   letter-spacing: -0.02em;
-  font-family: "Cormorant Garamond", Georgia, serif;
+  font-family: var(--font);
   line-height: 1.2;
 }
 
@@ -114,10 +114,10 @@
 .order-status-hero-wrap {
   margin-bottom: 2rem;
   padding: 14px;
-  background: linear-gradient(145deg, #f5f0e8 0%, #ebe5dc 100%);
-  border-radius: 12px;
-  border: 2px solid #d4c4a8;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: var(--bg-light);
+  border-radius: var(--radius);
+  border: 2px solid rgba(37, 99, 235, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .order-status-hero-wrap img {
@@ -125,7 +125,7 @@
   max-height: 420px;
   object-fit: contain;
   display: block;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 /* Preview set */
@@ -137,7 +137,7 @@
   margin: 0 0 0.85rem;
   font-size: 0.6875rem;
   font-weight: 600;
-  color: #8b7355;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
@@ -150,17 +150,17 @@
 
 .order-status-gallery a {
   display: block;
-  border-radius: 10px;
+  border-radius: var(--radius);
   overflow: hidden;
-  border: 2px solid #e8e0d4;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  border: 2px solid var(--bg-light);
+  box-shadow: var(--shadow);
   transition: transform 0.2s ease, border-color 0.2s, box-shadow 0.2s;
 }
 
 .order-status-gallery a:hover {
   transform: translateY(-2px);
-  border-color: #c9a96e;
-  box-shadow: 0 8px 24px rgba(201, 169, 110, 0.22);
+  border-color: var(--primary-light);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.2);
 }
 
 .order-status-gallery img {
@@ -181,7 +181,7 @@
   padding: 1rem 2rem;
   font-size: 1rem;
   font-weight: 600;
-  border-radius: 12px;
+  border-radius: var(--radius);
   box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -214,6 +214,20 @@
 
 .order-status-home:hover {
   color: var(--primary);
+}
+
+/* Any dynamic captions / labels under thumbnails – ensure readable */
+.order-status-gallery figcaption,
+.order-status-hero-wrap figcaption,
+[class*="order-status"] .caption,
+[class*="order-status"] .label {
+  color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+[class*="order-status"] .label-muted {
+  color: var(--text-muted);
+  font-size: 0.75rem;
 }
 
 @media (min-width: 640px) {
