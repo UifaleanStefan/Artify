@@ -14,10 +14,17 @@
     .help-page .lead { color: var(--text-muted); margin: 0 0 2rem; font-size: 1.0625rem; }
     .help-qa { margin-bottom: 2.5rem; }
     .help-qa h2 { font-size: 1.125rem; color: var(--primary); margin: 0 0 1rem; font-weight: 600; }
-    .help-q { font-weight: 600; color: var(--text); margin: 0 0 0.35rem; font-size: 0.9375rem; }
-    .help-a { color: var(--text-muted); margin: 0 0 1.25rem; font-size: 0.9375rem; line-height: 1.5; padding-left: 0; }
-    .help-q-item { border-bottom: 1px solid var(--bg-light); padding-bottom: 1rem; margin-bottom: 1rem; }
-    .help-q-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .help-q-item { margin-bottom: 0.5rem; border-radius: var(--radius); border: 1px solid #e2e8f0; background: #fff; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
+    .help-q-item:hover { border-color: rgba(37, 99, 235, 0.25); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .help-q-item.is-open { border-color: rgba(37, 99, 235, 0.35); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08); }
+    .help-q-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 1rem 1.25rem; border: none; background: none; cursor: pointer; text-align: left; font-family: inherit; font-weight: 600; color: var(--text); font-size: 0.9375rem; }
+    .help-q-btn:hover { color: var(--primary); }
+    .help-q-btn .chevron { flex-shrink: 0; width: 1.25rem; height: 1.25rem; color: var(--primary); transition: transform 0.25s ease; }
+    .help-q-item.is-open .help-q-btn .chevron { transform: rotate(180deg); }
+    .help-a-wrap { overflow: hidden; }
+    .help-a { color: var(--text-muted); font-size: 0.9375rem; line-height: 1.5; margin: 0; padding: 0 1.25rem 1rem; border-top: 1px solid #f1f5f9; }
+    .help-q-item .help-a { padding-top: 0.75rem; transition: opacity 0.2s ease; }
+    .help-q-item:not(.is-open) .help-a-wrap { display: none; }
     .help-contact { background: var(--bg-light); border-radius: var(--radius-lg); padding: 1.5rem; border: 1px solid rgba(37, 99, 235, 0.12); }
     .help-contact h2 { font-size: 1.125rem; color: var(--text); margin: 0 0 0.5rem; font-weight: 600; }
     .help-contact p { margin: 0; font-size: 0.9375rem; color: var(--text-muted); line-height: 1.5; }
@@ -42,25 +49,50 @@
 
     <section class="help-qa">
       <h2>Întrebări frecvente</h2>
-      <div class="help-q-item">
-        <p class="help-q">Cum funcționează serviciul?</p>
-        <p class="help-a">Încarci o poză cu fața ta, alegi un stil din galerie (un pachet), plătești și primești o galerie de portrete în acel stil. Procesul durează câteva minute; vei primi un email când galeria e gata.</p>
+      <div class="help-q-item is-open" data-faq>
+        <button type="button" class="help-q-btn" aria-expanded="true">
+          <span>Cum funcționează serviciul?</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="help-a-wrap">
+          <p class="help-a">Încarci o poză cu fața ta, alegi un stil din galerie (un pachet), plătești și primești o galerie de portrete în acel stil. Procesul durează câteva minute; vei primi un email când galeria e gata.</p>
+        </div>
       </div>
-      <div class="help-q-item">
-        <p class="help-q">Ce înseamnă un pachet?</p>
-        <p class="help-a">Un pachet este un stil artistic (de ex. Maeștri, Impresionism, Modern & Abstract). Când alegi un pachet, primești un set complet de portrete cu fața ta în acel stil, în rezoluție mare, gata de print sau partajat.</p>
+      <div class="help-q-item" data-faq>
+        <button type="button" class="help-q-btn" aria-expanded="false">
+          <span>Ce înseamnă un pachet?</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="help-a-wrap">
+          <p class="help-a">Un pachet este un stil artistic (de ex. Maeștri, Impresionism, Modern & Abstract). Când alegi un pachet, primești un set complet de portrete cu fața ta în acel stil, în rezoluție mare, gata de print sau partajat.</p>
+        </div>
       </div>
-      <div class="help-q-item">
-        <p class="help-q">Cât durează să primesc portretele?</p>
-        <p class="help-a">De obicei 2–5 minute. Îți trimitem un email când galeria e gata, cu link pentru vizualizare și descărcare.</p>
+      <div class="help-q-item" data-faq>
+        <button type="button" class="help-q-btn" aria-expanded="false">
+          <span>Cât durează să primesc portretele?</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="help-a-wrap">
+          <p class="help-a">De obicei 2–5 minute. Îți trimitem un email când galeria e gata, cu link pentru vizualizare și descărcare.</p>
+        </div>
       </div>
-      <div class="help-q-item">
-        <p class="help-q">Pot descărca imaginile mai târziu?</p>
-        <p class="help-a">Da. Linkurile din email și de pe pagina comenzii rămân valabile 14 zile. Descarcă imaginile sau salvează-le pe device în acest interval.</p>
+      <div class="help-q-item" data-faq>
+        <button type="button" class="help-q-btn" aria-expanded="false">
+          <span>Pot descărca imaginile mai târziu?</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="help-a-wrap">
+          <p class="help-a">Da. Linkurile din email și de pe pagina comenzii rămân valabile 14 zile. Descarcă imaginile sau salvează-le pe device în acest interval.</p>
+        </div>
       </div>
-      <div class="help-q-item">
-        <p class="help-q">Ce metode de plată acceptați?</p>
-        <p class="help-a">Plata se face online, în siguranță. Detaliile exacte sunt afișate pe pagina de plată.</p>
+      <div class="help-q-item" data-faq>
+        <button type="button" class="help-q-btn" aria-expanded="false">
+          <span>Ce metode de plată acceptați?</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="help-a-wrap">
+          <p class="help-a">Plata se face online, în siguranță. Detaliile exacte sunt afișate pe pagina de plată.</p>
+        </div>
       </div>
     </section>
 
@@ -103,5 +135,16 @@
       <span>🎨 Pentru iubitorii de artă.</span>
     </div>
   </footer>
+  <script>
+    document.querySelectorAll('[data-faq]').forEach(function (item) {
+      var btn = item.querySelector('.help-q-btn');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var isOpen = item.classList.contains('is-open');
+        item.classList.toggle('is-open', !isOpen);
+        btn.setAttribute('aria-expanded', !isOpen);
+      });
+    });
+  </script>
 </body>
 </html>
