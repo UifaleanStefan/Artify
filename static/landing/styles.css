@@ -495,18 +495,18 @@ body {
 .style-cards::-webkit-scrollbar-thumb { background: rgba(37, 99, 235, 0.35); border-radius: 3px; }
 .style-card {
   flex: 0 0 auto;
-  width: min(320px, 85vw);
-  min-width: 260px;
+  width: min(380px, 90vw);
+  min-width: 300px;
   position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  min-height: 280px;
+  min-height: 320px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   padding: 1.5rem;
   color: white;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6);
   text-decoration: none;
 }
 a.style-card:hover { opacity: 0.95; }
@@ -569,15 +569,15 @@ a.style-card:hover { opacity: 0.95; }
     linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
 }
 .style-card-bg--masters {
-  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.75) 100%),
+  background: linear-gradient(180deg, transparent 20%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.85) 100%),
     url("/static/landing/styles/masters/masters-01.jpg") center/cover no-repeat;
 }
 .style-card-bg--impression {
-  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.75) 100%),
+  background: linear-gradient(180deg, transparent 20%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.85) 100%),
     url("/static/landing/styles/impression-color/impression-color-01.jpg") center/cover no-repeat;
 }
 .style-card-bg--modern {
-  background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.75) 100%),
+  background: linear-gradient(180deg, transparent 20%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0.85) 100%),
     url("/static/landing/styles/modern-abstract/modern-abstract-01.jpg") center/cover no-repeat;
 }
 .style-tag {
@@ -599,8 +599,8 @@ a.style-card:hover { opacity: 0.95; }
 .tag-baroque { background: #5c4033; }
 .tag-fauvism { background: #e74c3c; }
 .tag-masters { background: var(--primary); }
-.style-card h3 { margin: 0 0 0.25rem; font-size: 1.25rem; }
-.style-card .style-artist { font-size: 0.875rem; opacity: 0.9; margin: 0; }
+.style-card h3 { margin: 0 0 0.25rem; font-size: 1.25rem; font-weight: 700; }
+.style-card .style-artist { font-size: 0.9375rem; opacity: 1; margin: 0; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.7); }
 .style-preview { color: white; text-decoration: none; font-size: 0.9375rem; font-weight: 500; }
 .style-preview:hover { text-decoration: underline; }
 
@@ -771,12 +771,14 @@ a.style-card:hover { opacity: 0.95; }
   color: #0f172a !important;
   -webkit-text-fill-color: #0f172a !important;
   font-weight: 700;
+  opacity: 1 !important;
 }
 #pricing.section .section-subtitle,
 .pricing-section .section-subtitle {
   color: #1e293b !important;
   -webkit-text-fill-color: #1e293b !important;
   font-weight: 500;
+  opacity: 1 !important;
 }
 .pricing-bg { position: absolute; inset: 0; background: inherit; pointer-events: none; }
 .pricing-cards {
