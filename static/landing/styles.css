@@ -588,6 +588,12 @@ a.style-card:hover { opacity: 0.95; }
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+.style-tag-right {
+  left: auto;
+  right: 1rem;
 }
 .tag-impressionism { background: var(--primary-light); }
 .tag-renaissance { background: #8b6914; }
