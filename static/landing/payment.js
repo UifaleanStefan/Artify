@@ -99,7 +99,7 @@
         window.location.href = '/create/done' + q;
       })
       .catch(function (err) {
-        payBtn.disabled = false; payBtn.textContent = 'Plătește 12 €';
+        payBtn.disabled = false; payBtn.textContent = 'Plătește 9,99 Lei';
         alert(err.message || 'Ceva nu a mers bine.');
       });
     });

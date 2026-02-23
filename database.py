@@ -45,7 +45,7 @@ class Order(Base):
     style_transfer_error = Column(Text)
     replicate_prediction_details = Column(Text)  # JSON array of Replicate prediction objects: id, status, error, metrics, created_at, started_at, completed_at, result_url, model, version, source, urls, logs
 
-    amount = Column(Float, default=12.00)
+    amount = Column(Float, default=9.99)
     payment_status = Column(String(20), default="pending")
     payment_provider = Column(String(50))
     payment_transaction_id = Column(String(255))

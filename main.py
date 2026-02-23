@@ -541,6 +541,12 @@ MODERN_ABSTRACT_PACK_PATHS = [
     *[f"/static/landing/styles/modern-abstract/modern-abstract-{i:02d}.jpg" for i in range(14, 16)],
 ]
 
+# Ancient Worlds pack: 15 reference images (oldest in Downloads = 01, newest = 15)
+STYLE_ID_ANCIENT_WORLDS_PACK = 16
+ANCIENT_WORLDS_PACK_PATHS = [
+    f"/static/landing/styles/ancient-worlds/ancient-worlds-{i:02d}.jpg" for i in range(1, 16)
+]
+
 # Per-image (painting title, artist) for email captions.
 # Masters pack: 15 reference images (masters-01.jpg … masters-15.jpg); each result image gets the label at the same index.
 MASTERS_PACK_LABELS: list[tuple[str, str]] = [
@@ -596,6 +602,24 @@ MODERN_ABSTRACT_PACK_LABELS: list[tuple[str, str]] = [
     ("Girl with a Mandolin", "Pablo Picasso"),             # 14
     ("Les Demoiselles d'Avignon", "Pablo Picasso"),       # 15
 ]
+# Ancient Worlds pack: 01 = first downloaded … 15 = last downloaded (see setup_ancient_worlds_pack.py)
+ANCIENT_WORLDS_PACK_LABELS: list[tuple[str, str]] = [
+    ("Nebamun Hunting in the Marshes", "Ancient Egypt"),           # 01
+    ("Akhenaten and Nefertiti with their Children", "Egypt (Amarna)"),  # 02
+    ("Book of the Dead of Hunefer", "Egypt"),                      # 03
+    ("Tomb of Ramesses I Wall Paintings", "Egypt"),                # 04
+    ("Achilles and Ajax Playing Dice Amphora", "Greece"),           # 05
+    ("The Berlin Painter Amphora", "Greece"),                       # 06
+    ("The Francois Vase", "Greece"),                                # 07
+    ("Alexander Mosaic", "Rome"),                                   # 08
+    ("Villa of Livia Garden Room", "Rome"),                         # 09
+    ("Pompeii Fresco of Bacchus", "Rome"),                          # 10
+    ("Fayum Mummy Portraits", "Roman Egypt"),                       # 11
+    ("Standard of Ur", "Mesopotamia"),                               # 12
+    ("Ishtar Gate Reliefs", "Babylon"),                             # 13
+    ("Ajanta Cave Paintings", "India"),                             # 14
+    ("Han Dynasty Silk Paintings", "Ancient China"),                # 15
+]
 
 
 def _build_result_labels(
@@ -611,6 +635,8 @@ def _build_result_labels(
         return IMPRESSION_COLOR_PACK_LABELS[:n]
     if order.style_id == STYLE_ID_MODERN_ABSTRACT_PACK:
         return MODERN_ABSTRACT_PACK_LABELS[:n]
+    if order.style_id == STYLE_ID_ANCIENT_WORLDS_PACK:
+        return ANCIENT_WORLDS_PACK_LABELS[:n]
     style_data = next((s for s in styles if s.get("id") == order.style_id), None)
     title = order.style_name or (style_data.get("title") if style_data else "Stil")
     artist = style_data.get("artist", "Artist") if style_data else "Artist"
@@ -659,6 +685,10 @@ async def create_order(
         style_image_urls = json.dumps([_resolve_style_image_url(p) for p in MODERN_ABSTRACT_PACK_PATHS])
         if not style_image_url:
             style_image_url = _resolve_style_image_url(MODERN_ABSTRACT_PACK_PATHS[0])
+    elif order_data.style_id == STYLE_ID_ANCIENT_WORLDS_PACK:
+        style_image_urls = json.dumps([_resolve_style_image_url(p) for p in ANCIENT_WORLDS_PACK_PATHS])
+        if not style_image_url:
+            style_image_url = _resolve_style_image_url(ANCIENT_WORLDS_PACK_PATHS[0])
 
     # Fail fast if style URLs are not public HTTPS (Replicate requires this)
     def _must_be_https(name: str, url: Optional[str]) -> None:
@@ -694,7 +724,7 @@ async def create_order(
         image_url=order_data.image_url,
         style_image_url=style_image_url,
         style_image_urls=style_image_urls,
-        amount=12.00,
+        amount=9.99,
         billing_name=order_data.billing_name,
         billing_address=order_data.billing_address,
         billing_city=order_data.billing_city,
