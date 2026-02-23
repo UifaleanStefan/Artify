@@ -222,6 +222,16 @@ async def help_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "landing" / "help.html", headers=_HTML_HEADERS)
 
 
+@app.get("/terms")
+async def terms_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "landing" / "terms.html", headers=_HTML_HEADERS)
+
+
+@app.get("/privacy")
+async def privacy_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "landing" / "privacy.html", headers=_HTML_HEADERS)
+
+
 @app.get("/order/{order_id}")
 async def order_status_page(order_id: str) -> FileResponse:
     """Page where users can view order status and result images (e.g. /order/ART-xxx)."""
