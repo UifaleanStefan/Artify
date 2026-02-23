@@ -21,7 +21,7 @@ class Settings(BaseSettings):
 
     # Timeouts and retries
     api_timeout_seconds: int = 120
-    polling_timeout_seconds: int = 300
+    polling_timeout_seconds: int = 600
     polling_interval_seconds: int = 5
     max_retries: int = 3
     replicate_rate_limit_retries: int = 8

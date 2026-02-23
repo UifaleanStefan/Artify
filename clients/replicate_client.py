@@ -25,7 +25,7 @@ class ReplicateClient:
         self,
         api_token: str,
         timeout_seconds: int = 120,
-        polling_timeout_seconds: int = 300,
+        polling_timeout_seconds: int = 600,
         polling_interval_seconds: int = 5,
         rate_limit_retries: int = 4,
         rate_limit_base_wait: float = 15.0,
@@ -134,6 +134,7 @@ class ReplicateClient:
         with httpx.Client(timeout=self.timeout_seconds) as client:
             while True:
                 if time.time() - start > self.polling_timeout:
+                    # Replicate didn't finish the job within the limit: server busy, cold start, or job stuck.
                     raise StyleTransferTimeout(
                         f"Polling timed out after {self.polling_timeout}s"
                     )

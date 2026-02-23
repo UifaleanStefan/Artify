@@ -89,12 +89,12 @@ class EmailService:
         self._send(email, subject, body)
 
     def send_order_failed(self, order_id: str, email: str, error: str):
-        subject = "Artify – Issue With Your Order"
+        subject = "Artify – Problemă la comanda ta"
         body = f"""
-        <h2>We're sorry</h2>
-        <p>There was an issue processing your artwork (Order: {order_id}).</p>
-        <p>Our team has been notified and will look into it. Please contact support if you need assistance.</p>
-        <p>Error details: {error}</p>
+        <h2>Ne cerem scuze</h2>
+        <p>A apărut o problemă la procesarea operei tale (Comandă: {order_id}).</p>
+        <p>Echipa noastră a fost notificată și va verifica situația. Te rugăm să ne contactezi dacă ai nevoie de ajutor.</p>
+        <p>Detalii eroare: {error}</p>
         """
         self._send(email, subject, body)
 

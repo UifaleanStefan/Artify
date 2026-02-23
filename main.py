@@ -1002,10 +1002,24 @@ def _run_style_transfer_sync(order_id: str) -> None:
             for i, style_url in enumerate(remaining_style_urls):
                 if i > 0:
                     time.sleep(30)
-                result_url, job_id = service.transfer_style_sync(
-                    image_url=order.image_url,
-                    style_image_url=style_url,
-                )
+                result_url, job_id = None, None
+                max_attempts = 3
+                for attempt in range(max_attempts):
+                    try:
+                        result_url, job_id = service.transfer_style_sync(
+                            image_url=order.image_url,
+                            style_image_url=style_url,
+                        )
+                        break
+                    except StyleTransferTimeout as e:
+                        if attempt < max_attempts - 1:
+                            logger.warning(
+                                "Style transfer polling timed out for order %s image %d (attempt %d/%d), retrying in 10s: %s",
+                                order_id, skip + i + 1, attempt + 1, max_attempts, e,
+                            )
+                            time.sleep(10)
+                            continue
+                        raise
                 result_urls_list.append(result_url)
                 job_ids.append(job_id)
                 try:
