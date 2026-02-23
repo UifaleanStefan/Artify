@@ -544,8 +544,7 @@ MODERN_ABSTRACT_PACK_PATHS = [
 # Ancient Worlds pack: 15 reference images (oldest in Downloads = 01, newest = 15)
 STYLE_ID_ANCIENT_WORLDS_PACK = 16
 ANCIENT_WORLDS_PACK_PATHS = [
-    f"/static/landing/styles/ancient-worlds/ancient-worlds-{i:02d}.jpg" if i != 4 else "/static/landing/styles/ancient-worlds/ancient-worlds-04.png"
-    for i in range(1, 16)
+    f"/static/landing/styles/ancient-worlds/ancient-worlds-{i:02d}.jpg" for i in range(1, 16)
 ]
 
 # Evolution of Portraits pack: 15 reference images (oldest in Downloads = 01, newest = 15)
