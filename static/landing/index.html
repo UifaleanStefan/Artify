@@ -144,23 +144,28 @@
       </div>
       <a href="/styles" class="btn btn-outline">✨ Vezi pachetele</a>
     </div>
-    <div class="style-cards">
-      <a href="/styles?style=13" class="style-card">
-        <div class="style-card-bg style-card-bg--masters"></div>
-        <span class="style-tag tag-masters">Maeștri</span>
-      </a>
-      <a href="/styles?style=14" class="style-card">
-        <div class="style-card-bg style-card-bg--impression"></div>
-        <span class="style-tag tag-impressionism">Impresionism</span>
-      </a>
-      <a href="/styles?style=15" class="style-card">
-        <div class="style-card-bg style-card-bg--modern"></div>
-        <span class="style-tag tag-modern">Modern și abstract</span>
-      </a>
-      <a href="/styles?style=16" class="style-card">
-        <div class="style-card-bg style-card-bg--ancient"></div>
-        <span class="style-tag tag-ancient">Lumi antice</span>
-      </a>
+    <div class="style-cards-wrap">
+      <div class="style-cards-track" id="style-cards-track">
+        <div class="style-cards-row" id="style-cards-original">
+          <a href="/styles?style=13" class="style-card">
+            <div class="style-card-bg style-card-bg--masters"></div>
+            <span class="style-tag tag-masters">Maeștri</span>
+          </a>
+          <a href="/styles?style=14" class="style-card">
+            <div class="style-card-bg style-card-bg--impression"></div>
+            <span class="style-tag tag-impressionism">Impresionism</span>
+          </a>
+          <a href="/styles?style=15" class="style-card">
+            <div class="style-card-bg style-card-bg--modern"></div>
+            <span class="style-tag tag-modern">Modern și abstract</span>
+          </a>
+          <a href="/styles?style=16" class="style-card">
+            <div class="style-card-bg style-card-bg--ancient"></div>
+            <span class="style-tag tag-ancient">Lumi antice</span>
+          </a>
+        </div>
+        <div class="style-cards-row" id="style-cards-duplicate" aria-hidden="true"></div>
+      </div>
     </div>
   </section>
 
@@ -274,6 +279,7 @@
 
   <script src="/static/landing/script.js"></script>
   <script src="/static/landing/testimonials.js"></script>
+  <script src="/static/landing/style-cards-scroll.js"></script>
   <script src="/static/landing/demo-compare.js"></script>
 </body>
 </html>

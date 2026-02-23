@@ -480,19 +480,29 @@ body {
 .styles-header .section-title,
 .styles-header .section-subtitle { text-align: left; }
 .styles-header .section-subtitle { margin-bottom: 0; }
-.style-cards {
+.style-cards-wrap {
+  position: relative;
+  overflow: hidden;
+}
+.style-cards-track {
   display: flex;
   flex-wrap: nowrap;
-  gap: 1.5rem;
   overflow-x: auto;
   overflow-y: hidden;
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   padding-bottom: 0.5rem;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-.style-cards::-webkit-scrollbar { height: 6px; }
-.style-cards::-webkit-scrollbar-track { background: rgba(0,0,0,0.06); border-radius: 3px; }
-.style-cards::-webkit-scrollbar-thumb { background: rgba(37, 99, 235, 0.35); border-radius: 3px; }
+.style-cards-track::-webkit-scrollbar { display: none; }
+.style-cards-row {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+  flex-shrink: 0;
+}
+.style-cards-row + .style-cards-row { margin-left: 1.5rem; }
 .style-card {
   flex: 0 0 auto;
   width: min(360px, 85vw);
