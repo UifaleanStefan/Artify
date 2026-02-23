@@ -32,10 +32,19 @@ class EmailService:
         """result_labels: optional list of (painting_title, artist) for each result image (same length as result_urls)."""
         subject = "✨ Galeria ta e gata — descoperă portretele!"
         base = (self.settings.public_base_url or "").rstrip("/")
+
+        def ensure_absolute(url: str) -> str:
+            if not url or not base:
+                return url or ""
+            u = (url or "").strip()
+            if u.startswith("http://") or u.startswith("https://"):
+                return u
+            return f"{base}{u}" if u.startswith("/") else f"{base}/{u}"
+
         order_link = f"{base}/order/{order_id}" if base else "#"
         download_all_link = f"{base}/api/orders/{order_id}/download-all" if base else "#"
-        hero = result_urls[0] if result_urls else ""
-        thumbs = result_urls[:15]
+        hero = ensure_absolute(result_urls[0]) if result_urls else ""
+        thumbs = [ensure_absolute(u) for u in (result_urls[:15] or [])]
         n = len(thumbs)
         labels = result_labels[:n] if result_labels and len(result_labels) >= n else None
         if labels and len(labels) != n:
@@ -54,8 +63,8 @@ class EmailService:
                         u, (title, artist) = thumbs[idx], labels[idx]
                         cells.append(
                             f'<td style="width:{CELL_WIDTH_PX}px;max-width:{CELL_WIDTH_PX}px;padding:10px 6px;vertical-align:top;text-align:center;">'
-                            f'<a href="{u}" style="display:block;text-decoration:none;"><img src="{u}" alt="{_escape_html(title)}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:2px solid #d4c4a8;box-shadow:0 4px 12px rgba(0,0,0,0.08);display:block;margin:0 auto;" /></a>'
-                            f'<div style="margin-top:8px;font-size:11px;color:#5c5248;line-height:1.4;width:90px;margin-left:auto;margin-right:auto;word-wrap:break-word;">{_escape_html(title)}<br/><span style="color:#8b7355;font-style:italic;">{_escape_html(artist)}</span></div>'
+                            f'<a href="{u}" style="display:block;text-decoration:none;"><img src="{u}" alt="{_escape_html(title)}" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:2px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,0.08);display:block;margin:0 auto;" /></a>'
+                            f'<div style="margin-top:8px;font-size:11px;color:#1e293b;line-height:1.4;width:90px;margin-left:auto;margin-right:auto;word-wrap:break-word;">{_escape_html(title)}<br/><span style="color:#64748b;font-style:italic;">{_escape_html(artist)}</span></div>'
                             f'</td>'
                         )
                     else:
@@ -72,7 +81,7 @@ class EmailService:
                         u = thumbs[idx]
                         cells.append(
                             f'<td style="width:{CELL_WIDTH_PX}px;padding:10px 6px;vertical-align:top;text-align:center;">'
-                            f'<a href="{u}"><img src="{u}" alt="Operă" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:2px solid #d4c4a8;box-shadow:0 4px 12px rgba(0,0,0,0.08);display:block;margin:0 auto;" /></a>'
+                            f'<a href="{u}"><img src="{u}" alt="Operă" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:2px solid #e2e8f0;box-shadow:0 4px 12px rgba(0,0,0,0.08);display:block;margin:0 auto;" /></a>'
                             f'</td>'
                         )
                     else:
@@ -81,31 +90,31 @@ class EmailService:
             thumbs_html = f'<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;border-collapse:collapse;"><tbody>{"".join(rows_html)}</tbody></table>'
         hero_block = ""
         if hero:
-            hero_caption = f'<div style="margin-top:10px;font-size:13px;color:#6b5d4f;"><span style="font-weight:600;color:#4a4035;">{_escape_html(hero_title)}</span><br/><span style="font-style:italic;color:#8b7355;">{_escape_html(hero_artist)}</span></div>' if (hero_title or hero_artist) else ""
+            hero_caption = f'<div style="margin-top:10px;font-size:13px;color:#64748b;"><span style="font-weight:600;color:#1e293b;">{_escape_html(hero_title)}</span><br/><span style="font-style:italic;color:#64748b;">{_escape_html(hero_artist)}</span></div>' if (hero_title or hero_artist) else ""
             hero_block = f"""
-            <div style="padding:28px 24px 24px 24px;background:#faf7f2;">
-              <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.12em;color:#9a8f7f;margin-bottom:12px;">Primul tău portret</div>
-              <div style="border:4px solid #c9a96e;border-radius:8px;padding:8px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.1);">
+            <div style="padding:28px 24px 24px 24px;background:#f8fafc;">
+              <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.12em;color:#64748b;margin-bottom:12px;">Primul tău portret</div>
+              <div style="border:2px solid #e2e8f0;border-radius:12px;padding:8px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.08);">
                 <img src="{hero}" alt="Portretul tău" style="width:100%;max-height:320px;object-fit:contain;display:block;" />
               </div>
               {hero_caption}
             </div>"""
         body = f"""
-        <div style="font-family:'Segoe UI',Georgia,'Times New Roman',serif;background:#e0d9ce;padding:32px 16px;color:#2c2419;">
-          <div style="max-width:580px;margin:0 auto;background:#fdfcf9;border:1px solid #d4cdc0;border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.12);">
-            <div style="padding:32px 28px 24px 28px;background:#fff;border-bottom:3px solid #c9a96e;">
+        <div style="font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:#f1f5f9;padding:32px 16px;color:#1e293b;">
+          <div style="max-width:580px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.08);">
+            <div style="padding:32px 28px 24px 28px;background:#fff;border-bottom:3px solid #2563eb;">
               <div style="text-align:center;">
-                <div style="font-size:28px;font-weight:700;color:#1e3a5f;letter-spacing:-0.01em;line-height:1.2;">Galeria ta e gata</div>
-                <div style="margin-top:8px;font-size:16px;color:#6b5d4f;">Tu, pictat în stilul <strong style="color:#8b7355;">{_escape_html(style_name or 'Maeștri')}</strong></div>
-                <div style="margin-top:12px;font-size:12px;color:#9a8f7f;">Comandă {_escape_html(order_id)}</div>
+                <div style="font-size:28px;font-weight:700;color:#1e293b;letter-spacing:-0.01em;line-height:1.2;">Galeria ta e gata</div>
+                <div style="margin-top:8px;font-size:16px;color:#64748b;">Tu, pictat în stilul <strong style="color:#2563eb;">{_escape_html(style_name or 'Maeștri')}</strong></div>
+                <div style="margin-top:12px;font-size:12px;color:#94a3b8;">Comandă {_escape_html(order_id)}</div>
               </div>
             </div>
             {hero_block}
             <div style="padding:24px 24px 12px 24px;">
-              <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.1em;color:#8b7355;margin-bottom:16px;font-weight:600;">Toate cele {n} portrete din galeria ta</div>
+              <div style="font-size:12px;text-transform:uppercase;letter-spacing:0.1em;color:#64748b;margin-bottom:16px;font-weight:600;">Toate cele {n} portrete din galeria ta</div>
               <div style="padding:8px 0 8px 0;">{thumbs_html}</div>
             </div>
-            <div style="padding:28px 28px 32px 28px;background:#f8fafc;border-top:2px solid rgba(37,99,235,0.15);">
+            <div style="padding:28px 28px 32px 28px;background:#f8fafc;border-top:2px solid #e2e8f0;">
               <p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#1e293b;">Salvează galeria completă</p>
               <p style="margin:0 0 24px 0;font-size:14px;color:#64748b;line-height:1.5;">Un singur clic — toate cele {n} imagini în rezoluție mare, gata de print sau de partajat.</p>
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:400px;">
