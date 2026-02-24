@@ -33,52 +33,30 @@ class EmailService:
         subject = "✨ Galeria ta e gata — descoperă portretele!"
         base = (self.settings.public_base_url or "").rstrip("/")
 
-        def ensure_absolute(url: str) -> str:
-            if not url or not base:
-                return url or ""
-            u = (url or "").strip()
-            if u.startswith("http://") or u.startswith("https://"):
-                return u
-            return f"{base}{u}" if u.startswith("/") else f"{base}/{u}"
-
         order_link = f"{base}/order/{order_id}" if base else "#"
         download_all_link = f"{base}/api/orders/{order_id}/download-all" if base else "#"
-        hero = ensure_absolute(result_urls[0]) if result_urls else ""
         n = len(result_urls) if result_urls else 0
-        labels = result_labels[:n] if result_labels and len(result_labels) >= n else None
-        if labels and len(labels) != n:
-            labels = None
-        hero_title, hero_artist = (labels[0][0], labels[0][1]) if labels and labels else ("", "")
 
-        # Flow: one hero image (first portrait) + clear link back to site. No thumbnail grid in email.
-        hero_block = ""
-        if hero:
-            hero_caption = f'<div style="margin-top:12px;font-size:14px;color:#64748b;text-align:center;"><span style="font-weight:600;color:#1e293b;">{_escape_html(hero_title)}</span><br/><span style="font-style:italic;color:#64748b;">{_escape_html(hero_artist)}</span></div>' if (hero_title or hero_artist) else ""
-            hero_block = f"""
-            <div style="padding:24px 20px 28px 20px;background:#f8fafc;">
-              <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.14em;color:#64748b;margin-bottom:14px;text-align:center;">Primul tău portret</div>
-              <div style="border:1px solid #e2e8f0;border-radius:16px;padding:12px;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.1);max-width:100%;">
-                <img src="{hero}" alt="Portretul tău" style="width:100%;max-height:380px;object-fit:contain;display:block;border-radius:8px;" />
-              </div>
-              {hero_caption}
-            </div>"""
-
+        # No images in email – only the CTA button so users never miss what they paid for
         body = f"""
         <div style="font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;background:#f1f5f9;padding:32px 16px;color:#1e293b;">
           <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,0.08);">
-            <div style="padding:28px 24px 20px 24px;background:#fff;border-bottom:3px solid #2563eb;">
+            <div style="padding:28px 24px 24px 24px;background:#fff;border-bottom:3px solid #2563eb;">
               <div style="text-align:center;">
                 <div style="font-size:26px;font-weight:700;color:#1e293b;letter-spacing:-0.01em;line-height:1.2;">Galeria ta e gata</div>
                 <div style="margin-top:6px;font-size:15px;color:#64748b;">Tu, pictat în stilul <strong style="color:#2563eb;">{_escape_html(style_name or 'Maeștri')}</strong></div>
-                <div style="margin-top:10px;font-size:11px;color:#94a3b8;">Comandă {_escape_html(order_id)}</div>
+                <div style="margin-top:10px;font-size:11px;color:#94a3b8;">Comandă {_escape_html(order_id)} – {n} portrete</div>
               </div>
             </div>
-            {hero_block}
-            <div style="padding:28px 24px 32px 24px;background:#fff;text-align:center;">
-              <p style="margin:0 0 8px 0;font-size:15px;color:#64748b;line-height:1.5;">Descoperă toate cele {n} portrete și povestea lor pe site.</p>
-              <p style="margin:0 0 20px 0;font-size:14px;color:#94a3b8;">Un singur click — galeria completă te așteaptă.</p>
-              <a href="{order_link}" style="display:inline-block;padding:16px 32px;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);color:#ffffff !important;text-decoration:none;border-radius:12px;font-weight:600;font-size:16px;box-shadow:0 4px 14px rgba(37,99,235,0.35);-webkit-text-fill-color:#ffffff;">Vezi galeria pe site</a>
-              <p style="margin:20px 0 0 0;font-size:13px;"><a href="{download_all_link}" style="color:#2563eb;text-decoration:none;font-weight:500;">Descarcă toate imaginile (ZIP)</a></p>
+            <div style="padding:32px 24px 36px 24px;background:#fff;text-align:center;">
+              <p style="margin:0 0 24px 0;font-size:16px;color:#1e293b;line-height:1.5;font-weight:600;">Rezultatele tale sunt gata. Apasă butonul de mai jos pentru a vedea galeria.</p>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 24px auto;">
+                <tr><td style="border-radius:12px;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);box-shadow:0 4px 14px rgba(37,99,235,0.4);">
+                  <a href="{order_link}" style="display:inline-block;padding:20px 40px;color:#ffffff !important;text-decoration:none;border-radius:12px;font-weight:700;font-size:18px;-webkit-text-fill-color:#ffffff;">Vezi galeria pe site</a>
+                </td></tr>
+              </table>
+              <p style="margin:0 0 8px 0;font-size:14px;color:#64748b;">Sau descarcă toate imaginile:</p>
+              <p style="margin:0;"><a href="{download_all_link}" style="color:#2563eb;text-decoration:underline;font-weight:600;font-size:14px;">Descarcă toate imaginile (ZIP)</a></p>
             </div>
             <div style="padding:18px 24px;text-align:center;font-size:12px;color:#64748b;border-top:1px solid #e2e8f0;background:#f1f5f9;">
               Mulțumim că ai ales Artify. Făcut cu drag pentru iubitorii de artă.

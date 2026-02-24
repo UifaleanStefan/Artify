@@ -15,12 +15,7 @@
   var copyBtn = document.getElementById('done-copy-btn');
   var doneTitle = document.getElementById('done-title');
   var doneSubtitle = document.getElementById('done-subtitle');
-  var doneIcon = document.getElementById('done-icon');
-  var doneMessage = document.getElementById('done-message');
   var doneMessageText = document.getElementById('done-message-text');
-  var doneFirstResult = document.getElementById('done-first-result');
-  var doneFirstResultLink = document.getElementById('done-first-result-link');
-  var doneFirstResultImg = document.getElementById('done-first-result-img');
 
   if (orderIdEl) orderIdEl.textContent = orderId || '—';
   if (styleNameEl) styleNameEl.textContent = style ? (style.title + ' – ' + style.artist) : '—';
@@ -45,17 +40,10 @@
     var startedAt = Date.now();
     var maxPollMs = 10 * 60 * 1000; // stop polling after 10 minutes
 
-    function showFirstImage(url) {
-      if (doneTitle) doneTitle.textContent = 'Opera ta e gata!';
-      if (doneSubtitle) doneSubtitle.textContent = 'Iată prima ta operă.';
-      if (doneIcon) doneIcon.style.display = 'none';
-      if (doneFirstResult && doneFirstResultLink && doneFirstResultImg) {
-        doneFirstResultImg.src = url;
-        doneFirstResultImg.alt = 'Opera ta';
-        doneFirstResultLink.href = url;
-        doneFirstResult.style.display = 'block';
-      }
-      if (doneMessageText) doneMessageText.textContent = 'Toate portretele le vei primi pe email. Verifică inbox-ul (și Spam) – acolo e și linkul către galerie.';
+    function onGalleryReady() {
+      if (doneTitle) doneTitle.textContent = 'Galeria ta e gata!';
+      if (doneSubtitle) doneSubtitle.textContent = 'Verifică emailul – acolo ai linkul către galerie.';
+      if (doneMessageText) doneMessageText.textContent = 'Am trimis un email la ' + (email || 'tine') + ' cu linkul către galerie. Verifică inbox-ul și dosarul Spam.';
     }
 
     function stopPolling() {
@@ -82,7 +70,7 @@
           }
 
           if (urls.length > 0) {
-            showFirstImage(urls[0]);
+            onGalleryReady();
             stopPolling();
             return;
           }
