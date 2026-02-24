@@ -64,7 +64,17 @@ class ReplicateClient:
             "input": {
                 "structure_image": image_url,
                 "style_image": style_image_url,
-                "prompt": "Adapt the style of the style image to the structure image, keeping the brush strokes and brush details while emphasizing the features of the structure image, adapting them to the time period and style of the style image. Very important to keep the features in the structure image, so people are recognizable. Keep the gender of the person in the structure image.",
+                "prompt": (
+                    "Adapt the style of the style image to the structure image. "
+                    "CRITICAL: Preserve the exact facial features, identity, age, and likeness of EVERY person in the structure image. "
+                    "Each face must remain clearly recognizable. Keep brush strokes and artistic style from the style image "
+                    "while strictly maintaining the structure image's faces, expressions, and proportions. "
+                    "Preserve gender and individual characteristics of all people."
+                ),
+                "negative_prompt": (
+                    "blurry faces, distorted features, merged faces, unrecognizable people, "
+                    "wrong age, changed identity, deformed faces, extra limbs, bad anatomy"
+                ),
                 "structure_denoising_strength": structure_denoising_strength,
                 "output_format": "jpg",
                 "output_quality": 80,
