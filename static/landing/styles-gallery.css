@@ -55,6 +55,7 @@
   cursor: pointer;
   font-family: var(--font);
   transition: all 0.15s;
+  white-space: nowrap;
 }
 .filter-btn:hover { border-color: var(--primary); color: var(--primary); }
 .filter-btn.active {
@@ -158,6 +159,22 @@
 }
 
 @media (max-width: 768px) {
-  .styles-toolbar { flex-direction: column; }
+  .styles-toolbar {
+    flex-direction: column;
+    margin-bottom: 1rem;
+  }
   .styles-search { width: 100%; }
+  /* Single scrollable row of tags so packs aren't pushed down; ~3 tags visible */
+  .styles-filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .styles-filters::-webkit-scrollbar { height: 4px; }
+  .styles-filters::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 2px; }
+  .styles-filters::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 2px; }
+  .filter-btn { flex-shrink: 0; }
 }

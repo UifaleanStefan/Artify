@@ -732,6 +732,7 @@ a.style-card:hover .style-card-bg {
 .tag-ancient { background: #8b6914; }
 .tag-evolution { background: #6b21a8; }
 .tag-royalty { background: #b45309; }
+.tag-animated { background: #0ea5e9; }
 .style-card h3 { margin: 0 0 0.25rem; font-size: 1.25rem; font-weight: 700; }
 .style-card .style-artist { font-size: 0.9375rem; opacity: 1; margin: 0; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.7); }
 .style-preview { color: white; text-decoration: none; font-size: 0.9375rem; font-weight: 500; }

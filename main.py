@@ -98,7 +98,7 @@ def _persist_result_images(order_id: str, result_urls: list[str]) -> list[str]:
     return result_urls
 
 
-from database import Order, OrderResultImage, OrderStatus, get_db, SessionLocal, init_db
+from database import Order, OrderResultImage, OrderSourceImage, OrderStatus, get_db, SessionLocal, init_db
 from models import StyleTransferResponse
 from models.order_schemas import OrderCreateRequest, OrderResponse, OrderStatusResponse
 from services import StyleTransferService
@@ -518,6 +518,34 @@ def _build_public_upload_url(upload_id: str, ext: str) -> str:
     return f"{base}/api/uploads/{upload_id}/photo{ext}"
 
 
+def _is_our_upload_url(url: str) -> bool:
+    """True if url is our /api/uploads/... (lost on redeploy unless persisted)."""
+    base = (get_settings().public_base_url or "").rstrip("/")
+    if not base or not url or not url.strip().startswith("https://"):
+        return False
+    prefix = base.rstrip("/") + "/api/uploads/"
+    return url.strip().startswith(prefix)
+
+
+def _parse_upload_id_and_filename(url: str):
+    """If url is our upload URL, return (upload_id, filename); else None."""
+    base = (get_settings().public_base_url or "").rstrip("/")
+    if not base or not url or not url.strip().startswith("https://"):
+        return None
+    prefix = base.rstrip("/") + "/api/uploads/"
+    u = url.strip()
+    if not u.startswith(prefix):
+        return None
+    rest = u[len(prefix):]
+    parts = rest.split("/", 1)
+    if len(parts) != 2 or not parts[0] or not parts[1]:
+        return None
+    upload_id, filename = parts[0], parts[1].split("?")[0]
+    if Path(filename).suffix.lower() not in IMAGE_EXTENSIONS:
+        return None
+    return (upload_id, filename)
+
+
 @app.get("/api/uploads/{upload_id}/{filename}")
 async def get_uploaded_image(upload_id: str, filename: str):
     """Serve uploaded source images via this backend domain."""
@@ -603,6 +631,12 @@ EVOLUTION_PORTRAITS_PACK_PATHS = [
 STYLE_ID_ROYALTY_PORTRAITS_PACK = 18
 ROYALTY_PORTRAITS_PACK_PATHS = [
     f"/static/landing/styles/royalty-portraits/royalty-portraits-{i:02d}.jpg" for i in range(1, 16)
+]
+
+# Animated Classics pack: 15 reference images (01 = Toy Story … 15 = Aladdin)
+STYLE_ID_ANIMATED_CLASSICS_PACK = 19
+ANIMATED_CLASSICS_PACK_PATHS = [
+    f"/static/landing/styles/animated-classics/animated-classics-{i:02d}.jpg" for i in range(1, 16)
 ]
 
 # Per-image (painting title, artist) for email captions.
@@ -696,6 +730,24 @@ EVOLUTION_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
     ("Self-Portrait with Thorn Necklace and Hummingbird", "Frida Kahlo"), # 14
     ("Marilyn Diptych", "Andy Warhol"),                                  # 15
 ]
+# Animated Classics pack: 01 = Toy Story … 15 = Aladdin (replacement Aladdin image is last; see setup_animated_classics_pack.py)
+ANIMATED_CLASSICS_PACK_LABELS: list[tuple[str, str]] = [
+    ("Toy Story", "Pixar"),                                    # 01
+    ("Frozen", "Disney"),                                      # 02
+    ("The Incredibles", "Pixar"),                              # 03
+    ("Shrek", "DreamWorks"),                                    # 04
+    ("Tangled", "Disney"),                                      # 05
+    ("How to Train Your Dragon", "DreamWorks"),                # 06
+    ("Spider-Man: Into the Spider-Verse", "Sony Pictures Animation"),  # 07
+    ("The Lego Movie", "Warner Animation"),                     # 08
+    ("The Mitchells vs. the Machines", "Sony Pictures Animation"),  # 09
+    ("The Lion King", "Disney"),                                # 10
+    ("Beauty and the Beast", "Disney"),                        # 11
+    ("The Simpsons Movie", "20th Century Animation"),          # 12
+    ("Despicable Me", "Illumination"),                         # 13
+    ("Hotel Transylvania", "Sony Pictures Animation"),          # 14
+    ("Aladdin", "Disney"),                                      # 15 (replacement image at end)
+]
 # Royalty & Power Portraits pack: 01 = first downloaded … 15 = last downloaded (see setup_royalty_portraits_pack.py)
 ROYALTY_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
     ("Napoleon Crossing the Alps", "Jacques-Louis David"),                    # 01
@@ -735,6 +787,8 @@ def _build_result_labels(
         return EVOLUTION_PORTRAITS_PACK_LABELS[:n]
     if order.style_id == STYLE_ID_ROYALTY_PORTRAITS_PACK:
         return ROYALTY_PORTRAITS_PACK_LABELS[:n]
+    if order.style_id == STYLE_ID_ANIMATED_CLASSICS_PACK:
+        return ANIMATED_CLASSICS_PACK_LABELS[:n]
     style_data = next((s for s in styles if s.get("id") == order.style_id), None)
     title = order.style_name or (style_data.get("title") if style_data else "Stil")
     artist = style_data.get("artist", "Artist") if style_data else "Artist"
@@ -795,6 +849,10 @@ async def create_order(
         style_image_urls = json.dumps([_resolve_style_image_url(p) for p in ROYALTY_PORTRAITS_PACK_PATHS])
         if not style_image_url:
             style_image_url = _resolve_style_image_url(ROYALTY_PORTRAITS_PACK_PATHS[0])
+    elif order_data.style_id == STYLE_ID_ANIMATED_CLASSICS_PACK:
+        style_image_urls = json.dumps([_resolve_style_image_url(p) for p in ANIMATED_CLASSICS_PACK_PATHS])
+        if not style_image_url:
+            style_image_url = _resolve_style_image_url(ANIMATED_CLASSICS_PACK_PATHS[0])
 
     # Fail fast if style URLs are not public HTTPS (Replicate requires this)
     def _must_be_https(name: str, url: Optional[str]) -> None:
@@ -843,6 +901,35 @@ async def create_order(
     db.commit()
     db.refresh(order)
     logger.info(f"Order created: {order_id} for {order_data.email}")
+
+    # Persist customer upload into DB so style transfer still has the image after redeploy
+    if _is_our_upload_url(order_data.image_url):
+        parsed = _parse_upload_id_and_filename(order_data.image_url)
+        if parsed:
+            upload_id, filename = parsed
+            file_path = get_upload_dir() / upload_id / filename
+            if file_path.exists() and file_path.is_file():
+                try:
+                    content = file_path.read_bytes()
+                    ext = Path(filename).suffix.lower()
+                    content_type = "image/jpeg" if ext in (".jpg", ".jpeg") else f"image/{ext[1:]}"
+                    if ext == ".png":
+                        content_type = "image/png"
+                    elif ext == ".webp":
+                        content_type = "image/webp"
+                    row = OrderSourceImage(
+                        order_id=order_id,
+                        content_type=content_type,
+                        data=content,
+                    )
+                    db.merge(row)
+                    db.commit()
+                    logger.info("Order %s: persisted source image from upload %s", order_id, upload_id)
+                except Exception as e:
+                    logger.warning("Order %s: could not persist source image: %s", order_id, e)
+            else:
+                logger.warning("Order %s: upload file missing at %s (redeploy?)", order_id, file_path)
+
     return OrderResponse.model_validate(order)
 
 
@@ -911,6 +998,17 @@ async def get_order_result_image(order_id: str, index: int, db: Session = Depend
         if path.exists():
             return FileResponse(path, media_type=f"image/{ext}" if ext != "jpg" else "image/jpeg")
     raise HTTPException(status_code=404, detail="Image not available")
+
+
+@app.get("/api/orders/{order_id}/source-image")
+async def get_order_source_image(order_id: str, db: Session = Depends(get_db)):
+    """Serve the customer's uploaded photo for this order (persisted at order creation; survives redeploy)."""
+    if "/" in order_id or "\\" in order_id or order_id in (".", ".."):
+        raise HTTPException(status_code=400, detail="Invalid order id")
+    row = db.query(OrderSourceImage).filter(OrderSourceImage.order_id == order_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Source image not available")
+    return Response(content=row.data, media_type=row.content_type)
 
 
 @app.get("/api/orders/{order_id}/download-all")
@@ -1068,6 +1166,14 @@ def _run_style_transfer_sync(order_id: str) -> None:
             order.status = OrderStatus.PROCESSING.value
             db.commit()
 
+            # Use persisted source image URL if available (survives redeploy); else order.image_url
+            source_image_url = order.image_url
+            if db.query(OrderSourceImage).filter(OrderSourceImage.order_id == order_id).first():
+                base = (get_settings().public_base_url or "").rstrip("/")
+                if base:
+                    source_image_url = f"{base}/api/orders/{order_id}/source-image"
+                    logger.info("Order %s: using persisted source image URL for style transfer", order_id)
+
             service = get_service()
             remaining_style_urls = style_urls[skip:]
             for i, style_url in enumerate(remaining_style_urls):
@@ -1078,7 +1184,7 @@ def _run_style_transfer_sync(order_id: str) -> None:
                 for attempt in range(max_attempts):
                     try:
                         result_url, job_id = service.transfer_style_sync(
-                            image_url=order.image_url,
+                            image_url=source_image_url,
                             style_image_url=style_url,
                         )
                         break

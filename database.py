@@ -74,6 +74,16 @@ class OrderResultImage(Base):
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
+class OrderSourceImage(Base):
+    """Customer upload stored at order creation so style transfer works after redeploy."""
+    __tablename__ = "art_order_source_images"
+
+    order_id = Column(String(50), primary_key=True, nullable=False)
+    content_type = Column(String(32), nullable=False, default="image/jpeg")
+    data = Column(LargeBinary, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 def get_database_url() -> str:
     settings = get_settings()
     db_url = settings.database_url or os.environ.get("DATABASE_URL", "").strip()
@@ -102,7 +112,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 def init_db():
-    # Creates art_orders and art_order_result_images (result image blobs, 14-day TTL)
+    # Creates art_orders, art_order_result_images, art_order_source_images
     Base.metadata.create_all(bind=engine)
     # Ensure style_image_urls exists for Masters pack (existing DBs from before this column)
     for col_sql in (
