@@ -125,6 +125,10 @@
   if (styleId) {
     var id = parseInt(styleId, 10);
     style = data.find(function (s) { return s.id === id; });
+    if (style && style.comingSoon) {
+      window.location.href = '/styles';
+      return;
+    }
   }
   if (!style) {
     if (styleCard) styleCard.innerHTML = '<p>Niciun stil ales. <a href="/styles">Alege un stil</a> mai întâi.</p>';

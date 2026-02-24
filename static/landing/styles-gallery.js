@@ -41,13 +41,15 @@
     if (emptyMsg) emptyMsg.style.display = 'none';
 
     styles.forEach(function (s) {
-      var card = document.createElement('a');
-      card.className = 'gallery-card';
-      card.href = '/upload?style=' + s.id;
+      var isComingSoon = s.comingSoon === true;
+      var card = document.createElement(isComingSoon ? 'div' : 'a');
+      card.className = 'gallery-card' + (isComingSoon ? ' gallery-card--coming-soon' : '');
+      if (!isComingSoon) card.href = '/upload?style=' + s.id;
       card.innerHTML =
         '<div class="gallery-card-thumb">' +
           '<div class="gallery-card-thumb-bg ' + (s.preview && s.styleImageUrl ? '' : (s.thumbnailClass || '')) + '"' + (s.preview && s.styleImageUrl ? ' style="' + thumbStyle(s) + '"' : '') + '></div>' +
           '<span class="gallery-card-tag ' + tagClass(s.category) + '">' + s.category + '</span>' +
+          (isComingSoon ? '<span class="gallery-card-coming-soon">Coming Soon</span>' : '') +
         '</div>' +
         '<div class="gallery-card-body">' +
           '<h3>' + s.title + '</h3>' +
@@ -55,7 +57,7 @@
           '<p class="gallery-card-desc">' + s.description + '</p>' +
           '<div class="gallery-card-footer">' +
             '<span class="gallery-card-rating">★ ' + s.rating + '</span>' +
-            '<span class="gallery-card-select">Alege stilul →</span>' +
+            (isComingSoon ? '<span class="gallery-card-coming-soon-text">În curând</span>' : '<span class="gallery-card-select">Alege stilul →</span>') +
           '</div>' +
         '</div>';
       grid.appendChild(card);

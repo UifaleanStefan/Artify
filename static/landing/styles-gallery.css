@@ -151,6 +151,38 @@
   color: var(--primary);
 }
 
+/* Coming Soon cards */
+.gallery-card--coming-soon {
+  cursor: default;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.gallery-card--coming-soon:hover {
+  transform: none;
+  box-shadow: var(--shadow);
+}
+.gallery-card--coming-soon .gallery-card-thumb-bg {
+  filter: grayscale(15%);
+}
+.gallery-card-coming-soon {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fbbf24;
+}
+.gallery-card-coming-soon-text {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
 .styles-empty {
   text-align: center;
   padding: 3rem 1rem;

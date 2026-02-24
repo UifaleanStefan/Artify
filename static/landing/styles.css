@@ -618,6 +618,25 @@ img { max-width: 100%; height: auto; }
   transform: translateZ(0); /* force GPU accel for smooth zoom */
 }
 a.style-card:hover { opacity: 0.98; }
+.style-card--coming-soon {
+  cursor: default;
+  opacity: 0.8;
+  pointer-events: none;
+}
+.style-card--coming-soon .style-card-bg { filter: grayscale(20%); }
+.style-card-coming-soon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fbbf24;
+}
 .style-card-bg {
   position: absolute;
   inset: 0;

@@ -821,6 +821,14 @@ async def create_order(
     except Exception as e:
         logger.warning(f"Could not load style data: {e}")
 
+    # Reject orders for Coming Soon / unavailable styles
+    UNAVAILABLE_STYLE_IDS = (STYLE_ID_ANCIENT_WORLDS_PACK, STYLE_ID_EVOLUTION_PORTRAITS_PACK, STYLE_ID_ROYALTY_PORTRAITS_PACK)
+    if order_data.style_id in UNAVAILABLE_STYLE_IDS:
+        raise HTTPException(
+            status_code=400,
+            detail="Acest pachet de stiluri nu este disponibil momentan. Te rugăm să alegi alt stil.",
+        )
+
     order_id = f"ART-{int(datetime.utcnow().timestamp() * 1000)}-{uuid.uuid4().hex[:8].upper()}"
 
     style_image_url = _resolve_style_image_url(style_data.get("styleImageUrl") if style_data else None)
