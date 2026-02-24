@@ -387,22 +387,10 @@ img { max-width: 100%; height: auto; }
   margin-bottom: 1.5rem;
 }
 
-/* Horizontal hierarchy: gradient line between sections (one per break) */
-.section-divider {
-  width: 100%;
-  max-width: 320px;
-  height: 3px;
-  margin: 0 auto 2.5rem;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--primary), var(--accent-2), var(--accent), var(--accent-3));
-  opacity: 0.75;
-}
-/* Thinner accent line for sub-hierarchy */
+/* Horizontal hierarchy: gradient line between sections – hidden to reduce clutter; only line under title remains */
+.section-divider,
 .section-divider--thin {
-  height: 2px;
-  max-width: 200px;
-  margin-bottom: 1.5rem;
-  opacity: 0.6;
+  display: none;
 }
 
 /* How it works */
@@ -1173,7 +1161,9 @@ a.style-card:hover .style-card-bg {
   .review-summary-box { flex-wrap: wrap; justify-content: center; padding: 0.5rem 1rem; }
   .section { padding: 3rem 1rem; }
   .section-title { font-size: clamp(1.5rem, 5vw, 2rem); }
-  .section-line { margin-bottom: 1.5rem; }
+  /* Fewer lines on mobile: hide title lines too */
+  .section-line,
+  .section-line--top { display: none; }
   .how-section { border-radius: 12px; }
   .steps { grid-template-columns: 1fr; gap: 1.25rem; }
   .step-card { padding: 1.5rem; }
