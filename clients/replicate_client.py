@@ -64,7 +64,7 @@ class ReplicateClient:
             "input": {
                 "structure_image": image_url,
                 "style_image": style_image_url,
-O                "prompt": (
+                "prompt": (
                     "Adapt the style of the style image to the structure image. "
                     "CRITICAL: Preserve the exact facial features, identity, age, and likeness of EVERY person in the structure image. "
                     "Each face must remain clearly recognizable. Keep brush strokes and artistic style from the style image "
