@@ -37,6 +37,7 @@ class Order(Base):
     style_name = Column(String(255))
 
     image_url = Column(Text, nullable=False)
+    portrait_mode = Column(String(20), default="realistic")  # realistic | artistic
     style_image_url = Column(Text)
     style_image_urls = Column(Text)  # JSON array of style URLs for packs (e.g. Masters 15)
     result_urls = Column(Text)  # JSON array of result image URLs
@@ -116,6 +117,7 @@ def init_db():
     Base.metadata.create_all(bind=engine)
     # Ensure style_image_urls exists for Masters pack (existing DBs from before this column)
     for col_sql in (
+        "ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS portrait_mode VARCHAR(20) DEFAULT 'realistic'",
         "ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS style_image_urls TEXT",
         "ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS replicate_prediction_details TEXT",
         "ALTER TABLE art_orders ALTER COLUMN style_transfer_job_id TYPE TEXT",

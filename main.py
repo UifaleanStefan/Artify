@@ -874,6 +874,10 @@ async def create_order(
             detail="The uploaded photo URL must be a secure (HTTPS) link. Please upload your photo again.",
         )
 
+    portrait_mode = (order_data.portrait_mode or "realistic").strip().lower()
+    if portrait_mode not in ("realistic", "artistic"):
+        portrait_mode = "realistic"
+
     order = Order(
         order_id=order_id,
         status=OrderStatus.PENDING.value,
@@ -881,6 +885,7 @@ async def create_order(
         style_id=order_data.style_id,
         style_name=style_data.get("title") if style_data else None,
         image_url=order_data.image_url,
+        portrait_mode=portrait_mode,
         style_image_url=style_image_url,
         style_image_urls=style_image_urls,
         amount=9.99,
@@ -1170,6 +1175,10 @@ def _run_style_transfer_sync(order_id: str) -> None:
                     logger.info("Order %s: using persisted source image URL for style transfer", order_id)
 
             service = get_service()
+            portrait_mode = (order.portrait_mode or "realistic").strip().lower()
+            structure_denoising_strength = (
+                0.55 if portrait_mode == "realistic" else 0.8
+            )
             remaining_style_urls = style_urls[skip:]
             for i, style_url in enumerate(remaining_style_urls):
                 if i > 0:
@@ -1181,6 +1190,7 @@ def _run_style_transfer_sync(order_id: str) -> None:
                         result_url, job_id = service.transfer_style_sync(
                             image_url=source_image_url,
                             style_image_url=style_url,
+                            structure_denoising_strength=structure_denoising_strength,
                         )
                         break
                     except StyleTransferTimeout as e:

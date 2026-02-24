@@ -47,7 +47,12 @@ class ReplicateClient:
     # fofr/style-transfer: structure_image = pose/face to keep, style_image = artistic style
     STYLE_TRANSFER_VERSION = "fofr/style-transfer:f1023890703bc0a5a3a2c21b5e498833be5f6ef6e70e9daf6b9b3a4fd8309cf0"
 
-    def submit_style_transfer(self, image_url: str, style_image_url: str) -> str:
+    def submit_style_transfer(
+        self,
+        image_url: str,
+        style_image_url: str,
+        structure_denoising_strength: float = 0.7,
+    ) -> str:
         """Submit a style transfer job. Returns prediction ID."""
         if not image_url.startswith("https://") or not style_image_url.startswith("https://"):
             raise StyleTransferError(
@@ -60,7 +65,7 @@ class ReplicateClient:
                 "structure_image": image_url,
                 "style_image": style_image_url,
                 "prompt": "Adapt the style of the style image to the structure image, keeping the brush strokes and brush details while emphasizing the features of the structure image, adapting them to the time period and style of the style image. Very important to keep the features in the structure image, so people are recognizable. Keep the gender of the person in the structure image.",
-                "structure_denoising_strength": 0.7,
+                "structure_denoising_strength": structure_denoising_strength,
                 "output_format": "jpg",
                 "output_quality": 80,
                 "number_of_images": 1,

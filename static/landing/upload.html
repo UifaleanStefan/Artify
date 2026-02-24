@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Încarcă poza – Artify</title>
   <link rel="stylesheet" href="/static/landing/styles.css?v=3" />
-  <link rel="stylesheet" href="/static/landing/upload.css?v=3" />
+  <link rel="stylesheet" href="/static/landing/upload.css?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
@@ -74,6 +74,27 @@
             <p class="upload-filename" id="upload-filename"></p>
           </div>
         </div>
+        <div class="upload-portrait-mode" id="portrait-mode">
+          <h4 class="upload-portrait-mode-title">Cum vrei să arate portretul?</h4>
+          <div class="upload-portrait-mode-options">
+            <label class="upload-portrait-option">
+              <input type="radio" name="portrait_mode" value="realistic" checked />
+              <span class="upload-portrait-option-inner">
+                <span class="upload-portrait-option-icon">📷</span>
+                <span class="upload-portrait-option-label">Realistic</span>
+                <span class="upload-portrait-option-desc">Păstrează trăsăturile feței mai aproape de original</span>
+              </span>
+            </label>
+            <label class="upload-portrait-option">
+              <input type="radio" name="portrait_mode" value="artistic" />
+              <span class="upload-portrait-option-inner">
+                <span class="upload-portrait-option-icon">🎨</span>
+                <span class="upload-portrait-option-label">Artistic</span>
+                <span class="upload-portrait-option-desc">Libertate creativă mai mare, stil pictural pronunțat</span>
+              </span>
+            </label>
+          </div>
+        </div>
         <div class="upload-tips">
           <span class="upload-tips-icon">📷</span>
           <div>
@@ -109,6 +130,6 @@
   </footer>
 
   <script src="/static/landing/styles-data.js?v=3"></script>
-  <script src="/static/landing/upload.js?v=3"></script>
+  <script src="/static/landing/upload.js?v=4"></script>
 </body>
 </html>

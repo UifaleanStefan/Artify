@@ -4,6 +4,7 @@
   var params = new URLSearchParams(window.location.search);
   var styleId = params.get('style');
   var imageUrl = params.get('image_url');
+  var portraitMode = params.get('portrait_mode') || 'realistic';
   var email = params.get('email') || '';
   var style = null;
 
@@ -53,7 +54,7 @@
   }
   if (deliveryEl) deliveryEl.textContent = email || '—';
   if (backLink) {
-    var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&email=' + encodeURIComponent(email);
+    var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&portrait_mode=' + encodeURIComponent(portraitMode) + '&email=' + encodeURIComponent(email);
     backLink.href = '/billing' + q;
   }
 
@@ -74,6 +75,7 @@
           email: email,
           style_id: parseInt(styleId, 10),
           image_url: imageUrl,
+          portrait_mode: portraitMode,
           billing_name: billingInfo.fullName,
           billing_address: billingInfo.address1 + (billingInfo.address2 ? ', ' + billingInfo.address2 : ''),
           billing_city: billingInfo.city,

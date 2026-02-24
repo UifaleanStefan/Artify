@@ -14,9 +14,16 @@ class StyleTransferService:
     def __init__(self, provider: ReplicateClient):
         self.provider = provider
 
-    def _transfer_style_sync(self, image_url: str, style_image_url: str) -> Tuple[str, str]:
+    def _transfer_style_sync(
+        self,
+        image_url: str,
+        style_image_url: str,
+        structure_denoising_strength: float = 0.7,
+    ) -> Tuple[str, str]:
         """Blocking provider calls wrapped for thread execution."""
-        job_id = self.provider.submit_style_transfer(image_url, style_image_url)
+        job_id = self.provider.submit_style_transfer(
+            image_url, style_image_url, structure_denoising_strength
+        )
         logger.info(
             "Style transfer submitted",
             extra={"job_id": job_id, "image_url": image_url[:80]},
@@ -32,14 +39,23 @@ class StyleTransferService:
         self,
         image_url: str,
         style_image_url: str,
+        structure_denoising_strength: float = 0.7,
     ) -> Tuple[str, str]:
         """Synchronous style transfer call for worker threads/background processing."""
-        return self._transfer_style_sync(image_url, style_image_url)
+        return self._transfer_style_sync(
+            image_url, style_image_url, structure_denoising_strength
+        )
 
     async def transfer_style(
         self,
         image_url: str,
         style_image_url: str,
+        structure_denoising_strength: float = 0.7,
     ) -> Tuple[str, str]:
         """Run style transfer without blocking event loop."""
-        return await asyncio.to_thread(self._transfer_style_sync, image_url, style_image_url)
+        return await asyncio.to_thread(
+            self._transfer_style_sync,
+            image_url,
+            style_image_url,
+            structure_denoising_strength,
+        )

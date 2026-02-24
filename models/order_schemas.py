@@ -7,6 +7,7 @@ class OrderCreateRequest(BaseModel):
     email: EmailStr
     style_id: int
     image_url: str
+    portrait_mode: Optional[str] = "realistic"  # "realistic" -> 0.55, "artistic" -> 0.8
     billing_name: Optional[str] = None
     billing_address: Optional[str] = None
     billing_city: Optional[str] = None

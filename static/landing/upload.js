@@ -110,7 +110,8 @@
           }
           var imageUrl = res.data && res.data.image_url;
           if (!imageUrl) throw new Error('Server did not return a photo URL.');
-          window.location.href = '/details?style=' + encodeURIComponent(style.id) + '&image_url=' + encodeURIComponent(imageUrl);
+          var portraitMode = (document.querySelector('input[name="portrait_mode"]:checked') || {}).value || 'realistic';
+          window.location.href = '/details?style=' + encodeURIComponent(style.id) + '&image_url=' + encodeURIComponent(imageUrl) + '&portrait_mode=' + encodeURIComponent(portraitMode);
         })
         .catch(function (err) {
           createBtn.disabled = false;

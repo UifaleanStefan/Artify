@@ -51,8 +51,8 @@ class EmailService:
             <div style="padding:32px 24px 36px 24px;background:#fff;text-align:center;">
               <p style="margin:0 0 24px 0;font-size:16px;color:#1e293b;line-height:1.5;font-weight:600;">Rezultatele tale sunt gata. Apasă butonul de mai jos pentru a vedea galeria.</p>
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 24px auto;">
-                <tr><td style="border-radius:12px;background:linear-gradient(135deg,#1d4ed8 0%,#2563eb 100%);box-shadow:0 4px 14px rgba(37,99,235,0.4);">
-                  <a href="{order_link}" style="display:inline-block;padding:20px 40px;color:#ffffff !important;text-decoration:none;border-radius:12px;font-weight:700;font-size:18px;-webkit-text-fill-color:#ffffff;">Vezi galeria pe site</a>
+                <tr><td align="center" style="border-radius:12px;background-color:#2563eb;padding:0;">
+                  <a href="{order_link}" style="display:inline-block;padding:20px 40px;color:#ffffff !important;text-decoration:none;border-radius:12px;font-weight:700;font-size:18px;background-color:#2563eb;">Vezi galeria pe site</a>
                 </td></tr>
               </table>
               <p style="margin:0 0 8px 0;font-size:14px;color:#64748b;">Sau descarcă toate imaginile:</p>

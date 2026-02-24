@@ -4,6 +4,7 @@
   var params = new URLSearchParams(window.location.search);
   var styleId = params.get('style');
   var imageUrl = params.get('image_url');
+  var portraitMode = params.get('portrait_mode') || 'realistic';
   var style = null;
 
   if (styleId) { var id = parseInt(styleId, 10); style = data.find(function (s) { return s.id === id; }); }
@@ -65,7 +66,7 @@
       if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
       if (!email) { if (errorEl) { errorEl.textContent = 'Adresa de email este obligatorie.'; errorEl.style.display = 'block'; } return; }
       if (email !== confirm) { if (errorEl) { errorEl.textContent = 'Adresele de email nu coincid.'; errorEl.style.display = 'block'; } return; }
-      var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&email=' + encodeURIComponent(email);
+      var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&portrait_mode=' + encodeURIComponent(portraitMode) + '&email=' + encodeURIComponent(email);
       window.location.href = '/billing' + q;
     });
   }
