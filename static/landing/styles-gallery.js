@@ -22,7 +22,6 @@
       'Ancient': 'tag-ancient',
       'Portraits': 'tag-evolution',
       'Royalty': 'tag-royalty',
-      'Animated': 'tag-animated',
     };
     return map[cat] || 'tag-impressionism';
   }

@@ -633,12 +633,6 @@ ROYALTY_PORTRAITS_PACK_PATHS = [
     f"/static/landing/styles/royalty-portraits/royalty-portraits-{i:02d}.jpg" for i in range(1, 16)
 ]
 
-# Animated Classics pack: 15 reference images (01 = Toy Story … 15 = Aladdin)
-STYLE_ID_ANIMATED_CLASSICS_PACK = 19
-ANIMATED_CLASSICS_PACK_PATHS = [
-    f"/static/landing/styles/animated-classics/animated-classics-{i:02d}.jpg" for i in range(1, 16)
-]
-
 # Per-image (painting title, artist) for email captions.
 # Masters pack: 15 reference images (masters-01.jpg … masters-15.jpg); each result image gets the label at the same index.
 MASTERS_PACK_LABELS: list[tuple[str, str]] = [
@@ -730,24 +724,6 @@ EVOLUTION_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
     ("Self-Portrait with Thorn Necklace and Hummingbird", "Frida Kahlo"), # 14
     ("Marilyn Diptych", "Andy Warhol"),                                  # 15
 ]
-# Animated Classics pack: 01 = Toy Story … 15 = Aladdin (replacement Aladdin image is last; see setup_animated_classics_pack.py)
-ANIMATED_CLASSICS_PACK_LABELS: list[tuple[str, str]] = [
-    ("Toy Story", "Pixar"),                                    # 01
-    ("Frozen", "Disney"),                                      # 02
-    ("The Incredibles", "Pixar"),                              # 03
-    ("Shrek", "DreamWorks"),                                    # 04
-    ("Tangled", "Disney"),                                      # 05
-    ("How to Train Your Dragon", "DreamWorks"),                # 06
-    ("Spider-Man: Into the Spider-Verse", "Sony Pictures Animation"),  # 07
-    ("The Lego Movie", "Warner Animation"),                     # 08
-    ("The Mitchells vs. the Machines", "Sony Pictures Animation"),  # 09
-    ("The Lion King", "Disney"),                                # 10
-    ("Beauty and the Beast", "Disney"),                        # 11
-    ("The Simpsons Movie", "20th Century Animation"),          # 12
-    ("Despicable Me", "Illumination"),                         # 13
-    ("Hotel Transylvania", "Sony Pictures Animation"),          # 14
-    ("Aladdin", "Disney"),                                      # 15 (replacement image at end)
-]
 # Royalty & Power Portraits pack: 01 = first downloaded … 15 = last downloaded (see setup_royalty_portraits_pack.py)
 ROYALTY_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
     ("Napoleon Crossing the Alps", "Jacques-Louis David"),                    # 01
@@ -787,8 +763,6 @@ def _build_result_labels(
         return EVOLUTION_PORTRAITS_PACK_LABELS[:n]
     if order.style_id == STYLE_ID_ROYALTY_PORTRAITS_PACK:
         return ROYALTY_PORTRAITS_PACK_LABELS[:n]
-    if order.style_id == STYLE_ID_ANIMATED_CLASSICS_PACK:
-        return ANIMATED_CLASSICS_PACK_LABELS[:n]
     style_data = next((s for s in styles if s.get("id") == order.style_id), None)
     title = order.style_name or (style_data.get("title") if style_data else "Stil")
     artist = style_data.get("artist", "Artist") if style_data else "Artist"
@@ -849,11 +823,6 @@ async def create_order(
         style_image_urls = json.dumps([_resolve_style_image_url(p) for p in ROYALTY_PORTRAITS_PACK_PATHS])
         if not style_image_url:
             style_image_url = _resolve_style_image_url(ROYALTY_PORTRAITS_PACK_PATHS[0])
-    elif order_data.style_id == STYLE_ID_ANIMATED_CLASSICS_PACK:
-        style_image_urls = json.dumps([_resolve_style_image_url(p) for p in ANIMATED_CLASSICS_PACK_PATHS])
-        if not style_image_url:
-            style_image_url = _resolve_style_image_url(ANIMATED_CLASSICS_PACK_PATHS[0])
-
     # Fail fast if style URLs are not public HTTPS (Replicate requires this)
     def _must_be_https(name: str, url: Optional[str]) -> None:
         if not url or not url.strip():
