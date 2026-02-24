@@ -566,6 +566,42 @@ body.museum-mode .footer-brand .logo-text {
   .exhibition-arrow {
     display: none; /* Hide side arrows on small screens, rely on filmstrip */
   }
+  /* On mobile: caption and share above the image so the image sits right above the filmstrip */
+  .museum-hero-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .museum-hero-caption {
+    order: 0;
+    margin: 0 0 0.5rem;
+    padding: 0 0.5rem;
+  }
+  .museum-caption-title {
+    font-size: 1.35rem;
+  }
+  .museum-caption-artist {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+  }
+  .museum-share-wrap {
+    order: 1;
+    margin: 0 0 0.75rem;
+  }
+  .btn-share {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  .museum-hero {
+    order: 2;
+  }
+  /* Tighten gap between main image and filmstrip so changing pictures is easier */
+  .museum-filmstrip-section {
+    padding-top: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .museum-filmstrip-label {
+    margin-bottom: 0.5rem;
+  }
   .filmstrip-item {
     width: 64px;
     height: 64px;
