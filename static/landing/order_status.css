@@ -78,6 +78,9 @@
 body.museum-mode {
   background-color: #020617; /* Slate 950 */
   color: #f8fafc;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 body.museum-mode .header {
@@ -94,6 +97,7 @@ body.museum-mode .order-status-main {
   max-width: 1200px;
   background: transparent;
   padding: 4rem 1.5rem 6rem;
+  overflow-x: hidden;
 }
 
 body.museum-mode .footer {
@@ -232,6 +236,7 @@ body.museum-mode .footer-brand .logo-text {
 .museum-compare-wrap {
   position: relative;
   width: 100%;
+  min-height: 280px;
   max-height: 65vh;
   aspect-ratio: 3 / 4; /* Portrait ratio usually used for Artify */
   overflow: hidden;
@@ -240,6 +245,7 @@ body.museum-mode .footer-brand .logo-text {
   border-radius: 2px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   touch-action: pan-y;
+  contain: paint;
 }
 
 .museum-compare-wrap.full-revealed {
@@ -308,6 +314,7 @@ body.museum-mode .footer-brand .logo-text {
   display: flex;
   align-items: center;
   justify-content: center;
+  touch-action: none;
 }
 
 .museum-compare-handle {
@@ -425,11 +432,14 @@ body.museum-mode .footer-brand .logo-text {
   align-items: center;
   gap: 0.75rem;
   overflow-x: auto;
+  overflow-y: hidden;
   padding: 0.5rem 1rem 1.5rem;
   max-width: 1000px;
   margin: 0 auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(255,255,255,0.2) transparent;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
 }
 
 .museum-filmstrip::-webkit-scrollbar {

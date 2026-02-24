@@ -117,6 +117,7 @@
       e.preventDefault();
       var touch = e.touches[0];
       function touchMove(ev) {
+        ev.preventDefault();
         var t = ev.touches[0];
         var rect = wrap.getBoundingClientRect();
         var x = t.clientX - rect.left;
