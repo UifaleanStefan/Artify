@@ -1241,7 +1241,7 @@ a.style-card:hover .style-card-bg {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    animation: testimonial-treadmill 24s linear infinite;
+    animation: testimonial-treadmill 34s linear infinite;
   }
   .testimonial-cards--col {
     display: flex;
