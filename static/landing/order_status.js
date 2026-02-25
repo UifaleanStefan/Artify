@@ -84,10 +84,17 @@
 
     var minPct = 5;
     var maxPct = 95;
+    var isDragging = false;
 
     function setPct(pct) {
       pct = Math.max(minPct, Math.min(maxPct, pct));
       wrap.style.setProperty('--compare-pct', String(pct));
+    }
+
+    function moveToPosition(clientX) {
+      var rect = wrap.getBoundingClientRect();
+      var x = clientX - rect.left;
+      setPct((x / rect.width) * 100);
     }
 
     function onMove(e) {
@@ -97,14 +104,22 @@
     }
 
     function stopDrag() {
+      isDragging = false;
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', stopDrag);
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
     }
 
+    /* Click anywhere on image to move slider there */
+    wrap.addEventListener('click', function (e) {
+      if (isDragging) return;
+      moveToPosition(e.clientX);
+    });
+
     divider.addEventListener('mousedown', function (e) {
       e.preventDefault();
+      isDragging = true;
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
       document.addEventListener('mousemove', onMove);
@@ -112,26 +127,42 @@
       onMove(e);
     });
 
+    /* Touch: tap anywhere to move, or drag handle */
     wrap.addEventListener('touchstart', function (e) {
-      if (e.target !== divider && !divider.contains(e.target)) return;
-      e.preventDefault();
       var touch = e.touches[0];
+      var touchedDivider = e.target === divider || divider.contains(e.target);
+      var startX = touch.clientX;
+      var startTime = Date.now();
+      var moved = false;
+
       function touchMove(ev) {
+        if (!touchedDivider) return;
+        moved = true;
         ev.preventDefault();
         var t = ev.touches[0];
         var rect = wrap.getBoundingClientRect();
-        var x = t.clientX - rect.left;
-        setPct((x / rect.width) * 100);
+        setPct(((t.clientX - rect.left) / rect.width) * 100);
       }
-      function touchEnd() {
+      function touchEnd(ev) {
         wrap.removeEventListener('touchmove', touchMove);
         wrap.removeEventListener('touchend', touchEnd);
+        /* If short tap with little movement, move slider to tap position */
+        if (!moved && ev.changedTouches && ev.changedTouches[0] && Date.now() - startTime < 400) {
+          var endX = ev.changedTouches[0].clientX;
+          if (Math.abs(endX - startX) < 15) {
+            moveToPosition(ev.changedTouches[0].clientX);
+          }
+        }
+      }
+
+      if (touchedDivider) {
+        e.preventDefault();
+        var rect = wrap.getBoundingClientRect();
+        setPct(((touch.clientX - rect.left) / rect.width) * 100);
       }
       wrap.addEventListener('touchmove', touchMove, { passive: false });
-      wrap.addEventListener('touchend', touchEnd);
-      var rect = wrap.getBoundingClientRect();
-      setPct(((touch.clientX - rect.left) / rect.width) * 100);
-    }, { passive: false });
+      wrap.addEventListener('touchend', touchEnd, { passive: true });
+    }, { passive: true });
   }
 
   function showImage(index) {

@@ -234,6 +234,7 @@ body.museum-mode .footer-brand .logo-text {
 
 /* Before / After Slider for Museum */
 .museum-compare-wrap {
+  cursor: pointer;
   position: relative;
   width: 100%;
   min-height: 280px;
