@@ -24,18 +24,25 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
-/* Promo banner – scrolling marquee at top */
+/* Promo banner – scrolling marquee at top (same on web & mobile) */
 .promo-banner {
   background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary) 25%, var(--accent) 50%, var(--primary) 75%, var(--primary-dark) 100%);
-  background-size: 200% 100%;
+  background-color: var(--primary);
   color: white;
   padding: 0.5rem 0;
   overflow: hidden;
   white-space: nowrap;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
 }
 .promo-banner-track {
   display: inline-flex;
   animation: promo-scroll 25s linear infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .promo-banner-track { animation: none; }
 }
 .promo-banner-item {
   display: inline-block;
@@ -43,6 +50,7 @@ html { scroll-behavior: smooth; }
   font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 @keyframes promo-scroll {
   0% { transform: translateX(0); }
@@ -620,7 +628,9 @@ img { max-width: 100%; height: auto; }
 }
 .testimonials-summary-wrap {
   margin-top: 2rem;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 /* Sections */
@@ -677,6 +687,9 @@ img { max-width: 100%; height: auto; }
   flex-direction: column;
   align-items: center;
   text-align: center;
+  width: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
 }
 .stats-section .section-title { margin-bottom: 2rem; }
 .stats-grid {
@@ -685,7 +698,8 @@ img { max-width: 100%; height: auto; }
   gap: 1.5rem;
   width: 100%;
   max-width: 900px;
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 .stats-card {
   background: var(--bg-accent);
@@ -744,30 +758,35 @@ img { max-width: 100%; height: auto; }
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
+  gap: 0.5rem;
   margin-bottom: 2rem;
-  max-width: 400px;
+  width: 100%;
+  max-width: 600px;
   margin-left: auto;
   margin-right: auto;
 }
 .steps-progress-line {
   flex: 1;
-  height: 2px;
+  min-width: 2rem;
+  height: 3px;
+  border-radius: 2px;
   background: linear-gradient(90deg, var(--primary), var(--accent));
-  opacity: 0.6;
+  opacity: 0.7;
 }
 .steps-progress-num {
-  width: 2rem;
-  height: 2rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary) 0%, var(--accent-3) 100%);
-  color: white;
+  color: white !important;
   font-size: 0.875rem;
   font-weight: 700;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 
 /* Steps grid – horizontal on desktop */
@@ -818,7 +837,12 @@ img { max-width: 100%; height: auto; }
 
 .how-cta-wrap {
   margin-top: 2rem;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.how-cta-wrap .btn {
+  min-width: 280px;
 }
 
 /* Demo section – before/after comparison slider */
@@ -1520,7 +1544,7 @@ a.style-card:hover .style-card-bg {
   padding: 0.25rem 0;
 }
 .footer-links a:hover { color: var(--primary); }
-.social-icons { display: flex; gap: 0.75rem; }
+.social-icons { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
 .social-icons a {
   width: 2.25rem;
   height: 2.25rem;
@@ -1533,6 +1557,26 @@ a.style-card:hover .style-card-bg {
   font-size: 0.875rem;
   text-decoration: none;
 }
+.social-instagram-link {
+  width: auto !important;
+  height: auto !important;
+  padding: 0.4rem 0.75rem !important;
+  border-radius: 9999px !important;
+  font-size: 0.875rem !important;
+}
+.footer-social {
+  text-align: center;
+}
+@media (max-width: 480px) {
+  .footer-social {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .footer-social .social-icons {
+    justify-content: center;
+  }
+}
 .footer-bottom {
   max-width: 1200px;
   margin: 0 auto;
@@ -1540,10 +1584,11 @@ a.style-card:hover .style-card-bg {
   border-top: 1px solid #e2e8f0;
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: center;
   gap: 1rem;
   font-size: 0.8125rem;
   color: var(--text-muted);
+  text-align: center;
 }
 
 @media (max-width: 768px) {
