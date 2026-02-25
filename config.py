@@ -16,7 +16,14 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # Replicate API
+    # Style transfer provider: "openai" (default) or "replicate"
+    style_transfer_provider: str = "openai"
+
+    # OpenAI API (when style_transfer_provider=openai)
+    openai_api_key: str = ""
+    openai_stylize_base_url: Optional[str] = None  # default: https://api.openai.com
+
+    # Replicate API (when style_transfer_provider=replicate)
     replicate_api_token: str = ""
 
     # Timeouts and retries

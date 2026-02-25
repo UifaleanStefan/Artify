@@ -5,6 +5,7 @@ import asyncio
 import io
 import json
 import logging
+import re
 import shutil
 import sys
 import time
@@ -24,7 +25,13 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from clients import ReplicateClient, StyleTransferError, StyleTransferRateLimit, StyleTransferTimeout
+from clients import (
+    OpenAIStylizeClient,
+    ReplicateClient,
+    StyleTransferError,
+    StyleTransferRateLimit,
+    StyleTransferTimeout,
+)
 from config import get_settings, get_upload_dir, get_order_results_dir
 
 
@@ -41,31 +48,38 @@ def _resolve_style_image_url(style_image_url: Optional[str]) -> Optional[str]:
     return url
 
 
-def _persist_result_images(order_id: str, result_urls: list[str]) -> list[str]:
+def _persist_result_images(order_id: str, result_items: list) -> list[str]:
     """
-    Download each result image from Replicate (or any URL), save to DB (survives redeploys)
-    and optionally to disk. Returns list of permanent URLs. Images in DB are subject to TTL (e.g. 14 days).
+    Persist result images to DB and disk. Each item can be:
+    - str (URL): fetch and persist
+    - dict with "content" (bytes) and "content_type": decode and persist directly (OpenAI b64)
+    Returns list of permanent URLs.
     """
     base_url = (get_settings().public_base_url or "").rstrip("/")
     if not base_url:
         logger.warning("PUBLIC_BASE_URL not set; cannot create permanent result URLs")
-        return result_urls
+        return [str(x) if isinstance(x, str) else "" for x in result_items]
     try:
         results_dir = get_order_results_dir() / order_id
         results_dir.mkdir(parents=True, exist_ok=True)
         permanent = []
         db = SessionLocal()
         try:
-            for i, url in enumerate(result_urls, start=1):
+            for i, item in enumerate(result_items, start=1):
                 try:
-                    with httpx.Client(timeout=45) as client:
-                        r = client.get(url)
-                    if r.status_code >= 400:
-                        logger.warning("Failed to fetch result image %s for %s: %s", i, order_id, r.status_code)
-                        permanent.append(url)
-                        continue
-                    content = r.content
-                    content_type = r.headers.get("content-type", "image/jpeg").split(";")[0].strip()
+                    if isinstance(item, dict) and "content" in item:
+                        content = item["content"]
+                        content_type = item.get("content_type", "image/jpeg").split(";")[0].strip()
+                    else:
+                        url = str(item)
+                        with httpx.Client(timeout=45) as client:
+                            r = client.get(url)
+                        if r.status_code >= 400:
+                            logger.warning("Failed to fetch result image %s for %s: %s", i, order_id, r.status_code)
+                            permanent.append(url)
+                            continue
+                        content = r.content
+                        content_type = r.headers.get("content-type", "image/jpeg").split(";")[0].strip()
                     if content_type not in ("image/jpeg", "image/png", "image/webp"):
                         content_type = "image/jpeg"
                     # Store in DB (survives redeploy)
@@ -78,16 +92,17 @@ def _persist_result_images(order_id: str, result_urls: list[str]) -> list[str]:
                     db.merge(row)
                     # Also write to disk for backward compat and redundancy
                     ext = "jpg"
-                    suf = Path(urlparse(url).path).suffix.lower()
-                    if suf in (".png", ".webp", ".gif"):
-                        ext = suf.lstrip(".")
+                    if "png" in content_type:
+                        ext = "png"
+                    elif "webp" in content_type:
+                        ext = "webp"
                     path = results_dir / f"{i}.{ext}"
                     path.write_bytes(content)
                     permanent.append(f"{base_url}/api/orders/{order_id}/result/{i}")
                 except Exception as e:
                     logger.warning("Persist result image %s for %s failed: %s", i, order_id, e)
-                    permanent.append(url)
-            if len(permanent) == len(result_urls):
+                    permanent.append(str(item) if isinstance(item, str) else "")
+            if len(permanent) == len(result_items):
                 db.commit()
                 logger.info("Persisted %d result images for order %s (DB + disk)", len(permanent), order_id)
                 return permanent
@@ -96,7 +111,7 @@ def _persist_result_images(order_id: str, result_urls: list[str]) -> list[str]:
             db.close()
     except Exception as e:
         logger.warning("Persist result images for %s failed: %s", order_id, e)
-    return result_urls
+    return [str(x) if isinstance(x, str) else "" for x in result_items]
 
 
 from database import Order, OrderResultImage, OrderSourceImage, OrderStatus, get_db, SessionLocal, init_db
@@ -124,13 +139,23 @@ _DB_INIT_STARTED = False
 ORDER_TTL_DAYS = 14
 
 
-def get_provider() -> ReplicateClient:
+def get_provider() -> ReplicateClient | OpenAIStylizeClient:
     settings = get_settings()
-    return ReplicateClient(
-        api_token=settings.replicate_api_token,
+    provider = (settings.style_transfer_provider or "openai").strip().lower()
+    if provider == "replicate":
+        return ReplicateClient(
+            api_token=settings.replicate_api_token,
+            timeout_seconds=settings.api_timeout_seconds,
+            polling_timeout_seconds=settings.polling_timeout_seconds,
+            polling_interval_seconds=settings.polling_interval_seconds,
+            rate_limit_retries=settings.replicate_rate_limit_retries,
+            rate_limit_base_wait=float(settings.replicate_rate_limit_base_wait_seconds),
+        )
+    return OpenAIStylizeClient(
+        api_key=settings.openai_api_key,
+        base_url=settings.openai_stylize_base_url,
         timeout_seconds=settings.api_timeout_seconds,
-        polling_timeout_seconds=settings.polling_timeout_seconds,
-        polling_interval_seconds=settings.polling_interval_seconds,
+        quality="medium",
         rate_limit_retries=settings.replicate_rate_limit_retries,
         rate_limit_base_wait=float(settings.replicate_rate_limit_base_wait_seconds),
     )
@@ -144,6 +169,10 @@ def get_service() -> StyleTransferService:
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Artify service starting")
     s = get_settings()
+    provider = (s.style_transfer_provider or "openai").strip().lower()
+    logger.info("Style transfer provider: %s", provider)
+    if provider == "openai" and not s.openai_api_key:
+        logger.warning("OPENAI_API_KEY not set; style transfer will fail at runtime")
     if s.resend_api_key:
         logger.info("Email: Resend (RESEND_API_KEY set)")
     elif s.sendgrid_api_key:
@@ -769,6 +798,137 @@ ROYALTY_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
     ("Portrait of Empress Catherine II", "Fyodor Rokotov"),                      # 15
 ]
 
+# Detailed style prompts for OpenAI (mode="prompt"). One per artwork; preserve face/identity.
+MASTERS_PACK_PROMPTS: list[str] = [
+    "in the style of Vincent van Gogh's Starry Night: thick impasto brush strokes, swirling night sky, vibrant yellows and blues, expressive texture. Preserve the subject's face, identity, and likeness.",
+    "in the style of Claude Monet's Water Lilies: soft impressionist brushwork, pastel colors, dappled light on water, dreamy atmosphere. Preserve the subject's face and identity.",
+    "in the style of Leonardo da Vinci's Renaissance portraiture: sfumato, soft lighting, classical composition, subtle modeling. Preserve the subject's face and likeness.",
+    "in the style of Pablo Picasso's Cubism: geometric shapes, fragmented planes, bold outlines, multiple viewpoints. Preserve the subject's recognizable face and identity.",
+    "in the style of Andy Warhol's Pop Art: bold flat colors, screen-print aesthetic, high contrast, celebrity portrait style. Preserve the subject's face and identity.",
+    "in the style of Gustav Klimt's golden phase: gold leaf patterns, Art Nouveau ornament, Byzantine influence, decorative borders. Preserve the subject's face and likeness.",
+    "in the style of Frida Kahlo's self-portraits: bold colors, Mexican folk art, symbolic elements, unibrow, flowers in hair. Preserve the subject's face and identity.",
+    "in the style of Hokusai's The Great Wave: Japanese ukiyo-e, woodblock print aesthetic, blue waves, Mount Fuji. Preserve the subject's face and likeness.",
+    "in the style of Rembrandt's chiaroscuro: dramatic light and shadow, warm browns, deep shadows, Old Master technique. Preserve the subject's face and identity.",
+    "in the style of Henri Matisse's Fauvism: bold flat colors, simplified forms, expressive color, decorative patterns. Preserve the subject's face and likeness.",
+    "in the style of Salvador Dalí's Surrealism: dreamlike imagery, melting forms, meticulous detail, fantastical elements. Preserve the subject's face and identity.",
+    "in the style of Johannes Vermeer's Girl with a Pearl Earring: soft diffused light, pearl earring, intimate portrait, Dutch Golden Age. Preserve the subject's face and likeness.",
+    "in the style of Vincent van Gogh's Sunflowers: thick brush strokes, vibrant yellows, expressive texture, post-impressionist. Preserve the subject's face and identity.",
+    "in the style of Gustav Klimt's The Kiss: gold leaf, embracing figures, Art Nouveau, decorative patterns. Preserve the subject's face and likeness.",
+    "in the style of Sandro Botticelli's Birth of Venus: Renaissance elegance, flowing hair, mythological grace, soft colors. Preserve the subject's face and identity.",
+]
+IMPRESSION_COLOR_PACK_PROMPTS: list[str] = [
+    "in the style of Claude Monet's Water Lilies: soft impressionist brushwork, pastel colors, dappled light. Preserve the subject's face and identity.",
+    "in the style of Vincent van Gogh: thick brush strokes, vibrant colors, expressive texture. Preserve the subject's face and likeness.",
+    "in the style of Henri Matisse's Fauvism: bold flat colors, simplified forms, expressive color. Preserve the subject's face and identity.",
+    "in the style of Claude Monet's Water Lilies detail: soft impressionist brushwork, pastel palette. Preserve the subject's face and likeness.",
+    "in the style of Claude Monet's Impression, Sunrise: hazy atmosphere, orange sun, soft brushwork. Preserve the subject's face and identity.",
+    "in the style of Henri Matisse's Fauvist portraits: bold colors, simplified forms. Preserve the subject's face and likeness.",
+    "in the style of Vincent van Gogh's Wheatfield with Crows: dramatic sky, expressive brushwork, dark crows. Preserve the subject's face and identity.",
+    "in the style of Henri Matisse's Women at Tahiche: bold patterns, flat color, decorative. Preserve the subject's face and likeness.",
+    "in the style of Claude Monet's Japanese Bridge: impressionist garden, soft light, pastel colors. Preserve the subject's face and identity.",
+    "in the style of Vincent van Gogh's self-portrait: thick brush strokes, expressive eyes, post-impressionist. Preserve the subject's face and likeness.",
+    "in the style of Henri Matisse's The Dance: bold color, flowing forms, rhythmic movement. Preserve the subject's face and identity.",
+    "in the style of Vincent van Gogh's Irises: vibrant blues and greens, expressive brushwork. Preserve the subject's face and likeness.",
+    "in the style of Claude Monet's Haystacks: soft light, impressionist brushwork, warm tones. Preserve the subject's face and identity.",
+    "in the style of Henri Matisse's Odalisque: bold color, decorative patterns, exotic influence. Preserve the subject's face and likeness.",
+    "in the style of Vincent van Gogh's Road with Cypress and Star: swirling sky, expressive cypress, night scene. Preserve the subject's face and identity.",
+]
+MODERN_ABSTRACT_PACK_PROMPTS: list[str] = [
+    "in the style of Wassily Kandinsky's Composition VIII: geometric shapes, bold colors, abstract expression. Preserve the subject's face and identity.",
+    "in the style of Mark Rothko's color fields: large blocks of color, soft edges, contemplative. Preserve the subject's face and likeness.",
+    "in the style of Jackson Pollock's drip painting: splattered paint, energetic lines, abstract expressionist. Preserve the subject's face and identity.",
+    "in the style of Kazimir Malevich's Black Square: suprematist, geometric minimalism, bold contrast. Preserve the subject's face and likeness.",
+    "in the style of Piet Mondrian's Broadway Boogie Woogie: grid, primary colors, geometric abstraction. Preserve the subject's face and identity.",
+    "in the style of Willem de Kooning's Woman I: abstract expressionist, bold brushwork, distorted forms. Preserve the subject's face and likeness.",
+    "in the style of Ernst Ludwig Kirchner's Street Berlin: expressionist, angular forms, bold colors. Preserve the subject's face and identity.",
+    "in the style of Franz Marc's Blue Horse I: expressionist, bold blue, animal forms. Preserve the subject's face and likeness.",
+    "in the style of Edvard Munch's The Scream: expressionist, swirling sky, emotional intensity. Preserve the subject's face and identity.",
+    "in the style of René Magritte's The Lovers: surrealist, mysterious, dreamlike. Preserve the subject's face and likeness.",
+    "in the style of Salvador Dalí's The Elephants: surrealist, elongated forms, dreamlike. Preserve the subject's face and identity.",
+    "in the style of Salvador Dalí's Persistence of Memory: surrealist, melting forms, meticulous detail. Preserve the subject's face and likeness.",
+    "in the style of Georges Braque's Cubism: fragmented planes, muted palette, analytical cubist. Preserve the subject's face and identity.",
+    "in the style of Pablo Picasso's Girl with a Mandolin: cubist, geometric forms, musical theme. Preserve the subject's face and likeness.",
+    "in the style of Pablo Picasso's Les Demoiselles d'Avignon: proto-cubist, angular faces, bold primitive. Preserve the subject's face and identity.",
+]
+ANCIENT_WORLDS_PACK_PROMPTS: list[str] = [
+    "in the style of Ancient Egyptian tomb painting: flat figures, profile view, hieroglyphic aesthetic, warm earth tones. Preserve the subject's face and identity.",
+    "in the style of Amarna period Egyptian art: elongated forms, naturalistic, sun disk motifs. Preserve the subject's face and likeness.",
+    "in the style of Egyptian Book of the Dead: papyrus aesthetic, flat figures, symbolic imagery. Preserve the subject's face and identity.",
+    "in the style of Egyptian tomb wall paintings: Ramesside period, warm colors, ceremonial. Preserve the subject's face and likeness.",
+    "in the style of Greek black-figure pottery: red and black, mythological figures, amphora form. Preserve the subject's face and identity.",
+    "in the style of Greek red-figure pottery: elegant line work, classical figures. Preserve the subject's face and likeness.",
+    "in the style of Greek vase painting: Francois Vase, narrative friezes, black figures. Preserve the subject's face and identity.",
+    "in the style of Roman Alexander Mosaic: tessellated, battle scene, Hellenistic influence. Preserve the subject's face and likeness.",
+    "in the style of Roman Villa of Livia fresco: garden room, lush foliage, naturalistic. Preserve the subject's face and identity.",
+    "in the style of Pompeii fresco: Bacchus, Roman wall painting, warm colors. Preserve the subject's face and likeness.",
+    "in the style of Fayum mummy portraits: encaustic, Roman Egypt, realistic faces. Preserve the subject's face and identity.",
+    "in the style of Mesopotamian Standard of Ur: lapis lazuli, mosaic, narrative panels. Preserve the subject's face and likeness.",
+    "in the style of Babylonian Ishtar Gate: blue glaze, relief sculpture, lion motifs. Preserve the subject's face and identity.",
+    "in the style of Ajanta cave paintings: Indian Buddhist, flowing lines, rich colors. Preserve the subject's face and likeness.",
+    "in the style of Han Dynasty silk paintings: ancient China, flowing brushwork, delicate. Preserve the subject's face and identity.",
+]
+EVOLUTION_PORTRAITS_PACK_PROMPTS: list[str] = [
+    "in the style of Fayum mummy portraits: encaustic, Roman Egypt, realistic faces. Preserve the subject's face and identity.",
+    "in the style of Egyptian tomb of Nefertari: warm colors, hieroglyphic aesthetic. Preserve the subject's face and likeness.",
+    "in the style of Medieval portrait: flat, iconic, gold leaf background. Preserve the subject's face and identity.",
+    "in the style of Byzantine Christ Pantocrator: iconic, gold background, solemn. Preserve the subject's face and likeness.",
+    "in the style of Leonardo da Vinci's Mona Lisa: sfumato, enigmatic smile, Renaissance. Preserve the subject's face and identity.",
+    "in the style of Raphael's portrait: Renaissance elegance, soft modeling. Preserve the subject's face and likeness.",
+    "in the style of Albrecht Dürer's self-portrait: Northern Renaissance, meticulous detail. Preserve the subject's face and identity.",
+    "in the style of Johannes Vermeer's Girl with a Pearl Earring: soft light, pearl earring, intimate. Preserve the subject's face and likeness.",
+    "in the style of Rembrandt's self-portrait: chiaroscuro, Old Master, warm tones. Preserve the subject's face and identity.",
+    "in the style of John Singer Sargent's Madame X: elegant, dramatic pose, Gilded Age. Preserve the subject's face and likeness.",
+    "in the style of Vincent van Gogh's self-portrait: bandaged ear, thick brush strokes, expressive. Preserve the subject's face and identity.",
+    "in the style of Pablo Picasso's Les Demoiselles: proto-cubist, angular. Preserve the subject's face and likeness.",
+    "in the style of Pablo Picasso's portrait of Dora Maar: cubist, fragmented planes. Preserve the subject's face and identity.",
+    "in the style of Frida Kahlo's self-portrait: thorn necklace, symbolic, Mexican folk. Preserve the subject's face and likeness.",
+    "in the style of Andy Warhol's Marilyn: Pop Art, screen print, bold colors. Preserve the subject's face and identity.",
+]
+ROYALTY_PORTRAITS_PACK_PROMPTS: list[str] = [
+    "in the style of Jacques-Louis David's Napoleon: neoclassical, heroic, equestrian. Preserve the subject's face and identity.",
+    "in the style of Hyacinthe Rigaud's Louis XIV: baroque, royal regalia, grandeur. Preserve the subject's face and likeness.",
+    "in the style of Hans Holbein's Henry VIII: Tudor portrait, rich fabrics, imposing. Preserve the subject's face and identity.",
+    "in the style of Elizabethan Armada portrait: jeweled, royal, ornate. Preserve the subject's face and likeness.",
+    "in the style of Anthony van Dyck's equestrian portrait: baroque, noble pose. Preserve the subject's face and identity.",
+    "in the style of Diego Velázquez's Pope Innocent X: baroque, dramatic lighting. Preserve the subject's face and likeness.",
+    "in the style of Velázquez's Philip IV: Spanish court, rich fabrics, formal. Preserve the subject's face and identity.",
+    "in the style of François Boucher's Madame de Pompadour: rococo, pastel, decorative. Preserve the subject's face and likeness.",
+    "in the style of Thomas Gainsborough's Blue Boy: blue satin, aristocratic, 18th century. Preserve the subject's face and identity.",
+    "in the style of Francisco Goya's portrait: Spanish master, dark tones, psychological. Preserve the subject's face and likeness.",
+    "in the style of Lorenzo Lippi's nobleman portrait: baroque, aristocratic. Preserve the subject's face and identity.",
+    "in the style of Giuseppe Arcimboldo's Vertumnus: composite portrait, fruits and vegetables. Preserve the subject's face and likeness.",
+    "in the style of Giuseppe Castiglione's Qianlong: Chinese-European fusion, imperial. Preserve the subject's face and identity.",
+    "in the style of Mughal miniature: Shah Jahan, jewel tones, intricate detail. Preserve the subject's face and likeness.",
+    "in the style of Fyodor Rokotov's Catherine II: Russian imperial, elegant. Preserve the subject's face and identity.",
+]
+
+# Map style_id to prompts list for URL-to-prompt resolution
+_STYLE_ID_TO_PROMPTS: dict[int, list[str]] = {
+    STYLE_ID_MASTERS_PACK: MASTERS_PACK_PROMPTS,
+    STYLE_ID_IMPRESSION_COLOR_PACK: IMPRESSION_COLOR_PACK_PROMPTS,
+    STYLE_ID_MODERN_ABSTRACT_PACK: MODERN_ABSTRACT_PACK_PROMPTS,
+    STYLE_ID_ANCIENT_WORLDS_PACK: ANCIENT_WORLDS_PACK_PROMPTS,
+    STYLE_ID_EVOLUTION_PORTRAITS_PACK: EVOLUTION_PORTRAITS_PACK_PROMPTS,
+    STYLE_ID_ROYALTY_PORTRAITS_PACK: ROYALTY_PORTRAITS_PACK_PROMPTS,
+}
+
+
+def _style_url_to_prompt(style_url: str, style_id: int) -> str:
+    """Parse style URL to get pack and index, return the corresponding style prompt."""
+    # Match paths like .../styles/masters/masters-01.jpg or .../masters-01.jpg
+    match = re.search(r"/styles/([^/]+)/\1-(\d{2})\.(?:jpg|jpeg|png|webp)", style_url, re.I)
+    if not match:
+        match = re.search(r"/([a-z-]+)-(\d{2})\.(?:jpg|jpeg|png|webp)", style_url, re.I)
+    if not match:
+        return "in the style of classical portrait painting. Preserve the subject's face and identity."
+    pack_name = match.group(1).lower()
+    index_str = match.group(2)
+    idx = int(index_str)  # 1-based
+    prompts = _STYLE_ID_TO_PROMPTS.get(style_id)
+    if not prompts or idx < 1 or idx > len(prompts):
+        return "in the style of classical portrait painting. Preserve the subject's face and identity."
+    return prompts[idx - 1]
+
 
 def _build_result_labels(
     order: Order, result_urls_list: list[str], styles: list
@@ -1183,6 +1343,8 @@ def _run_style_transfer_sync(order_id: str) -> None:
                     logger.info("Order %s: using persisted source image URL for style transfer", order_id)
 
             service = get_service()
+            settings = get_settings()
+            use_openai = (settings.style_transfer_provider or "openai").strip().lower() == "openai"
             portrait_mode = (order.portrait_mode or "realistic").strip().lower()
             structure_denoising_strength = (
                 0.55 if portrait_mode == "realistic" else 0.8
@@ -1192,13 +1354,15 @@ def _run_style_transfer_sync(order_id: str) -> None:
                 if i > 0:
                     time.sleep(30)
                 result_url, job_id = None, None
+                style_prompt = _style_url_to_prompt(style_url, order.style_id) if use_openai else None
                 max_attempts = 3
                 for attempt in range(max_attempts):
                     try:
                         result_url, job_id = service.transfer_style_sync(
                             image_url=source_image_url,
-                            style_image_url=style_url,
+                            style_image_url=style_url if not use_openai else None,
                             structure_denoising_strength=structure_denoising_strength,
+                            style_prompt=style_prompt,
                         )
                         break
                     except StyleTransferTimeout as e:
@@ -1212,6 +1376,7 @@ def _run_style_transfer_sync(order_id: str) -> None:
                         raise
                 result_urls_list.append(result_url)
                 job_ids.append(job_id)
+                result_url_for_pred = result_url if isinstance(result_url, str) else None
                 try:
                     pred = service.provider.get_prediction(job_id)
                     prediction_details.append({
@@ -1222,7 +1387,7 @@ def _run_style_transfer_sync(order_id: str) -> None:
                         "created_at": pred.get("created_at"),
                         "started_at": pred.get("started_at"),
                         "completed_at": pred.get("completed_at"),
-                        "result_url": result_url,
+                        "result_url": result_url_for_pred,
                         "model": pred.get("model"),
                         "version": pred.get("version"),
                         "source": pred.get("source"),
@@ -1231,9 +1396,11 @@ def _run_style_transfer_sync(order_id: str) -> None:
                         "logs": (pred.get("logs") or "")[:500] if pred.get("logs") else None,
                     })
                 except Exception:
-                    prediction_details.append({"id": job_id, "status": "succeeded", "result_url": result_url})
+                    prediction_details.append({"id": job_id, "status": "succeeded", "result_url": result_url_for_pred})
 
-                order.result_urls = json.dumps(result_urls_list)
+                # Store serializable version (dicts with bytes can't be JSON-serialized)
+                serializable = [x if isinstance(x, str) else "openai://pending" for x in result_urls_list]
+                order.result_urls = json.dumps(serializable)
                 order.style_transfer_job_id = ",".join(job_ids)
                 order.replicate_prediction_details = json.dumps(prediction_details)
                 db.commit()
