@@ -27,7 +27,11 @@ class StyleTransferService:
         if isinstance(self.provider, OpenAIStylizeClient):
             if not style_prompt:
                 raise ValueError("style_prompt required when using OpenAI provider")
-            content, content_type = self.provider.stylize(image_url, style_prompt)
+            # Map structure_denoising_strength to input_fidelity: realistic (0.55) -> high, artistic (0.8) -> low
+            input_fidelity = "high" if structure_denoising_strength <= 0.6 else "low"
+            content, content_type = self.provider.stylize(
+                image_url, style_prompt, input_fidelity=input_fidelity
+            )
             logger.info(
                 "OpenAI style transfer completed",
                 extra={"image_url": image_url[:80]},
