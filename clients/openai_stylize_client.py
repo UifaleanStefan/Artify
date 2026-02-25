@@ -75,6 +75,7 @@ class OpenAIStylizeClient:
             "quality": quality,
             "output_format": output_format,
             "input_fidelity": input_fidelity,
+            "moderation": "low",  # Less restrictive; reduces false positives on portraits
             "n": 1,
             "size": "1024x1024",
         }

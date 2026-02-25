@@ -24,37 +24,26 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
-/* Promo banner – scrolling marquee at top (same on web & mobile) */
+/* Promo banner – single line, centered (no marquee duplication) */
 .promo-banner {
   background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary) 25%, var(--accent) 50%, var(--primary) 75%, var(--primary-dark) 100%);
   background-color: var(--primary);
   color: white;
-  padding: 0.5rem 0;
-  overflow: hidden;
-  white-space: nowrap;
+  padding: 0.5rem 1rem;
   min-height: 2.5rem;
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
 }
-.promo-banner-track {
-  display: inline-flex;
-  animation: promo-scroll 25s linear infinite;
-  will-change: transform;
-}
-@media (prefers-reduced-motion: reduce) {
-  .promo-banner-track { animation: none; }
-}
-.promo-banner-item {
-  display: inline-block;
-  padding: 0 3rem;
+.promo-banner-text {
   font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
-@keyframes promo-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+@media (max-width: 480px) {
+  .promo-banner-text { font-size: 0.8125rem; }
 }
 
 body {
@@ -686,6 +675,7 @@ img { max-width: 100%; height: auto; }
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   text-align: center;
   width: 100%;
   padding: 2rem;
@@ -694,12 +684,12 @@ img { max-width: 100%; height: auto; }
 .stats-section .section-title { margin-bottom: 2rem; }
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1.5rem;
   width: 100%;
   max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
+  align-self: center;
 }
 .stats-card {
   background: var(--bg-accent);
