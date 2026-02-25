@@ -59,5 +59,8 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && menuOverlay.classList.contains('open')) closeMenu();
     });
+    window.addEventListener('resize', function () {
+      if (window.innerWidth >= 769 && menuOverlay.classList.contains('open')) closeMenu();
+    });
   }
 })();

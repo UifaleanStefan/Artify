@@ -336,6 +336,12 @@ img { max-width: 100%; height: auto; }
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5) !important;
 }
 .btn-block { width: 100%; }
+/* Desktop: never show hamburger or menu overlay */
+@media (min-width: 769px) {
+  .hamburger-btn { display: none !important; }
+  .menu-overlay { display: none !important; }
+  .header .nav { display: flex; }
+}
 @media (max-width: 768px) {
   .btn { min-height: 44px; padding: 0.75rem 1.25rem; }
   .btn-lg { min-height: 48px; padding: 0.875rem 1.5rem; }
