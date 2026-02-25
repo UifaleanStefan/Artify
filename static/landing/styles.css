@@ -140,8 +140,9 @@ img { max-width: 100%; height: auto; }
   transition: transform 0.3s, opacity 0.3s;
 }
 
-/* Menu overlay – glassmorphism slide-out */
+/* Menu overlay – glassmorphism slide-out, hidden on desktop */
 .menu-overlay {
+  display: none;
   position: fixed;
   inset: 0;
   z-index: 200;
@@ -340,13 +341,15 @@ img { max-width: 100%; height: auto; }
 @media (min-width: 769px) {
   .hamburger-btn { display: none !important; }
   .menu-overlay { display: none !important; }
-  .header .nav { display: flex; }
+  .header .nav { display: flex !important; }
 }
+/* Mobile: show hamburger, hide desktop nav, enable menu overlay */
 @media (max-width: 768px) {
   .btn { min-height: 44px; padding: 0.75rem 1.25rem; }
   .btn-lg { min-height: 48px; padding: 0.875rem 1.5rem; }
   .hamburger-btn { display: flex; }
   .header .nav { display: none; }
+  .menu-overlay { display: block; }
 }
 
 /* Pack style thumb (scroll + arrows – used on details, billing, payment) */
@@ -656,12 +659,19 @@ img { max-width: 100%; height: auto; }
   border-radius: var(--radius-lg);
   box-shadow: 0 2px 24px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(37, 99, 235, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 .stats-section .section-title { margin-bottom: 2rem; }
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
 }
 .stats-card {
   background: var(--bg-accent);
@@ -700,7 +710,7 @@ img { max-width: 100%; height: auto; }
   font-weight: 500;
 }
 @media (max-width: 768px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; max-width: 100%; }
   .stats-card { padding: 1.25rem 0.75rem; }
   .stats-number { font-size: 1.5rem; }
 }
@@ -787,6 +797,7 @@ img { max-width: 100%; height: auto; }
   max-height: 420px;
   overflow: hidden;
   user-select: none;
+  cursor: pointer;
   --compare-pct: 50;
 }
 .compare-before,
