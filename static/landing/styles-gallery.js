@@ -49,7 +49,7 @@
         '<div class="gallery-card-thumb">' +
           '<div class="gallery-card-thumb-bg ' + (s.preview && s.styleImageUrl ? '' : (s.thumbnailClass || '')) + '"' + (s.preview && s.styleImageUrl ? ' style="' + thumbStyle(s) + '"' : '') + '></div>' +
           '<span class="gallery-card-tag ' + tagClass(s.category) + '">' + s.category + '</span>' +
-          (isComingSoon ? '<span class="gallery-card-coming-soon">Coming Soon</span>' : '') +
+          (isComingSoon ? '<span class="gallery-card-coming-soon">În curând</span>' : '') +
         '</div>' +
         '<div class="gallery-card-body">' +
           '<h3>' + s.title + '</h3>' +
