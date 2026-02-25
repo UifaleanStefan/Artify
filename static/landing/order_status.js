@@ -172,8 +172,8 @@
     var imgUrl = globalUrls[currentIndex];
     var styleImgUrl = null;
     
-    if (globalStyleUrls && globalStyleUrls.length > 0) {
-      styleImgUrl = globalStyleUrls.length > currentIndex ? globalStyleUrls[currentIndex] : globalStyleUrls[0];
+    if (globalStyleUrls && globalStyleUrls.length > currentIndex) {
+      styleImgUrl = globalStyleUrls[currentIndex];
     }
     
     if (styleImgUrl) {

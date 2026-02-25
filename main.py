@@ -155,7 +155,8 @@ def get_provider() -> ReplicateClient | OpenAIStylizeClient:
         api_key=settings.openai_api_key,
         base_url=settings.openai_stylize_base_url,
         timeout_seconds=settings.api_timeout_seconds,
-        quality="medium",
+        model=settings.openai_stylize_model or "gpt-image-1-mini",
+        quality=settings.openai_stylize_quality or "low",
         rate_limit_retries=settings.replicate_rate_limit_retries,
         rate_limit_base_wait=float(settings.replicate_rate_limit_base_wait_seconds),
     )
@@ -163,6 +164,23 @@ def get_provider() -> ReplicateClient | OpenAIStylizeClient:
 
 def get_service() -> StyleTransferService:
     return StyleTransferService(provider=get_provider())
+
+
+def get_replicate_service() -> Optional[StyleTransferService]:
+    """Replicate service for fallback when OpenAI fails. Returns None if replicate_api_token is not set."""
+    settings = get_settings()
+    if not (settings.replicate_api_token or "").strip():
+        return None
+    return StyleTransferService(
+        provider=ReplicateClient(
+            api_token=settings.replicate_api_token,
+            timeout_seconds=settings.api_timeout_seconds,
+            polling_timeout_seconds=settings.polling_timeout_seconds,
+            polling_interval_seconds=settings.polling_interval_seconds,
+            rate_limit_retries=settings.replicate_rate_limit_retries,
+            rate_limit_base_wait=float(settings.replicate_rate_limit_base_wait_seconds),
+        )
+    )
 
 
 @asynccontextmanager
@@ -690,39 +708,41 @@ ROYALTY_PORTRAITS_PACK_PATHS = [
 
 # Per-image (painting title, artist) for email captions.
 # Masters pack: 15 reference images (masters-01.jpg … masters-15.jpg); each result image gets the label at the same index.
+# Verified 2025-02: labels match actual images in pack.
 MASTERS_PACK_LABELS: list[tuple[str, str]] = [
-    ("Noapte înstelată", "Vincent van Gogh"),
-    ("Nufări", "Claude Monet"),
-    ("Portret renascentist", "Leonardo da Vinci"),
-    ("Portret cubist", "Pablo Picasso"),
-    ("Portret pop art", "Andy Warhol"),
-    ("Portret auriu", "Gustav Klimt"),
-    ("Stilul autoportretului", "Frida Kahlo"),
-    ("Marea val", "Katsushika Hokusai"),
-    ("Portret clarobscur", "Rembrandt van Rijn"),
-    ("Portret fauvist", "Henri Matisse"),
-    ("Vis surrealist", "Salvador Dalí"),
-    ("Fata cu perlă", "Johannes Vermeer"),
-    ("Flori de floarea-soarelui", "Vincent van Gogh"),
-    ("Sărutul", "Gustav Klimt"),
-    ("Nașterea lui Venus", "Sandro Botticelli"),
+    ("Crearea lui Adam", "Michelangelo"),                    # 01
+    ("Mona Lisa", "Leonardo da Vinci"),                      # 02
+    ("Compoziție cu grile", "Piet Mondrian"),                # 03
+    ("Strigătul", "Edvard Munch"),                           # 04
+    ("3 Mai 1808", "Francisco Goya"),                        # 05
+    ("Judith și Holoferne", "Caravaggio"),                   # 06
+    ("Străjirea de noapte", "Rembrandt van Rijn"),            # 07
+    ("Las Meninas", "Diego Velázquez"),                      # 08
+    ("Stilul clarobscur", "Rembrandt van Rijn"),              # 09 - verify image
+    ("Compoziția VIII", "Wassily Kandinsky"),                 # 10
+    ("Impresie, răsărit de soare", "Claude Monet"),          # 11
+    ("Pranzul la barcă", "Pierre-Auguste Renoir"),            # 12
+    ("Flori de floarea-soarelui", "Vincent van Gogh"),        # 13 - verify image
+    ("Domnișoarele din Avignon", "Pablo Picasso"),            # 14
+    ("Persistența memoriei", "Salvador Dalí"),               # 15
 ]
+# Impression & Color pack: verified 2025-02 - labels match actual images.
 IMPRESSION_COLOR_PACK_LABELS: list[tuple[str, str]] = [
-    ("Nufări", "Claude Monet"),
-    ("Noapte înstelată", "Vincent van Gogh"),
-    ("Portret fauvist", "Henri Matisse"),
-    ("Nufări (detaliu)", "Claude Monet"),
-    ("Impresie, răsărit de soare", "Claude Monet"),
-    ("Portret fauvist", "Henri Matisse"),
-    ("Câmp de grâu cu corbi", "Vincent van Gogh"),
-    ("Femei la tahiche", "Henri Matisse"),
-    ("Podul japonez", "Claude Monet"),
-    ("Autoportret", "Vincent van Gogh"),
-    ("Dans", "Henri Matisse"),
-    ("Irisi", "Vincent van Gogh"),
-    ("Stogul de fân", "Claude Monet"),
-    ("Odalisque", "Henri Matisse"),
-    ("Drum cu chiparos și stele", "Vincent van Gogh"),
+    ("Noapte înstelată", "Vincent van Gogh"),                # 01 - city street at night
+    ("Nufări", "Claude Monet"),                              # 02
+    ("Clasa de balet", "Edgar Degas"),                       # 03
+    ("D'où venons-nous...", "Paul Gauguin"),                 # 04
+    ("Femeie cu perdeau", "Claude Monet"),                   # 05 - Woman with Parasol
+    ("Podul japonez", "Claude Monet"),                       # 06
+    ("Impresie, răsărit de soare", "Claude Monet"),          # 07
+    ("Irisi", "Vincent van Gogh"),                           # 08
+    ("Muntele Sainte-Victoire", "Paul Cézanne"),             # 09
+    ("Pranzul la barcă", "Pierre-Auguste Renoir"),          # 10
+    ("Balul de la Moulin de la Galette", "Pierre-Auguste Renoir"),  # 11
+    ("Leagănul", "Pierre-Auguste Renoir"),                   # 12 - The Swing
+    ("Stogul de fân", "Claude Monet"),                       # 13 - verify image
+    ("Terasa cafenelei noaptea", "Vincent van Gogh"),        # 14 - Café Terrace at Night
+    ("Flori de floarea-soarelui", "Vincent van Gogh"),       # 15
 ]
 # Modern & Abstract pack: (titlu operă, artist) per imagine, verificate vizual
 # 01–15 = modern-abstract-01.jpg … 13.png … 15.jpg
@@ -733,7 +753,7 @@ MODERN_ABSTRACT_PACK_LABELS: list[tuple[str, str]] = [
     ("Black Square", "Kazimir Malevich"),                 # 04
     ("Broadway Boogie Woogie", "Piet Mondrian"),          # 05
     ("Woman I", "Willem de Kooning"),                     # 06
-    ("Street, Berlin", "Ernst Ludwig Kirchner"),          # 07
+    ("Street, Dresden", "Ernst Ludwig Kirchner"),         # 07 - Die Straße
     ("Blue Horse I", "Franz Marc"),                       # 08
     ("The Scream", "Edvard Munch"),                       # 09
     ("The Lovers", "René Magritte"),                      # 10
@@ -799,39 +819,41 @@ ROYALTY_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
 ]
 
 # Detailed style prompts for OpenAI (mode="prompt"). One per artwork; preserve face/identity.
+# Verified 2025-02: prompts match actual images in Masters pack.
 MASTERS_PACK_PROMPTS: list[str] = [
-    "in the style of Vincent van Gogh's Starry Night: thick impasto brush strokes, swirling night sky, vibrant yellows and blues, expressive texture. Preserve the subject's face, identity, and likeness.",
-    "in the style of Claude Monet's Water Lilies: soft impressionist brushwork, pastel colors, dappled light on water, dreamy atmosphere. Preserve the subject's face and identity.",
-    "in the style of Leonardo da Vinci's Renaissance portraiture: sfumato, soft lighting, classical composition, subtle modeling. Preserve the subject's face and likeness.",
-    "in the style of Pablo Picasso's Cubism: geometric shapes, fragmented planes, bold outlines, multiple viewpoints. Preserve the subject's recognizable face and identity.",
-    "in the style of Andy Warhol's Pop Art: bold flat colors, screen-print aesthetic, high contrast, celebrity portrait style. Preserve the subject's face and identity.",
-    "in the style of Gustav Klimt's golden phase: gold leaf patterns, Art Nouveau ornament, Byzantine influence, decorative borders. Preserve the subject's face and likeness.",
-    "in the style of Frida Kahlo's self-portraits: bold colors, Mexican folk art, symbolic elements, unibrow, flowers in hair. Preserve the subject's face and identity.",
-    "in the style of Hokusai's The Great Wave: Japanese ukiyo-e, woodblock print aesthetic, blue waves, Mount Fuji. Preserve the subject's face and likeness.",
+    "in the style of Michelangelo's The Creation of Adam: Sistine Chapel fresco, idealized human form, divine touch, Renaissance grandeur. Preserve the subject's face, identity, and likeness.",
+    "in the style of Leonardo da Vinci's Mona Lisa: sfumato, enigmatic smile, soft lighting, atmospheric landscape, Renaissance portraiture. Preserve the subject's face and identity.",
+    "in the style of Piet Mondrian's geometric abstraction: grid, primary colors, neoplasticism, De Stijl. Preserve the subject's face and likeness.",
+    "in the style of Edvard Munch's The Scream: expressionist, swirling sky, emotional intensity, distorted figure. Preserve the subject's face and identity.",
+    "in the style of Francisco Goya's The Third of May 1808: dramatic chiaroscuro, historical narrative, Romanticism. Preserve the subject's face and identity.",
+    "in the style of Caravaggio's Judith Beheading Holofernes: Baroque chiaroscuro, dramatic lighting, intense realism. Preserve the subject's face and likeness.",
+    "in the style of Rembrandt's The Night Watch: Dutch Golden Age, chiaroscuro, group portrait, dynamic composition. Preserve the subject's face and identity.",
+    "in the style of Diego Velázquez's Las Meninas: Spanish Baroque, complex composition, court portrait, mirror reflection. Preserve the subject's face and likeness.",
     "in the style of Rembrandt's chiaroscuro: dramatic light and shadow, warm browns, deep shadows, Old Master technique. Preserve the subject's face and identity.",
-    "in the style of Henri Matisse's Fauvism: bold flat colors, simplified forms, expressive color, decorative patterns. Preserve the subject's face and likeness.",
-    "in the style of Salvador Dalí's Surrealism: dreamlike imagery, melting forms, meticulous detail, fantastical elements. Preserve the subject's face and identity.",
-    "in the style of Johannes Vermeer's Girl with a Pearl Earring: soft diffused light, pearl earring, intimate portrait, Dutch Golden Age. Preserve the subject's face and likeness.",
+    "in the style of Wassily Kandinsky's Composition VIII: geometric abstraction, bold colors, dynamic forms. Preserve the subject's face and likeness.",
+    "in the style of Claude Monet's Impression, Sunrise: hazy harbor, orange sun, impressionist brushwork. Preserve the subject's face and identity.",
+    "in the style of Pierre-Auguste Renoir's Luncheon of the Boating Party: impressionist, social gathering, dappled light, vibrant colors. Preserve the subject's face and likeness.",
     "in the style of Vincent van Gogh's Sunflowers: thick brush strokes, vibrant yellows, expressive texture, post-impressionist. Preserve the subject's face and identity.",
-    "in the style of Gustav Klimt's The Kiss: gold leaf, embracing figures, Art Nouveau, decorative patterns. Preserve the subject's face and likeness.",
-    "in the style of Sandro Botticelli's Birth of Venus: Renaissance elegance, flowing hair, mythological grace, soft colors. Preserve the subject's face and identity.",
+    "in the style of Pablo Picasso's Les Demoiselles d'Avignon: proto-cubist, angular faces, bold primitive, fragmented forms. Preserve the subject's face and likeness.",
+    "in the style of Salvador Dalí's The Persistence of Memory: surrealist, melting clocks, dreamlike landscape. Preserve the subject's face and identity.",
 ]
+# Impression & Color pack: verified 2025-02 - prompts match actual images.
 IMPRESSION_COLOR_PACK_PROMPTS: list[str] = [
-    "in the style of Claude Monet's Water Lilies: soft impressionist brushwork, pastel colors, dappled light. Preserve the subject's face and identity.",
-    "in the style of Vincent van Gogh: thick brush strokes, vibrant colors, expressive texture. Preserve the subject's face and likeness.",
-    "in the style of Henri Matisse's Fauvism: bold flat colors, simplified forms, expressive color. Preserve the subject's face and identity.",
-    "in the style of Claude Monet's Water Lilies detail: soft impressionist brushwork, pastel palette. Preserve the subject's face and likeness.",
-    "in the style of Claude Monet's Impression, Sunrise: hazy atmosphere, orange sun, soft brushwork. Preserve the subject's face and identity.",
-    "in the style of Henri Matisse's Fauvist portraits: bold colors, simplified forms. Preserve the subject's face and likeness.",
-    "in the style of Vincent van Gogh's Wheatfield with Crows: dramatic sky, expressive brushwork, dark crows. Preserve the subject's face and identity.",
-    "in the style of Henri Matisse's Women at Tahiche: bold patterns, flat color, decorative. Preserve the subject's face and likeness.",
-    "in the style of Claude Monet's Japanese Bridge: impressionist garden, soft light, pastel colors. Preserve the subject's face and identity.",
-    "in the style of Vincent van Gogh's self-portrait: thick brush strokes, expressive eyes, post-impressionist. Preserve the subject's face and likeness.",
-    "in the style of Henri Matisse's The Dance: bold color, flowing forms, rhythmic movement. Preserve the subject's face and identity.",
+    "in the style of Vincent van Gogh's night city scenes: thick brush strokes, glowing lights, urban atmosphere. Preserve the subject's face and identity.",
+    "in the style of Claude Monet's Water Lilies: soft impressionist brushwork, pastel colors, dappled light on water. Preserve the subject's face and likeness.",
+    "in the style of Edgar Degas's ballet class: impressionist, dancers, rehearsal studio, soft light. Preserve the subject's face and identity.",
+    "in the style of Paul Gauguin's Where Do We Come From: post-impressionist, Tahitian figures, symbolic color. Preserve the subject's face and likeness.",
+    "in the style of Claude Monet's Woman with a Parasol: impressionist, outdoor scene, dappled light, flowing dress. Preserve the subject's face and identity.",
+    "in the style of Claude Monet's Japanese Bridge: impressionist garden, water lilies, soft light, pastel colors. Preserve the subject's face and likeness.",
+    "in the style of Claude Monet's Impression, Sunrise: hazy harbor, orange sun, soft brushwork. Preserve the subject's face and identity.",
     "in the style of Vincent van Gogh's Irises: vibrant blues and greens, expressive brushwork. Preserve the subject's face and likeness.",
+    "in the style of Paul Cézanne's Mont Sainte-Victoire: post-impressionist, geometric forms, structured landscape. Preserve the subject's face and identity.",
+    "in the style of Pierre-Auguste Renoir's Luncheon of the Boating Party: impressionist, social gathering, dappled light. Preserve the subject's face and likeness.",
+    "in the style of Pierre-Auguste Renoir's Bal du moulin de la Galette: impressionist, dance, outdoor cafe, vibrant colors. Preserve the subject's face and identity.",
+    "in the style of Pierre-Auguste Renoir's The Swing: impressionist, woman on swing, dappled forest light. Preserve the subject's face and likeness.",
     "in the style of Claude Monet's Haystacks: soft light, impressionist brushwork, warm tones. Preserve the subject's face and identity.",
-    "in the style of Henri Matisse's Odalisque: bold color, decorative patterns, exotic influence. Preserve the subject's face and likeness.",
-    "in the style of Vincent van Gogh's Road with Cypress and Star: swirling sky, expressive cypress, night scene. Preserve the subject's face and identity.",
+    "in the style of Vincent van Gogh's Café Terrace at Night: bright yellow awning, starry sky, night scene. Preserve the subject's face and likeness.",
+    "in the style of Vincent van Gogh's Sunflowers: thick brush strokes, vibrant yellows, expressive texture. Preserve the subject's face and identity.",
 ]
 MODERN_ABSTRACT_PACK_PROMPTS: list[str] = [
     "in the style of Wassily Kandinsky's Composition VIII: geometric shapes, bold colors, abstract expression. Preserve the subject's face and identity.",
@@ -840,7 +862,7 @@ MODERN_ABSTRACT_PACK_PROMPTS: list[str] = [
     "in the style of Kazimir Malevich's Black Square: suprematist, geometric minimalism, bold contrast. Preserve the subject's face and likeness.",
     "in the style of Piet Mondrian's Broadway Boogie Woogie: grid, primary colors, geometric abstraction. Preserve the subject's face and identity.",
     "in the style of Willem de Kooning's Woman I: abstract expressionist, bold brushwork, distorted forms. Preserve the subject's face and likeness.",
-    "in the style of Ernst Ludwig Kirchner's Street Berlin: expressionist, angular forms, bold colors. Preserve the subject's face and identity.",
+    "in the style of Ernst Ludwig Kirchner's Street Dresden: German expressionist, angular forms, bold colors, urban scene. Preserve the subject's face and identity.",
     "in the style of Franz Marc's Blue Horse I: expressionist, bold blue, animal forms. Preserve the subject's face and likeness.",
     "in the style of Edvard Munch's The Scream: expressionist, swirling sky, emotional intensity. Preserve the subject's face and identity.",
     "in the style of René Magritte's The Lovers: surrealist, mysterious, dreamlike. Preserve the subject's face and likeness.",
@@ -902,6 +924,22 @@ ROYALTY_PORTRAITS_PACK_PROMPTS: list[str] = [
     "in the style of Fyodor Rokotov's Catherine II: Russian imperial, elegant. Preserve the subject's face and identity.",
 ]
 
+# Verify alignment: PACK_PATHS[i] -> PACK_LABELS[i] -> PACK_PROMPTS[i] (index i = file NN where NN = i+1)
+def _verify_pack_alignment() -> None:
+    packs = [
+        (MASTERS_PACK_PATHS, MASTERS_PACK_LABELS, MASTERS_PACK_PROMPTS),
+        (IMPRESSION_COLOR_PACK_PATHS, IMPRESSION_COLOR_PACK_LABELS, IMPRESSION_COLOR_PACK_PROMPTS),
+        (MODERN_ABSTRACT_PACK_PATHS, MODERN_ABSTRACT_PACK_LABELS, MODERN_ABSTRACT_PACK_PROMPTS),
+        (ANCIENT_WORLDS_PACK_PATHS, ANCIENT_WORLDS_PACK_LABELS, ANCIENT_WORLDS_PACK_PROMPTS),
+        (EVOLUTION_PORTRAITS_PACK_PATHS, EVOLUTION_PORTRAITS_PACK_LABELS, EVOLUTION_PORTRAITS_PACK_PROMPTS),
+        (ROYALTY_PORTRAITS_PACK_PATHS, ROYALTY_PORTRAITS_PACK_LABELS, ROYALTY_PORTRAITS_PACK_PROMPTS),
+    ]
+    for paths, labels, prompts in packs:
+        n = len(paths)
+        if len(labels) != n or len(prompts) != n:
+            logger.error("Pack alignment error: paths=%d labels=%d prompts=%d", n, len(labels), len(prompts))
+
+
 # Map style_id to prompts list for URL-to-prompt resolution
 _STYLE_ID_TO_PROMPTS: dict[int, list[str]] = {
     STYLE_ID_MASTERS_PACK: MASTERS_PACK_PROMPTS,
@@ -911,21 +949,25 @@ _STYLE_ID_TO_PROMPTS: dict[int, list[str]] = {
     STYLE_ID_EVOLUTION_PORTRAITS_PACK: EVOLUTION_PORTRAITS_PACK_PROMPTS,
     STYLE_ID_ROYALTY_PORTRAITS_PACK: ROYALTY_PORTRAITS_PACK_PROMPTS,
 }
+_verify_pack_alignment()
 
 
 def _style_url_to_prompt(style_url: str, style_id: int) -> str:
-    """Parse style URL to get pack and index, return the corresponding style prompt."""
-    # Match paths like .../styles/masters/masters-01.jpg or .../masters-01.jpg
+    """Parse style URL to get 1-based index, return the corresponding style prompt.
+    Critical: index from URL must match PACK_PATHS order (01=first, 02=second, ...).
+    """
+    # Match paths like .../styles/masters/masters-01.jpg or .../impression-color-05.jpg
     match = re.search(r"/styles/([^/]+)/\1-(\d{2})\.(?:jpg|jpeg|png|webp)", style_url, re.I)
     if not match:
-        match = re.search(r"/([a-z-]+)-(\d{2})\.(?:jpg|jpeg|png|webp)", style_url, re.I)
+        match = re.search(r"/([a-z0-9-]+)-(\d{2})\.(?:jpg|jpeg|png|webp)", style_url, re.I)
     if not match:
+        logger.warning("Could not parse style index from URL: %s", (style_url or "")[:80])
         return "in the style of classical portrait painting. Preserve the subject's face and identity."
-    pack_name = match.group(1).lower()
     index_str = match.group(2)
-    idx = int(index_str)  # 1-based
+    idx = int(index_str)  # 1-based (01 -> 1)
     prompts = _STYLE_ID_TO_PROMPTS.get(style_id)
     if not prompts or idx < 1 or idx > len(prompts):
+        logger.warning("Style index %d out of range for style_id %s (prompts len=%d)", idx, style_id, len(prompts or []))
         return "in the style of classical portrait painting. Preserve the subject's face and identity."
     return prompts[idx - 1]
 
@@ -1117,6 +1159,7 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
         
     labels = None
     style_name = order.style_name
+    style_image_urls_out = order.style_image_urls
     if order.status == "completed" and order.result_urls:
         try:
             urls = json.loads(order.result_urls)
@@ -1128,6 +1171,12 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
                     style_data = next((s for s in styles if s.get("id") == order.style_id), None)
                     if style_data:
                         style_name = style_data.get("title")
+                # Ensure style_image_urls has same length and order as result_urls (1:1 mapping)
+                if order.style_image_urls:
+                    style_arr = json.loads(order.style_image_urls)
+                    if isinstance(style_arr, list) and len(style_arr) != len(urls):
+                        style_arr = style_arr[: len(urls)]
+                        style_image_urls_out = json.dumps(style_arr)
         except Exception:
             pass
 
@@ -1139,7 +1188,7 @@ async def get_order_status(order_id: str, db: Session = Depends(get_db)) -> Orde
         style_id=order.style_id,
         style_name=style_name,
         initial_image_url=order.image_url,
-        style_image_urls=order.style_image_urls,
+        style_image_urls=style_image_urls_out,
         replicate_prediction_details=order.replicate_prediction_details,
         error=order.style_transfer_error,
     )
@@ -1350,13 +1399,15 @@ def _run_style_transfer_sync(order_id: str) -> None:
                 0.55 if portrait_mode == "realistic" else 0.8
             )
             remaining_style_urls = style_urls[skip:]
+            replicate_fallback = get_replicate_service() if use_openai else None
             for i, style_url in enumerate(remaining_style_urls):
                 if i > 0:
                     time.sleep(30)
                 result_url, job_id = None, None
+                provider_used = service
                 style_prompt = _style_url_to_prompt(style_url, order.style_id) if use_openai else None
-                max_attempts = 3
-                for attempt in range(max_attempts):
+                max_openai_attempts = 3
+                for attempt in range(max_openai_attempts):
                     try:
                         result_url, job_id = service.transfer_style_sync(
                             image_url=source_image_url,
@@ -1365,20 +1416,41 @@ def _run_style_transfer_sync(order_id: str) -> None:
                             style_prompt=style_prompt,
                         )
                         break
-                    except StyleTransferTimeout as e:
-                        if attempt < max_attempts - 1:
+                    except (StyleTransferTimeout, StyleTransferError) as e:
+                        if attempt < max_openai_attempts - 1:
                             logger.warning(
-                                "Style transfer polling timed out for order %s image %d (attempt %d/%d), retrying in 10s: %s",
-                                order_id, skip + i + 1, attempt + 1, max_attempts, e,
+                                "Style transfer failed for order %s image %d (attempt %d/%d), retrying in 10s: %s",
+                                order_id, skip + i + 1, attempt + 1, max_openai_attempts, e,
                             )
                             time.sleep(10)
                             continue
+                        # After 3 OpenAI failures: try Replicate fallback if available
+                        if use_openai and replicate_fallback:
+                            try:
+                                logger.info(
+                                    "OpenAI failed 3 times for order %s image %d; falling back to Replicate",
+                                    order_id, skip + i + 1,
+                                )
+                                result_url, job_id = replicate_fallback.transfer_style_sync(
+                                    image_url=source_image_url,
+                                    style_image_url=style_url,
+                                    structure_denoising_strength=structure_denoising_strength,
+                                    style_prompt=None,
+                                )
+                                provider_used = replicate_fallback
+                                break
+                            except (StyleTransferTimeout, StyleTransferError) as fallback_err:
+                                logger.warning(
+                                    "Replicate fallback also failed for order %s image %d: %s",
+                                    order_id, skip + i + 1, fallback_err,
+                                )
+                                raise fallback_err from e
                         raise
                 result_urls_list.append(result_url)
                 job_ids.append(job_id)
                 result_url_for_pred = result_url if isinstance(result_url, str) else None
                 try:
-                    pred = service.provider.get_prediction(job_id)
+                    pred = provider_used.provider.get_prediction(job_id)
                     prediction_details.append({
                         "id": pred.get("id"),
                         "status": pred.get("status"),

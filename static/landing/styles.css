@@ -743,87 +743,76 @@ img { max-width: 100%; height: auto; }
 .how-section .section-subtitle { margin-bottom: 1.5rem; }
 .how-subtitle { margin-bottom: 2rem !important; }
 
-/* Progress indicator – horizontal line with numbered circles (desktop) */
-.steps-progress {
+/* Vertical timeline – numbered markers + cards (Cântec-Cadou style) */
+.steps-timeline {
+  position: relative;
+  max-width: 720px;
+  margin: 0 auto;
+  padding-left: 0;
+}
+.steps-timeline::before {
+  content: '';
+  position: absolute;
+  left: 1.25rem;
+  top: 2rem;
+  bottom: 2rem;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--primary) 0%, var(--accent) 50%, var(--accent-2) 100%);
+  opacity: 0.6;
+}
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+.step-item:last-child { margin-bottom: 0; }
+.step-marker {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-3) 100%);
+  color: white;
+  font-size: 0.9375rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-  width: 100%;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35);
+  z-index: 1;
 }
-.steps-progress-line {
-  flex: 1;
-  min-width: 2rem;
-  height: 3px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  opacity: 0.7;
-}
-.steps-progress-num {
-  width: 2.25rem;
-  height: 2.25rem;
-  min-width: 2.25rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-3) 100%);
-  color: white !important;
-  font-size: 0.875rem;
-  font-weight: 700;
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-}
-
-/* Steps grid – horizontal on desktop */
-.steps {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-}
+.step-item:nth-child(2) .step-marker { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-3) 100%); box-shadow: 0 2px 10px rgba(245, 158, 11, 0.35); }
+.step-item:nth-child(3) .step-marker { background: linear-gradient(135deg, var(--accent-2) 0%, var(--primary) 100%); box-shadow: 0 2px 10px rgba(16, 185, 129, 0.35); }
 .step-card {
+  flex: 1;
+  min-width: 0;
   background: white;
-  padding: 1.75rem 1.5rem;
+  padding: 1.5rem 1.5rem;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+  text-align: left;
   border: 1px solid rgba(37, 99, 235, 0.08);
 }
-.step-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  opacity: 0.9;
-}
-.step-card:nth-child(2)::before { background: linear-gradient(90deg, var(--accent), var(--accent-3)); }
-.step-card:nth-child(3)::before { background: linear-gradient(90deg, var(--accent-2), var(--primary)); }
 .step-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  margin: 0 auto 1rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: 0 0 0.75rem;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.35rem;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  font-size: 1.2rem;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.3);
 }
-.step-card:nth-child(2) .step-icon { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%); box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); }
-.step-card:nth-child(3) .step-icon { background: linear-gradient(135deg, var(--accent-2) 0%, #34d399 100%); box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); }
-.step-card h3 { font-size: 1.125rem; margin: 0 0 0.5rem; color: var(--text); }
-.step-card p { margin: 0; color: var(--text-muted); font-size: 0.875rem; line-height: 1.4; }
+.step-item:nth-child(2) .step-icon { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%); box-shadow: 0 3px 8px rgba(245, 158, 11, 0.3); }
+.step-item:nth-child(3) .step-icon { background: linear-gradient(135deg, var(--accent-2) 0%, #34d399 100%); box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3); }
+.step-card h3 { font-size: 1.125rem; margin: 0 0 0.5rem; color: var(--text); font-weight: 600; }
+.step-card p { margin: 0; color: var(--text-muted); font-size: 0.875rem; line-height: 1.45; }
 
 .how-cta-wrap {
   margin-top: 2rem;
@@ -1595,9 +1584,11 @@ a.style-card:hover .style-card-bg {
   .section-line,
   .section-line--top { display: none; }
   .how-section { border-radius: 12px; }
-  .steps-progress { display: none; }
-  .steps { grid-template-columns: 1fr; gap: 1.25rem; }
-  .step-card { padding: 1.5rem; }
+  .steps-timeline { padding-left: 0; }
+  .steps-timeline::before { left: 1rem; top: 1.5rem; bottom: 1.5rem; }
+  .step-item { gap: 1rem; margin-bottom: 1.25rem; }
+  .step-marker { width: 2rem; height: 2rem; font-size: 0.8125rem; }
+  .step-card { padding: 1.25rem 1rem; }
   .how-cta-wrap { margin-top: 1.5rem; }
   .styles-header { flex-direction: column; align-items: stretch; text-align: center; }
   .styles-header .section-title,

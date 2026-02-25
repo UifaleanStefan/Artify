@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     # OpenAI API (when style_transfer_provider=openai)
     openai_api_key: str = ""
     openai_stylize_base_url: Optional[str] = None  # default: https://api.openai.com
+    openai_stylize_model: str = "gpt-image-1.5"  # gpt-image-1.5 (better) or gpt-image-1-mini (cheaper)
+    openai_stylize_quality: str = "low"  # low (~$0.01/img), medium (~$0.04), high (~$0.17)
 
     # Replicate API (when style_transfer_provider=replicate)
     replicate_api_token: str = ""
