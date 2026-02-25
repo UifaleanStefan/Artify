@@ -66,6 +66,9 @@ class OpenAIStylizeClient:
         quality = quality or self.quality
         output_format = output_format or self.output_format
         input_fidelity = input_fidelity or self.input_fidelity
+        # gpt-image-1-mini does not support input_fidelity="high"; fall back to "low"
+        if self.model == "gpt-image-1-mini" and input_fidelity == "high":
+            input_fidelity = "low"
 
         url = f"{self.base_url}/v1/images/edits"
         payload = {
