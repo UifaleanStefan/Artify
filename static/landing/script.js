@@ -29,4 +29,35 @@
     });
   }
   window.addEventListener('scroll', onScroll);
+
+  /* Hamburger menu */
+  var hamburgerBtn = document.getElementById('hamburger-btn');
+  var menuOverlay = document.getElementById('menu-overlay');
+  var menuClose = document.getElementById('menu-close');
+  if (hamburgerBtn && menuOverlay && menuClose) {
+    function openMenu() {
+      menuOverlay.classList.add('open');
+      menuOverlay.setAttribute('aria-hidden', 'false');
+      hamburgerBtn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMenu() {
+      menuOverlay.classList.remove('open');
+      menuOverlay.setAttribute('aria-hidden', 'true');
+      hamburgerBtn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+    hamburgerBtn.addEventListener('click', openMenu);
+    menuClose.addEventListener('click', closeMenu);
+    menuOverlay.addEventListener('click', function (e) {
+      if (e.target === menuOverlay) closeMenu();
+    });
+    var menuLinks = menuOverlay.querySelectorAll('a');
+    menuLinks.forEach(function (link) {
+      link.addEventListener('click', function () { closeMenu(); });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menuOverlay.classList.contains('open')) closeMenu();
+    });
+  }
 })();
