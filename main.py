@@ -162,7 +162,7 @@ def get_provider() -> ReplicateClient | OpenAIStylizeClient:
         api_key=settings.openai_api_key,
         base_url=settings.openai_stylize_base_url,
         timeout_seconds=settings.api_timeout_seconds,
-        model=settings.openai_stylize_model or "gpt-image-1-mini",
+        model=settings.openai_stylize_model or "gpt-image-1.5",
         quality=settings.openai_stylize_quality or "low",
         rate_limit_retries=settings.replicate_rate_limit_retries,
         rate_limit_base_wait=float(settings.replicate_rate_limit_base_wait_seconds),
@@ -1406,8 +1406,9 @@ def _run_style_transfer_sync(order_id: str) -> None:
             settings = get_settings()
             use_openai = (settings.style_transfer_provider or "openai").strip().lower() == "openai"
             portrait_mode = (order.portrait_mode or "realistic").strip().lower()
-            structure_denoising_strength = (
-                0.55 if portrait_mode == "realistic" else 0.8
+            artistic_suffix = (
+                " Make the result more artistic, painterly, and boldly stylized."
+                if portrait_mode == "artistic" else None
             )
             remaining_style_urls = style_urls[skip:]
             replicate_fallback = get_replicate_service() if use_openai else None
@@ -1423,8 +1424,9 @@ def _run_style_transfer_sync(order_id: str) -> None:
                         result_url, job_id = service.transfer_style_sync(
                             image_url=source_image_url,
                             style_image_url=style_url if not use_openai else None,
-                            structure_denoising_strength=structure_denoising_strength,
+                            structure_denoising_strength=0.7,
                             style_prompt=style_prompt,
+                            prompt_suffix=artistic_suffix,
                         )
                         break
                     except (StyleTransferTimeout, StyleTransferError) as e:
@@ -1445,8 +1447,9 @@ def _run_style_transfer_sync(order_id: str) -> None:
                                 result_url, job_id = replicate_fallback.transfer_style_sync(
                                     image_url=source_image_url,
                                     style_image_url=style_url,
-                                    structure_denoising_strength=structure_denoising_strength,
+                                    structure_denoising_strength=0.7,
                                     style_prompt=None,
+                                    prompt_suffix=artistic_suffix,
                                 )
                                 provider_used = replicate_fallback
                                 break

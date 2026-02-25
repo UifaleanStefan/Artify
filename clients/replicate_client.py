@@ -52,25 +52,29 @@ class ReplicateClient:
         image_url: str,
         style_image_url: str,
         structure_denoising_strength: float = 0.7,
+        prompt_suffix: Optional[str] = None,
     ) -> str:
         """Submit a style transfer job. Returns prediction ID."""
         if not image_url.startswith("https://") or not style_image_url.startswith("https://"):
             raise StyleTransferError(
                 "Image URLs must be public HTTPS URLs (set PUBLIC_BASE_URL on the server that creates orders)."
             )
+        base_prompt = (
+            "Adapt the style of the style image to the structure image. "
+            "CRITICAL: Preserve the exact facial features, identity, age, and likeness of EVERY person in the structure image. "
+            "Each face must remain clearly recognizable. Keep brush strokes and artistic style from the style image "
+            "while strictly maintaining the structure image's faces, expressions, and proportions. "
+            "Preserve gender and individual characteristics of all people."
+        )
+        if prompt_suffix:
+            base_prompt = base_prompt + " " + prompt_suffix.strip()
         url = f"{self.base_url}/predictions"
         payload = {
             "version": self.STYLE_TRANSFER_VERSION,
             "input": {
                 "structure_image": image_url,
                 "style_image": style_image_url,
-                "prompt": (
-                    "Adapt the style of the style image to the structure image. "
-                    "CRITICAL: Preserve the exact facial features, identity, age, and likeness of EVERY person in the structure image. "
-                    "Each face must remain clearly recognizable. Keep brush strokes and artistic style from the style image "
-                    "while strictly maintaining the structure image's faces, expressions, and proportions. "
-                    "Preserve gender and individual characteristics of all people."
-                ),
+                "prompt": base_prompt,
                 "negative_prompt": (
                     "blurry faces, distorted features, merged faces, unrecognizable people, "
                     "wrong age, changed identity, deformed faces, extra limbs, bad anatomy"

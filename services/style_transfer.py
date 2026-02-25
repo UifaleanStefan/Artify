@@ -22,15 +22,15 @@ class StyleTransferService:
         style_image_url: Optional[str] = None,
         structure_denoising_strength: float = 0.7,
         style_prompt: Optional[str] = None,
+        prompt_suffix: Optional[str] = None,
     ) -> Tuple[Union[str, dict], str]:
         """Blocking provider calls. Returns (result_url or {content, content_type}, job_id)."""
         if isinstance(self.provider, OpenAIStylizeClient):
             if not style_prompt:
                 raise ValueError("style_prompt required when using OpenAI provider")
-            # Map structure_denoising_strength to input_fidelity: realistic (0.55) -> high, artistic (0.8) -> low
-            input_fidelity = "high" if structure_denoising_strength <= 0.6 else "low"
+            full_prompt = style_prompt + (prompt_suffix or "")
             content, content_type = self.provider.stylize(
-                image_url, style_prompt, input_fidelity=input_fidelity
+                image_url, full_prompt, input_fidelity="high"
             )
             logger.info(
                 "OpenAI style transfer completed",
@@ -41,7 +41,7 @@ class StyleTransferService:
             if not style_image_url:
                 raise ValueError("style_image_url required when using Replicate provider")
             job_id = self.provider.submit_style_transfer(
-                image_url, style_image_url, structure_denoising_strength
+                image_url, style_image_url, structure_denoising_strength, prompt_suffix=prompt_suffix
             )
             logger.info(
                 "Style transfer submitted",
@@ -60,6 +60,7 @@ class StyleTransferService:
         style_image_url: Optional[str] = None,
         structure_denoising_strength: float = 0.7,
         style_prompt: Optional[str] = None,
+        prompt_suffix: Optional[str] = None,
     ) -> Tuple[Union[str, dict], str]:
         """Synchronous style transfer call for worker threads/background processing."""
         return self._transfer_style_sync(
@@ -67,6 +68,7 @@ class StyleTransferService:
             style_image_url,
             structure_denoising_strength,
             style_prompt,
+            prompt_suffix,
         )
 
     async def transfer_style(
@@ -75,6 +77,7 @@ class StyleTransferService:
         style_image_url: Optional[str] = None,
         structure_denoising_strength: float = 0.7,
         style_prompt: Optional[str] = None,
+        prompt_suffix: Optional[str] = None,
     ) -> Tuple[str, str]:
         """Run style transfer without blocking event loop."""
         return await asyncio.to_thread(
@@ -83,4 +86,5 @@ class StyleTransferService:
             style_image_url,
             structure_denoising_strength,
             style_prompt,
+            prompt_suffix,
         )
