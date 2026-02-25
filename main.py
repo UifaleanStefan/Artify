@@ -747,7 +747,7 @@ IMPRESSION_COLOR_PACK_LABELS: list[tuple[str, str]] = [
     ("Pranzul la barcă", "Pierre-Auguste Renoir"),          # 10
     ("Balul de la Moulin de la Galette", "Pierre-Auguste Renoir"),  # 11
     ("Leagănul", "Pierre-Auguste Renoir"),                   # 12 - The Swing
-    ("Stogul de fân", "Claude Monet"),                       # 13 - verify image
+    ("Noapte înstelată", "Vincent van Gogh"),                # 13 - Starry Night
     ("Terasa cafenelei noaptea", "Vincent van Gogh"),        # 14 - Café Terrace at Night
     ("Flori de floarea-soarelui", "Vincent van Gogh"),       # 15
 ]
@@ -858,7 +858,7 @@ IMPRESSION_COLOR_PACK_PROMPTS: list[str] = [
     "in the style of Pierre-Auguste Renoir's Luncheon of the Boating Party: impressionist, social gathering, dappled light. Preserve the subject's face and likeness.",
     "in the style of Pierre-Auguste Renoir's Bal du moulin de la Galette: impressionist, dance, outdoor cafe, vibrant colors. Preserve the subject's face and identity.",
     "in the style of Pierre-Auguste Renoir's The Swing: impressionist, woman on swing, dappled forest light. Preserve the subject's face and likeness.",
-    "in the style of Claude Monet's Haystacks: soft light, impressionist brushwork, warm tones. Preserve the subject's face and identity.",
+    "in the style of Vincent van Gogh's Starry Night: thick impasto brush strokes, swirling night sky, vibrant yellows and blues, expressive texture. Preserve the subject's face and identity.",
     "in the style of Vincent van Gogh's Café Terrace at Night: bright yellow awning, starry sky, night scene. Preserve the subject's face and likeness.",
     "in the style of Vincent van Gogh's Sunflowers: thick brush strokes, vibrant yellows, expressive texture. Preserve the subject's face and identity.",
 ]
@@ -959,7 +959,12 @@ _STYLE_ID_TO_PROMPTS: dict[int, list[str]] = {
 _verify_pack_alignment()
 
 
-_BRUSHWORK_PHRASE = " Replicate the brushwork and paint texture of the painting. "
+_BRUSHWORK_PHRASE = (
+    " CRITICAL: Faithfully replicate the exact brushwork, stroke direction, paint texture, "
+    "and surface quality of the original painting. Use visible, textured brushstrokes that match "
+    "the painting's technique—impasto where thick, smooth where blended. The result must look "
+    "like an actual oil painting with authentic brush marks. "
+)
 
 def _style_url_to_prompt(style_url: str, style_id: int) -> str:
     """Parse style URL to get 1-based index, return the corresponding style prompt.
@@ -1407,7 +1412,9 @@ def _run_style_transfer_sync(order_id: str) -> None:
             use_openai = (settings.style_transfer_provider or "openai").strip().lower() == "openai"
             portrait_mode = (order.portrait_mode or "realistic").strip().lower()
             artistic_suffix = (
-                " Make the result more artistic, painterly, and boldly stylized."
+                " Make the result strongly artistic and painterly. Emphasize visible brushwork, "
+                "bold impasto texture, and pronounced brushstrokes. The output must look like a "
+                "real oil painting with thick, expressive paint application—not smooth or digital."
                 if portrait_mode == "artistic" else None
             )
             remaining_style_urls = style_urls[skip:]
