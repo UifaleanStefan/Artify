@@ -72,6 +72,13 @@ def _persist_result_images(order_id: str, result_items: list) -> list[str]:
                         content_type = item.get("content_type", "image/jpeg").split(";")[0].strip()
                     else:
                         url = str(item)
+                        if not url.startswith(("http://", "https://")):
+                            logger.debug(
+                                "Skipping persist for result image %s (non-fetchable placeholder): %s",
+                                i, url[:50] if len(url) > 50 else url,
+                            )
+                            permanent.append("")
+                            continue
                         with httpx.Client(timeout=45) as client:
                             r = client.get(url)
                         if r.status_code >= 400:
@@ -952,6 +959,8 @@ _STYLE_ID_TO_PROMPTS: dict[int, list[str]] = {
 _verify_pack_alignment()
 
 
+_BRUSHWORK_PHRASE = " Replicate the brushwork and paint texture of the painting. "
+
 def _style_url_to_prompt(style_url: str, style_id: int) -> str:
     """Parse style URL to get 1-based index, return the corresponding style prompt.
     Critical: index from URL must match PACK_PATHS order (01=first, 02=second, ...).
@@ -962,14 +971,16 @@ def _style_url_to_prompt(style_url: str, style_id: int) -> str:
         match = re.search(r"/([a-z0-9-]+)-(\d{2})\.(?:jpg|jpeg|png|webp)", style_url, re.I)
     if not match:
         logger.warning("Could not parse style index from URL: %s", (style_url or "")[:80])
-        return "in the style of classical portrait painting. Preserve the subject's face and identity."
+        return "in the style of classical portrait painting." + _BRUSHWORK_PHRASE + "Preserve the subject's face and identity."
     index_str = match.group(2)
     idx = int(index_str)  # 1-based (01 -> 1)
     prompts = _STYLE_ID_TO_PROMPTS.get(style_id)
     if not prompts or idx < 1 or idx > len(prompts):
         logger.warning("Style index %d out of range for style_id %s (prompts len=%d)", idx, style_id, len(prompts or []))
-        return "in the style of classical portrait painting. Preserve the subject's face and identity."
-    return prompts[idx - 1]
+        return "in the style of classical portrait painting." + _BRUSHWORK_PHRASE + "Preserve the subject's face and identity."
+    base = prompts[idx - 1]
+    # Insert brushwork phrase before "Preserve" (prompts end with ". Preserve the subject's...")
+    return base.replace(". Preserve", "." + _BRUSHWORK_PHRASE + "Preserve")
 
 
 def _build_result_labels(
