@@ -51,40 +51,44 @@
       onMove(e);
     });
 
-    /* Touch: tap anywhere to move, or drag handle */
-    wrap.addEventListener('touchstart', function (e) {
+    /* Touch: drag handle to move slider; tap anywhere on image to jump */
+    var handle = divider.querySelector('.compare-handle') || divider;
+
+    handle.addEventListener('touchstart', function (e) {
+      e.preventDefault(); /* stop outer scroll container stealing this drag */
       var touch = e.touches[0];
-      var touchedDivider = e.target === divider || divider.contains(e.target);
-      var startX = touch.clientX;
-      var startTime = Date.now();
-      var moved = false;
+      var rect = wrap.getBoundingClientRect();
+      setPct(wrap, ((touch.clientX - rect.left) / rect.width) * 100);
 
       function touchMove(ev) {
-        if (!touchedDivider) return;
-        moved = true;
         ev.preventDefault();
         var t = ev.touches[0];
-        var rect = wrap.getBoundingClientRect();
-        setPct(wrap, ((t.clientX - rect.left) / rect.width) * 100);
+        var r = wrap.getBoundingClientRect();
+        setPct(wrap, ((t.clientX - r.left) / r.width) * 100);
       }
+      function touchEnd() {
+        handle.removeEventListener('touchmove', touchMove);
+        handle.removeEventListener('touchend', touchEnd);
+      }
+      handle.addEventListener('touchmove', touchMove, { passive: false });
+      handle.addEventListener('touchend', touchEnd, { passive: true });
+    }, { passive: false });
+
+    /* Tap anywhere on the image (not on handle) to jump slider there */
+    wrap.addEventListener('touchstart', function (e) {
+      var touchedHandle = e.target === handle || handle.contains(e.target) ||
+                          e.target === divider || divider.contains(e.target);
+      if (touchedHandle) return; /* handled above */
+      var touch = e.touches[0];
+      var startX = touch.clientX;
+      var startTime = Date.now();
       function touchEnd(ev) {
-        wrap.removeEventListener('touchmove', touchMove);
         wrap.removeEventListener('touchend', touchEnd);
-        /* If short tap with little movement, move slider to tap position */
-        if (!moved && ev.changedTouches && ev.changedTouches[0] && Date.now() - startTime < 400) {
-          var endX = ev.changedTouches[0].clientX;
-          if (Math.abs(endX - startX) < 15) {
-            moveToPosition(wrap, ev.changedTouches[0].clientX);
-          }
+        if (ev.changedTouches && Date.now() - startTime < 350 &&
+            Math.abs(ev.changedTouches[0].clientX - startX) < 12) {
+          moveToPosition(wrap, ev.changedTouches[0].clientX);
         }
       }
-
-      if (touchedDivider) {
-        e.preventDefault();
-        var rect = wrap.getBoundingClientRect();
-        setPct(wrap, ((touch.clientX - rect.left) / rect.width) * 100);
-      }
-      wrap.addEventListener('touchmove', touchMove, { passive: false });
       wrap.addEventListener('touchend', touchEnd, { passive: true });
     }, { passive: true });
   }
