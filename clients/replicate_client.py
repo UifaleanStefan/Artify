@@ -53,6 +53,7 @@ class ReplicateClient:
         style_image_url: str,
         structure_denoising_strength: float = 0.7,
         prompt_suffix: Optional[str] = None,
+        output_quality: Optional[int] = None,
     ) -> str:
         """Submit a style transfer job. Returns prediction ID."""
         if not image_url.startswith("https://") or not style_image_url.startswith("https://"):
@@ -81,7 +82,7 @@ class ReplicateClient:
                 ),
                 "structure_denoising_strength": structure_denoising_strength,
                 "output_format": "jpg",
-                "output_quality": 80,
+                "output_quality": output_quality or 80,
                 "number_of_images": 1,
             },
         }

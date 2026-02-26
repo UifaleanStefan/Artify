@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marketing Style Transfer – Artify</title>
+  <link rel="stylesheet" href="/static/landing/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <style>
+    .marketing-main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    .marketing-section {
+      margin-bottom: 2rem;
+    }
+    .marketing-section h2 {
+      font-size: 1.25rem;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+    .marketing-upload-zone {
+      border: 2px dashed var(--primary);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      background: var(--bg-accent);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .marketing-upload-zone:hover {
+      background: rgba(37, 99, 235, 0.08);
+      border-color: var(--primary-light);
+    }
+    .marketing-upload-zone.dragover {
+      background: rgba(37, 99, 235, 0.12);
+      border-color: var(--primary);
+    }
+    .marketing-upload-zone input[type="file"] {
+      display: none;
+    }
+    .marketing-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid rgba(100, 116, 139, 0.3);
+      border-radius: var(--radius);
+      background: white;
+      font-family: inherit;
+    }
+    .marketing-select optgroup {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .marketing-result {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+    .marketing-result img {
+      max-width: 100%;
+      border-radius: var(--radius);
+      display: block;
+      margin: 0 auto 1rem;
+    }
+    .marketing-result .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 1rem;
+    }
+    .marketing-result .download-btn:hover {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    }
+    .marketing-error {
+      color: var(--warm);
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(239, 68, 68, 0.08);
+      border-radius: var(--radius);
+    }
+    .marketing-loading {
+      color: var(--text-muted);
+      margin-top: 1rem;
+    }
+    .marketing-preview {
+      max-width: 200px;
+      margin: 1rem auto;
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .marketing-preview img {
+      width: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <header class="header header-with-border">
+    <a href="/" class="logo">
+      <span class="logo-icon">🎨</span>
+      <span class="logo-text">Artify</span>
+    </a>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/styles">Styles</a>
+      <a href="/marketing" class="active">Marketing Demo</a>
+    </nav>
+  </header>
+
+  <main class="marketing-main">
+    <h1 class="section-title" style="margin-bottom: 1.5rem;">Marketing Style Transfer</h1>
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">
+      Upload an image, choose a painting style, and get one high-quality style transfer result.
+    </p>
+
+    <form id="marketing-form">
+      <div class="marketing-section">
+        <h2>1. Upload image</h2>
+        <div class="marketing-upload-zone" id="upload-zone">
+          <input type="file" id="photo-input" accept=".jpg,.jpeg,.png,.webp,.bmp,image/jpeg,image/png,image/webp,image/bmp" />
+          <div id="upload-zone-inner">
+            <span style="font-size: 2rem;">↑</span>
+            <p>Drag and drop or click to select</p>
+            <p class="upload-zone-hint" style="color: var(--text-muted); font-size: 0.875rem;">JPG, PNG up to 10 MB</p>
+          </div>
+          <div id="upload-preview" style="display: none;">
+            <div class="marketing-preview">
+              <img id="preview-img" alt="Preview" />
+            </div>
+            <button type="button" id="upload-remove" aria-label="Remove" style="margin-top:0.5rem;padding:0.25rem 0.75rem;background:rgba(100,116,139,0.15);border:none;border-radius:6px;cursor:pointer;font-size:1rem;">Remove</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="marketing-section">
+        <h2>2. Choose painting style</h2>
+        <select id="style-select" class="marketing-select" required>
+          <option value="">Loading styles…</option>
+        </select>
+      </div>
+
+      <div class="marketing-section">
+        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn" disabled>
+          Transform
+        </button>
+      </div>
+    </form>
+
+    <div id="error" class="marketing-error" style="display: none;"></div>
+    <div id="loading" class="marketing-loading" style="display: none;">Processing… This may take 30–90 seconds.</div>
+    <div id="result" class="marketing-result" style="display: none;">
+      <h3 style="margin-bottom: 1rem;">Result</h3>
+      <img id="result-img" alt="Style transfer result" />
+      <a id="download-btn" class="download-btn" download="artify-result.jpg">Download</a>
+    </div>
+  </main>
+
+  <script src="/static/landing/marketing.js"></script>
+</body>
+</html>

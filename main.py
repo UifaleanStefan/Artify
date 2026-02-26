@@ -18,7 +18,7 @@ from typing import AsyncGenerator, Optional
 from urllib.parse import urlparse
 
 import httpx
-from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -329,6 +329,12 @@ async def terms_page() -> FileResponse:
 @app.get("/privacy")
 async def privacy_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "landing" / "privacy.html", headers=_HTML_HEADERS)
+
+
+@app.get("/marketing")
+async def marketing_page() -> FileResponse:
+    """Marketing page: single high-quality style transfer demo."""
+    return FileResponse(STATIC_DIR / "landing" / "marketing.html", headers=_HTML_HEADERS)
 
 
 @app.get("/order/{order_id}")
@@ -826,109 +832,110 @@ ROYALTY_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
 ]
 
 # Detailed style prompts for OpenAI (mode="prompt"). One per artwork; preserve face/identity.
+# Each prompt explicitly describes brushwork, color palette, and technique for accurate results.
 # Verified 2025-02: prompts match actual images in Masters pack.
 MASTERS_PACK_PROMPTS: list[str] = [
-    "in the style of Michelangelo's The Creation of Adam: Sistine Chapel fresco, idealized human form, divine touch, Renaissance grandeur. Preserve the subject's face, identity, and likeness.",
-    "in the style of Leonardo da Vinci's Mona Lisa: sfumato, enigmatic smile, soft lighting, atmospheric landscape, Renaissance portraiture. Preserve the subject's face and identity.",
-    "in the style of Piet Mondrian's geometric abstraction: grid, primary colors, neoplasticism, De Stijl. Preserve the subject's face and likeness.",
-    "in the style of Edvard Munch's The Scream: expressionist, swirling sky, emotional intensity, distorted figure. Preserve the subject's face and identity.",
-    "in the style of Francisco Goya's The Third of May 1808: dramatic chiaroscuro, historical narrative, Romanticism. Preserve the subject's face and identity.",
-    "in the style of Caravaggio's Judith Beheading Holofernes: Baroque chiaroscuro, dramatic lighting, intense realism. Preserve the subject's face and likeness.",
-    "in the style of Rembrandt's The Night Watch: Dutch Golden Age, chiaroscuro, group portrait, dynamic composition. Preserve the subject's face and identity.",
-    "in the style of Diego Velázquez's Las Meninas: Spanish Baroque, complex composition, court portrait, mirror reflection. Preserve the subject's face and likeness.",
-    "in the style of Rembrandt's chiaroscuro: dramatic light and shadow, warm browns, deep shadows, Old Master technique. Preserve the subject's face and identity.",
-    "in the style of Wassily Kandinsky's Composition VIII: geometric abstraction, bold colors, dynamic forms. Preserve the subject's face and likeness.",
-    "in the style of Claude Monet's Impression, Sunrise: hazy harbor, orange sun, impressionist brushwork. Preserve the subject's face and identity.",
-    "in the style of Pierre-Auguste Renoir's Luncheon of the Boating Party: impressionist, social gathering, dappled light, vibrant colors. Preserve the subject's face and likeness.",
-    "in the style of Vincent van Gogh's Sunflowers: thick brush strokes, vibrant yellows, expressive texture, post-impressionist. Preserve the subject's face and identity.",
-    "in the style of Pablo Picasso's Les Demoiselles d'Avignon: proto-cubist, angular faces, bold primitive, fragmented forms. Preserve the subject's face and likeness.",
-    "in the style of Salvador Dalí's The Persistence of Memory: surrealist, melting clocks, dreamlike landscape. Preserve the subject's face and identity.",
+    "in the style of Michelangelo's The Creation of Adam: fresco technique with soft, blended brushwork, warm flesh tones (peach, terracotta), cool blue-grey background, idealized Renaissance anatomy, divine touch gesture. Preserve the subject's face, identity, and likeness.",
+    "in the style of Leonardo da Vinci's Mona Lisa: sfumato—soft, blended strokes with no hard edges, muted earth palette (umber, ochre, olive green), warm golden-brown skin tones, hazy atmospheric background. Preserve the subject's face and identity.",
+    "in the style of Piet Mondrian's geometric abstraction: flat, hard-edge color blocks, primary palette (red, yellow, blue) on white, black grid lines, no brush texture—clean geometric planes. Preserve the subject's face and likeness.",
+    "in the style of Edvard Munch's The Scream: swirling, wavy brushstrokes in sky, orange and yellow undulating sky, blue-green water, distorted perspective, expressionist anxiety. Preserve the subject's face and identity.",
+    "in the style of Francisco Goya's The Third of May 1808: dramatic chiaroscuro, dark browns and blacks, stark white shirt, warm lantern light, loose brushwork for crowd, tight detail on central figure. Preserve the subject's face and identity.",
+    "in the style of Caravaggio's Judith Beheading Holofernes: tenebrist lighting—deep black shadows, single light source, rich red fabric, creamy flesh tones, precise brushwork on faces. Preserve the subject's face and likeness.",
+    "in the style of Rembrandt's The Night Watch: Dutch Golden Age chiaroscuro, warm amber and browns, golden highlights on faces, deep shadows, visible brushwork, group portrait composition. Preserve the subject's face and identity.",
+    "in the style of Diego Velázquez's Las Meninas: Spanish Baroque, layered brushwork, warm greys and browns, cream and gold fabrics, complex mirror composition, court portrait. Preserve the subject's face and likeness.",
+    "in the style of Rembrandt's chiaroscuro portraits: thick impasto in lit areas, smooth blending in shadows, warm amber and umber palette, deep black backgrounds, visible brush marks on skin. Preserve the subject's face and identity.",
+    "in the style of Wassily Kandinsky's Composition VIII: flat geometric shapes, primary colors (red, blue, yellow) plus black and white, crisp edges, abstract circles and lines, no realistic texture. Preserve the subject's face and likeness.",
+    "in the style of Claude Monet's Impression, Sunrise: short, broken brushstrokes, orange and pink sunrise, blue-grey harbor, soft hazy atmosphere, loose impressionist technique. Preserve the subject's face and identity.",
+    "in the style of Pierre-Auguste Renoir's Luncheon of the Boating Party: soft, blended impressionist strokes, warm skin tones, white and cream fabrics, dappled sunlight, vibrant blues and greens. Preserve the subject's face and likeness.",
+    "in the style of Vincent van Gogh's Sunflowers: thick impasto brushstrokes in visible directions, vibrant yellows and ochres, green stems, textured paint surface, post-impressionist. Preserve the subject's face and identity.",
+    "in the style of Pablo Picasso's Les Demoiselles d'Avignon: angular geometric planes, ochre and pink palette, African mask influence, fragmented cubist forms, bold outlines. Preserve the subject's face and likeness.",
+    "in the style of Salvador Dalí's The Persistence of Memory: smooth, meticulous brushwork, soft melting forms, warm desert palette (sand, blue sky), surrealist dreamscape. Preserve the subject's face and identity.",
 ]
 # Impression & Color pack: verified 2025-02 - prompts match actual images.
 IMPRESSION_COLOR_PACK_PROMPTS: list[str] = [
-    "in the style of Vincent van Gogh's night city scenes: thick brush strokes, glowing lights, urban atmosphere. Preserve the subject's face and identity.",
-    "in the style of Claude Monet's Water Lilies: soft impressionist brushwork, pastel colors, dappled light on water. Preserve the subject's face and likeness.",
-    "in the style of Edgar Degas's ballet class: impressionist, dancers, rehearsal studio, soft light. Preserve the subject's face and identity.",
-    "in the style of Paul Gauguin's Where Do We Come From: post-impressionist, Tahitian figures, symbolic color. Preserve the subject's face and likeness.",
-    "in the style of Claude Monet's Woman with a Parasol: impressionist, outdoor scene, dappled light, flowing dress. Preserve the subject's face and identity.",
-    "in the style of Claude Monet's Japanese Bridge: impressionist garden, water lilies, soft light, pastel colors. Preserve the subject's face and likeness.",
-    "in the style of Claude Monet's Impression, Sunrise: hazy harbor, orange sun, soft brushwork. Preserve the subject's face and identity.",
-    "in the style of Vincent van Gogh's Irises: vibrant blues and greens, expressive brushwork. Preserve the subject's face and likeness.",
-    "in the style of Paul Cézanne's Mont Sainte-Victoire: post-impressionist, geometric forms, structured landscape. Preserve the subject's face and identity.",
-    "in the style of Pierre-Auguste Renoir's Luncheon of the Boating Party: impressionist, social gathering, dappled light. Preserve the subject's face and likeness.",
-    "in the style of Pierre-Auguste Renoir's Bal du moulin de la Galette: impressionist, dance, outdoor cafe, vibrant colors. Preserve the subject's face and identity.",
-    "in the style of Pierre-Auguste Renoir's The Swing: impressionist, woman on swing, dappled forest light. Preserve the subject's face and likeness.",
-    "in the style of Vincent van Gogh's Starry Night: thick impasto brush strokes, swirling night sky, vibrant yellows and blues, expressive texture. Preserve the subject's face and identity.",
-    "in the style of Vincent van Gogh's Café Terrace at Night: bright yellow awning, starry sky, night scene. Preserve the subject's face and likeness.",
-    "in the style of Vincent van Gogh's Sunflowers: thick brush strokes, vibrant yellows, expressive texture. Preserve the subject's face and identity.",
+    "in the style of Vincent van Gogh's night city scenes: short thick brushstrokes, warm yellows and oranges for street lamps, deep blue night sky, cobblestone texture. Preserve the subject's face and identity.",
+    "in the style of Claude Monet's Water Lilies: soft, broken brushstrokes, pastel greens and pinks, lavender reflections on water, dappled light, no hard edges. Preserve the subject's face and likeness.",
+    "in the style of Edgar Degas's ballet class: soft pastel brushwork, peach and cream tones, tutus in white and pink, rehearsal studio atmosphere. Preserve the subject's face and identity.",
+    "in the style of Paul Gauguin's Where Do We Come From: flat color blocks, Tahitian palette (rich greens, oranges, golds), bold outlines, simplified forms. Preserve the subject's face and likeness.",
+    "in the style of Claude Monet's Woman with a Parasol: loose impressionist strokes, sky blue and white, soft greens, dappled sunlight, flowing dress. Preserve the subject's face and identity.",
+    "in the style of Claude Monet's Japanese Bridge: wisteria purples and greens, arched bridge, water lily pond, soft blended strokes. Preserve the subject's face and likeness.",
+    "in the style of Claude Monet's Impression, Sunrise: short strokes, orange and pink sun, blue-grey harbor, hazy atmosphere. Preserve the subject's face and identity.",
+    "in the style of Vincent van Gogh's Irises: thick directional brushstrokes, vibrant blues and purples, green foliage, yellow accents, expressive texture. Preserve the subject's face and likeness.",
+    "in the style of Paul Cézanne's Mont Sainte-Victoire: structured brushwork, geometric planes, ochre and blue palette, post-impressionist. Preserve the subject's face and identity.",
+    "in the style of Pierre-Auguste Renoir's Luncheon of the Boating Party: soft blended strokes, warm skin tones, white and cream, dappled sunlight. Preserve the subject's face and likeness.",
+    "in the style of Pierre-Auguste Renoir's Bal du moulin de la Galette: impressionist dappled light, warm skin tones, blue and white dresses, outdoor cafe. Preserve the subject's face and identity.",
+    "in the style of Pierre-Auguste Renoir's The Swing: soft forest greens, dappled light, woman in white dress. Preserve the subject's face and likeness.",
+    "in the style of Vincent van Gogh's Starry Night: thick swirling impasto strokes, deep cobalt blue sky, bright yellow and orange stars, swirling cypress in dark green, visible brush texture throughout. Preserve the subject's face and identity.",
+    "in the style of Vincent van Gogh's Café Terrace at Night: bright yellow awning, starry blue sky, warm orange cafe glow, cobblestone, thick brushstrokes. Preserve the subject's face and likeness.",
+    "in the style of Vincent van Gogh's Sunflowers: thick impasto brushstrokes, vibrant yellows and ochres, green stems, textured paint. Preserve the subject's face and identity.",
 ]
 MODERN_ABSTRACT_PACK_PROMPTS: list[str] = [
-    "in the style of Wassily Kandinsky's Composition VIII: geometric shapes, bold colors, abstract expression. Preserve the subject's face and identity.",
-    "in the style of Mark Rothko's color fields: large blocks of color, soft edges, contemplative. Preserve the subject's face and likeness.",
-    "in the style of Jackson Pollock's drip painting: splattered paint, energetic lines, abstract expressionist. Preserve the subject's face and identity.",
-    "in the style of Kazimir Malevich's Black Square: suprematist, geometric minimalism, bold contrast. Preserve the subject's face and likeness.",
-    "in the style of Piet Mondrian's Broadway Boogie Woogie: grid, primary colors, geometric abstraction. Preserve the subject's face and identity.",
-    "in the style of Willem de Kooning's Woman I: abstract expressionist, bold brushwork, distorted forms. Preserve the subject's face and likeness.",
-    "in the style of Ernst Ludwig Kirchner's Street Dresden: German expressionist, angular forms, bold colors, urban scene. Preserve the subject's face and identity.",
-    "in the style of Franz Marc's Blue Horse I: expressionist, bold blue, animal forms. Preserve the subject's face and likeness.",
-    "in the style of Edvard Munch's The Scream: expressionist, swirling sky, emotional intensity. Preserve the subject's face and identity.",
-    "in the style of René Magritte's The Lovers: surrealist, mysterious, dreamlike. Preserve the subject's face and likeness.",
-    "in the style of Salvador Dalí's The Elephants: surrealist, elongated forms, dreamlike. Preserve the subject's face and identity.",
-    "in the style of Salvador Dalí's Persistence of Memory: surrealist, melting forms, meticulous detail. Preserve the subject's face and likeness.",
-    "in the style of Georges Braque's Cubism: fragmented planes, muted palette, analytical cubist. Preserve the subject's face and identity.",
-    "in the style of Pablo Picasso's Girl with a Mandolin: cubist, geometric forms, musical theme. Preserve the subject's face and likeness.",
-    "in the style of Pablo Picasso's Les Demoiselles d'Avignon: proto-cubist, angular faces, bold primitive. Preserve the subject's face and identity.",
+    "in the style of Wassily Kandinsky's Composition VIII: flat geometric shapes, primary colors (red, blue, yellow) plus black, crisp edges, circles and abstract forms. Preserve the subject's face and identity.",
+    "in the style of Mark Rothko's color fields: large blocks of color, soft blurred edges, orange and yellow or warm tones, contemplative. Preserve the subject's face and likeness.",
+    "in the style of Jackson Pollock's drip painting: splattered and dripped paint lines, black and white with color accents, energetic web, abstract expressionist. Preserve the subject's face and identity.",
+    "in the style of Kazimir Malevich's Black Square: suprematist, geometric shapes, black on white, bold contrast, minimal. Preserve the subject's face and likeness.",
+    "in the style of Piet Mondrian's Broadway Boogie Woogie: grid of primary colors, yellow, red, blue squares, black lines, geometric. Preserve the subject's face and identity.",
+    "in the style of Willem de Kooning's Woman I: aggressive brushwork, flesh pinks and yellows, distorted forms, abstract expressionist. Preserve the subject's face and likeness.",
+    "in the style of Ernst Ludwig Kirchner's Street Dresden: angular brushstrokes, bold pink and purple, yellow and green, German expressionist urban. Preserve the subject's face and identity.",
+    "in the style of Franz Marc's Blue Horse I: bold blue animal form, expressionist, geometric simplification. Preserve the subject's face and likeness.",
+    "in the style of Edvard Munch's The Scream: swirling orange and yellow sky, blue water, expressionist distortion. Preserve the subject's face and identity.",
+    "in the style of René Magritte's The Lovers: smooth surrealist brushwork, cloth draped over faces, mysterious. Preserve the subject's face and likeness.",
+    "in the style of Salvador Dalí's The Elephants: surrealist, elongated legs, dreamlike desert, meticulous detail. Preserve the subject's face and identity.",
+    "in the style of Salvador Dalí's Persistence of Memory: smooth melting forms, warm desert palette, surrealist. Preserve the subject's face and likeness.",
+    "in the style of Georges Braque's Cubism: fragmented geometric planes, muted browns and greys, analytical cubist. Preserve the subject's face and identity.",
+    "in the style of Pablo Picasso's Girl with a Mandolin: cubist geometric planes, ochre and brown palette, fragmented forms. Preserve the subject's face and likeness.",
+    "in the style of Pablo Picasso's Les Demoiselles d'Avignon: angular geometric planes, ochre and pink, proto-cubist. Preserve the subject's face and identity.",
 ]
 ANCIENT_WORLDS_PACK_PROMPTS: list[str] = [
-    "in the style of Ancient Egyptian tomb painting: flat figures, profile view, hieroglyphic aesthetic, warm earth tones. Preserve the subject's face and identity.",
-    "in the style of Amarna period Egyptian art: elongated forms, naturalistic, sun disk motifs. Preserve the subject's face and likeness.",
-    "in the style of Egyptian Book of the Dead: papyrus aesthetic, flat figures, symbolic imagery. Preserve the subject's face and identity.",
-    "in the style of Egyptian tomb wall paintings: Ramesside period, warm colors, ceremonial. Preserve the subject's face and likeness.",
-    "in the style of Greek black-figure pottery: red and black, mythological figures, amphora form. Preserve the subject's face and identity.",
-    "in the style of Greek red-figure pottery: elegant line work, classical figures. Preserve the subject's face and likeness.",
-    "in the style of Greek vase painting: Francois Vase, narrative friezes, black figures. Preserve the subject's face and identity.",
-    "in the style of Roman Alexander Mosaic: tessellated, battle scene, Hellenistic influence. Preserve the subject's face and likeness.",
-    "in the style of Roman Villa of Livia fresco: garden room, lush foliage, naturalistic. Preserve the subject's face and identity.",
-    "in the style of Pompeii fresco: Bacchus, Roman wall painting, warm colors. Preserve the subject's face and likeness.",
-    "in the style of Fayum mummy portraits: encaustic, Roman Egypt, realistic faces. Preserve the subject's face and identity.",
-    "in the style of Mesopotamian Standard of Ur: lapis lazuli, mosaic, narrative panels. Preserve the subject's face and likeness.",
-    "in the style of Babylonian Ishtar Gate: blue glaze, relief sculpture, lion motifs. Preserve the subject's face and identity.",
-    "in the style of Ajanta cave paintings: Indian Buddhist, flowing lines, rich colors. Preserve the subject's face and likeness.",
-    "in the style of Han Dynasty silk paintings: ancient China, flowing brushwork, delicate. Preserve the subject's face and identity.",
+    "in the style of Ancient Egyptian tomb painting: flat figures in profile, warm earth tones (ochre, terracotta), black outlines, hieroglyphic aesthetic. Preserve the subject's face and identity.",
+    "in the style of Amarna period Egyptian art: elongated forms, warm gold and blue, sun disk motifs, naturalistic. Preserve the subject's face and likeness.",
+    "in the style of Egyptian Book of the Dead: papyrus cream background, flat figures, red and black ink, symbolic imagery. Preserve the subject's face and identity.",
+    "in the style of Egyptian tomb wall paintings: Ramesside period, warm ochre and blue, ceremonial scenes. Preserve the subject's face and likeness.",
+    "in the style of Greek black-figure pottery: black figures on red clay, mythological scenes, amphora form. Preserve the subject's face and identity.",
+    "in the style of Greek red-figure pottery: red figures on black, elegant line work, classical. Preserve the subject's face and likeness.",
+    "in the style of Greek Francois Vase: black-figure, narrative friezes, terracotta. Preserve the subject's face and identity.",
+    "in the style of Roman Alexander Mosaic: tessellated stone, battle scene, warm earth tones. Preserve the subject's face and likeness.",
+    "in the style of Roman Villa of Livia fresco: garden room, lush green foliage, naturalistic, warm stone. Preserve the subject's face and identity.",
+    "in the style of Pompeii fresco: Bacchus, Roman wall painting, warm red and ochre. Preserve the subject's face and likeness.",
+    "in the style of Fayum mummy portraits: encaustic wax, Roman Egypt, realistic faces, warm skin tones. Preserve the subject's face and identity.",
+    "in the style of Mesopotamian Standard of Ur: lapis lazuli blue, gold, mosaic panels. Preserve the subject's face and likeness.",
+    "in the style of Babylonian Ishtar Gate: blue glaze tiles, lion relief, turquoise and gold. Preserve the subject's face and identity.",
+    "in the style of Ajanta cave paintings: Indian Buddhist, flowing lines, rich reds and greens. Preserve the subject's face and likeness.",
+    "in the style of Han Dynasty silk paintings: delicate brushwork, muted earth tones, flowing. Preserve the subject's face and identity.",
 ]
 EVOLUTION_PORTRAITS_PACK_PROMPTS: list[str] = [
-    "in the style of Fayum mummy portraits: encaustic, Roman Egypt, realistic faces. Preserve the subject's face and identity.",
-    "in the style of Egyptian tomb of Nefertari: warm colors, hieroglyphic aesthetic. Preserve the subject's face and likeness.",
-    "in the style of Medieval portrait: flat, iconic, gold leaf background. Preserve the subject's face and identity.",
-    "in the style of Byzantine Christ Pantocrator: iconic, gold background, solemn. Preserve the subject's face and likeness.",
-    "in the style of Leonardo da Vinci's Mona Lisa: sfumato, enigmatic smile, Renaissance. Preserve the subject's face and identity.",
-    "in the style of Raphael's portrait: Renaissance elegance, soft modeling. Preserve the subject's face and likeness.",
-    "in the style of Albrecht Dürer's self-portrait: Northern Renaissance, meticulous detail. Preserve the subject's face and identity.",
-    "in the style of Johannes Vermeer's Girl with a Pearl Earring: soft light, pearl earring, intimate. Preserve the subject's face and likeness.",
-    "in the style of Rembrandt's self-portrait: chiaroscuro, Old Master, warm tones. Preserve the subject's face and identity.",
-    "in the style of John Singer Sargent's Madame X: elegant, dramatic pose, Gilded Age. Preserve the subject's face and likeness.",
-    "in the style of Vincent van Gogh's self-portrait: bandaged ear, thick brush strokes, expressive. Preserve the subject's face and identity.",
-    "in the style of Pablo Picasso's Les Demoiselles: proto-cubist, angular. Preserve the subject's face and likeness.",
-    "in the style of Pablo Picasso's portrait of Dora Maar: cubist, fragmented planes. Preserve the subject's face and identity.",
-    "in the style of Frida Kahlo's self-portrait: thorn necklace, symbolic, Mexican folk. Preserve the subject's face and likeness.",
-    "in the style of Andy Warhol's Marilyn: Pop Art, screen print, bold colors. Preserve the subject's face and identity.",
+    "in the style of Fayum mummy portraits: encaustic wax, Roman Egypt, realistic faces, warm skin tones, dark eyes. Preserve the subject's face and identity.",
+    "in the style of Egyptian tomb of Nefertari: warm ochre and blue, flat figures, hieroglyphic aesthetic. Preserve the subject's face and likeness.",
+    "in the style of Medieval portrait: flat iconic style, gold leaf background, rich blues and reds. Preserve the subject's face and identity.",
+    "in the style of Byzantine Christ Pantocrator: gold background, solemn face, dark robes, iconic. Preserve the subject's face and likeness.",
+    "in the style of Leonardo da Vinci's Mona Lisa: sfumato soft blending, muted earth tones, enigmatic smile. Preserve the subject's face and identity.",
+    "in the style of Raphael's portrait: Renaissance soft modeling, warm skin, dark background. Preserve the subject's face and likeness.",
+    "in the style of Albrecht Dürer's self-portrait: Northern Renaissance, meticulous detail, fur collar. Preserve the subject's face and identity.",
+    "in the style of Johannes Vermeer's Girl with a Pearl Earring: soft diffused light, pearl earring, blue and yellow turban. Preserve the subject's face and likeness.",
+    "in the style of Rembrandt's self-portrait: chiaroscuro, warm amber and brown, thick brushwork in light. Preserve the subject's face and identity.",
+    "in the style of John Singer Sargent's Madame X: elegant black dress, pale skin, dramatic pose. Preserve the subject's face and likeness.",
+    "in the style of Vincent van Gogh's self-portrait: bandaged ear, thick directional brushstrokes, greens and ochres. Preserve the subject's face and identity.",
+    "in the style of Pablo Picasso's Les Demoiselles: proto-cubist angular planes, ochre and pink. Preserve the subject's face and likeness.",
+    "in the style of Pablo Picasso's portrait of Dora Maar: cubist fragmented planes, muted palette. Preserve the subject's face and identity.",
+    "in the style of Frida Kahlo's self-portrait: thorn necklace, Mexican folk colors, symbolic. Preserve the subject's face and likeness.",
+    "in the style of Andy Warhol's Marilyn: Pop Art screen print, bold pink and yellow, repeated image. Preserve the subject's face and identity.",
 ]
 ROYALTY_PORTRAITS_PACK_PROMPTS: list[str] = [
-    "in the style of Jacques-Louis David's Napoleon: neoclassical, heroic, equestrian. Preserve the subject's face and identity.",
-    "in the style of Hyacinthe Rigaud's Louis XIV: baroque, royal regalia, grandeur. Preserve the subject's face and likeness.",
-    "in the style of Hans Holbein's Henry VIII: Tudor portrait, rich fabrics, imposing. Preserve the subject's face and identity.",
-    "in the style of Elizabethan Armada portrait: jeweled, royal, ornate. Preserve the subject's face and likeness.",
-    "in the style of Anthony van Dyck's equestrian portrait: baroque, noble pose. Preserve the subject's face and identity.",
-    "in the style of Diego Velázquez's Pope Innocent X: baroque, dramatic lighting. Preserve the subject's face and likeness.",
-    "in the style of Velázquez's Philip IV: Spanish court, rich fabrics, formal. Preserve the subject's face and identity.",
-    "in the style of François Boucher's Madame de Pompadour: rococo, pastel, decorative. Preserve the subject's face and likeness.",
-    "in the style of Thomas Gainsborough's Blue Boy: blue satin, aristocratic, 18th century. Preserve the subject's face and identity.",
-    "in the style of Francisco Goya's portrait: Spanish master, dark tones, psychological. Preserve the subject's face and likeness.",
-    "in the style of Lorenzo Lippi's nobleman portrait: baroque, aristocratic. Preserve the subject's face and identity.",
-    "in the style of Giuseppe Arcimboldo's Vertumnus: composite portrait, fruits and vegetables. Preserve the subject's face and likeness.",
-    "in the style of Giuseppe Castiglione's Qianlong: Chinese-European fusion, imperial. Preserve the subject's face and identity.",
-    "in the style of Mughal miniature: Shah Jahan, jewel tones, intricate detail. Preserve the subject's face and likeness.",
-    "in the style of Fyodor Rokotov's Catherine II: Russian imperial, elegant. Preserve the subject's face and identity.",
+    "in the style of Jacques-Louis David's Napoleon Crossing the Alps: neoclassical, heroic equestrian, red cape, grey horse, dramatic sky. Preserve the subject's face and identity.",
+    "in the style of Hyacinthe Rigaud's Louis XIV: baroque, royal blue and gold, ermine, grand pose. Preserve the subject's face and likeness.",
+    "in the style of Hans Holbein's Henry VIII: Tudor portrait, rich red and gold fabrics, imposing. Preserve the subject's face and identity.",
+    "in the style of Elizabethan Armada portrait: jeweled, pearl necklace, black dress, royal. Preserve the subject's face and likeness.",
+    "in the style of Anthony van Dyck's equestrian portrait: baroque, noble pose, rich fabrics. Preserve the subject's face and identity.",
+    "in the style of Diego Velázquez's Pope Innocent X: baroque chiaroscuro, red silk, dramatic lighting. Preserve the subject's face and likeness.",
+    "in the style of Velázquez's Philip IV: Spanish court, brown and silver, rich fabrics. Preserve the subject's face and identity.",
+    "in the style of François Boucher's Madame de Pompadour: rococo, pastel pink and blue, decorative. Preserve the subject's face and likeness.",
+    "in the style of Thomas Gainsborough's Blue Boy: blue satin costume, aristocratic, 18th century. Preserve the subject's face and identity.",
+    "in the style of Francisco Goya's portrait: Spanish master, dark brown tones, psychological. Preserve the subject's face and likeness.",
+    "in the style of Lorenzo Lippi's nobleman portrait: baroque, aristocratic, dark background. Preserve the subject's face and identity.",
+    "in the style of Giuseppe Arcimboldo's Vertumnus: composite portrait, fruits and vegetables, autumn palette. Preserve the subject's face and likeness.",
+    "in the style of Giuseppe Castiglione's Qianlong: Chinese-European fusion, imperial yellow, detailed. Preserve the subject's face and identity.",
+    "in the style of Mughal miniature Shah Jahan: jewel tones, intricate detail, lapis and gold. Preserve the subject's face and likeness.",
+    "in the style of Fyodor Rokotov's Catherine II: Russian imperial, elegant, soft brushwork. Preserve the subject's face and identity.",
 ]
 
 # Verify alignment: PACK_PATHS[i] -> PACK_LABELS[i] -> PACK_PROMPTS[i] (index i = file NN where NN = i+1)
@@ -947,6 +954,31 @@ def _verify_pack_alignment() -> None:
             logger.error("Pack alignment error: paths=%d labels=%d prompts=%d", n, len(labels), len(prompts))
 
 
+# Map style_id to paths, labels, and pack names (for marketing selector)
+_STYLE_ID_TO_PATHS: dict[int, list[str]] = {
+    STYLE_ID_MASTERS_PACK: MASTERS_PACK_PATHS,
+    STYLE_ID_IMPRESSION_COLOR_PACK: IMPRESSION_COLOR_PACK_PATHS,
+    STYLE_ID_MODERN_ABSTRACT_PACK: MODERN_ABSTRACT_PACK_PATHS,
+    STYLE_ID_ANCIENT_WORLDS_PACK: ANCIENT_WORLDS_PACK_PATHS,
+    STYLE_ID_EVOLUTION_PORTRAITS_PACK: EVOLUTION_PORTRAITS_PACK_PATHS,
+    STYLE_ID_ROYALTY_PORTRAITS_PACK: ROYALTY_PORTRAITS_PACK_PATHS,
+}
+_STYLE_ID_TO_LABELS: dict[int, list[tuple[str, str]]] = {
+    STYLE_ID_MASTERS_PACK: MASTERS_PACK_LABELS,
+    STYLE_ID_IMPRESSION_COLOR_PACK: IMPRESSION_COLOR_PACK_LABELS,
+    STYLE_ID_MODERN_ABSTRACT_PACK: MODERN_ABSTRACT_PACK_LABELS,
+    STYLE_ID_ANCIENT_WORLDS_PACK: ANCIENT_WORLDS_PACK_LABELS,
+    STYLE_ID_EVOLUTION_PORTRAITS_PACK: EVOLUTION_PORTRAITS_PACK_LABELS,
+    STYLE_ID_ROYALTY_PORTRAITS_PACK: ROYALTY_PORTRAITS_PACK_LABELS,
+}
+_STYLE_ID_TO_PACK_NAME: dict[int, str] = {
+    STYLE_ID_MASTERS_PACK: "Masters",
+    STYLE_ID_IMPRESSION_COLOR_PACK: "Impression & Color",
+    STYLE_ID_MODERN_ABSTRACT_PACK: "Modern & Abstract",
+    STYLE_ID_ANCIENT_WORLDS_PACK: "Ancient Worlds",
+    STYLE_ID_EVOLUTION_PORTRAITS_PACK: "Evolution of Portraits",
+    STYLE_ID_ROYALTY_PORTRAITS_PACK: "Royalty & Power",
+}
 # Map style_id to prompts list for URL-to-prompt resolution
 _STYLE_ID_TO_PROMPTS: dict[int, list[str]] = {
     STYLE_ID_MASTERS_PACK: MASTERS_PACK_PROMPTS,
@@ -960,10 +992,10 @@ _verify_pack_alignment()
 
 
 _BRUSHWORK_PHRASE = (
-    " CRITICAL: Faithfully replicate the exact brushwork, stroke direction, paint texture, "
-    "and surface quality of the original painting. Use visible, textured brushstrokes that match "
-    "the painting's technique—impasto where thick, smooth where blended. The result must look "
-    "like an actual oil painting with authentic brush marks. "
+    " CRITICAL: Replicate the exact brushwork, stroke direction, paint texture, and color palette "
+    "of the original painting. Use visible brushstrokes matching the painting's technique—impasto "
+    "where thick, smooth blending where soft. Match the original's color temperature and palette. "
+    "The result must look like an actual oil painting with authentic brush marks and surface quality. "
 )
 
 def _style_url_to_prompt(style_url: str, style_id: int) -> str:
@@ -1023,6 +1055,121 @@ def _load_styles_data() -> list:
     if start < 0 or end <= start:
         return []
     return json.loads(content[start:end])
+
+
+# ── Marketing API ─────────────────────────────────────────────
+
+VALID_STYLE_IDS = frozenset({
+    STYLE_ID_MASTERS_PACK,
+    STYLE_ID_IMPRESSION_COLOR_PACK,
+    STYLE_ID_MODERN_ABSTRACT_PACK,
+    STYLE_ID_ANCIENT_WORLDS_PACK,
+    STYLE_ID_EVOLUTION_PORTRAITS_PACK,
+    STYLE_ID_ROYALTY_PORTRAITS_PACK,
+})
+
+
+@app.get("/api/marketing/styles")
+async def get_marketing_styles() -> JSONResponse:
+    """Return all 90 paintings for the marketing style selector."""
+    items = []
+    for style_id, paths in _STYLE_ID_TO_PATHS.items():
+        pack_name = _STYLE_ID_TO_PACK_NAME.get(style_id, "")
+        labels = _STYLE_ID_TO_LABELS.get(style_id, [])
+        for idx, path in enumerate(paths):
+            style_index = idx + 1
+            title, artist = labels[idx] if idx < len(labels) else ("", "")
+            style_image_url = _resolve_style_image_url(path)
+            items.append({
+                "style_id": style_id,
+                "style_index": style_index,
+                "pack_name": pack_name,
+                "title": title,
+                "artist": artist,
+                "style_image_url": style_image_url,
+            })
+    return JSONResponse(items)
+
+
+@app.post("/api/marketing/style-transfer")
+async def marketing_style_transfer(
+    image: UploadFile = File(...),
+    style_id: int = Form(...),
+    style_index: int = Form(...),
+) -> Response:
+    """
+    Single high-quality style transfer for marketing. Returns image bytes.
+    Uses quality=high (OpenAI) or output_quality=95 (Replicate).
+    """
+    if style_id not in VALID_STYLE_IDS:
+        raise HTTPException(status_code=400, detail="Invalid style_id (must be 13-18)")
+    if style_index < 1 or style_index > 15:
+        raise HTTPException(status_code=400, detail="style_index must be 1-15")
+
+    if not image.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+    ext = Path(image.filename).suffix.lower()
+    if ext not in IMAGE_EXTENSIONS:
+        raise HTTPException(status_code=400, detail=f"Unsupported format: {ext}")
+
+    content = await image.read()
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File must be under 10 MB")
+
+    upload_id = uuid.uuid4().hex[:12]
+    upload_dir = get_upload_dir() / upload_id
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    file_path = upload_dir / f"photo{ext}"
+    file_path.write_bytes(content)
+
+    settings = get_settings()
+    if settings.public_base_url:
+        image_url = _build_public_upload_url(upload_id, ext)
+    else:
+        image_url = _upload_to_litterbox(str(file_path), f"photo{ext}")
+
+    paths = _STYLE_ID_TO_PATHS.get(style_id)
+    if not paths or style_index > len(paths):
+        raise HTTPException(status_code=400, detail="Invalid style_index for pack")
+    style_path = paths[style_index - 1]
+    style_url = _resolve_style_image_url(style_path)
+    if not style_url or not style_url.startswith("https://"):
+        raise HTTPException(
+            status_code=500,
+            detail="PUBLIC_BASE_URL must be set so style images are accessible via HTTPS",
+        )
+
+    style_prompt = _style_url_to_prompt(style_url, style_id)
+    service = get_service()
+
+    def _run_transfer() -> tuple:
+        return service.transfer_style_sync(
+            image_url=image_url,
+            style_image_url=style_url,
+            structure_denoising_strength=0.7,
+            style_prompt=style_prompt,
+            prompt_suffix=None,
+            quality="high",
+            output_quality=95,
+        )
+
+    result, job_id = await asyncio.to_thread(_run_transfer)
+
+    if isinstance(result, dict) and "content" in result:
+        image_bytes = result["content"]
+        content_type = result.get("content_type", "image/jpeg")
+    else:
+        result_url = str(result)
+        with httpx.Client(timeout=60) as client:
+            r = client.get(result_url)
+        if r.status_code >= 400:
+            raise HTTPException(status_code=502, detail="Failed to fetch style transfer result")
+        image_bytes = r.content
+        content_type = r.headers.get("content-type", "image/jpeg").split(";")[0].strip()
+
+    if content_type not in ("image/jpeg", "image/png", "image/webp"):
+        content_type = "image/jpeg"
+    return Response(content=image_bytes, media_type=content_type)
 
 
 # ── Order endpoints ──────────────────────────────────────────
