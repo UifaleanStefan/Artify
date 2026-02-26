@@ -59,9 +59,11 @@
         }
         styleSelect.appendChild(optgroup);
       }
+      updateSubmitState();
     })
     .catch(() => {
       styleSelect.innerHTML = '<option value="">Failed to load styles</option>';
+      updateSubmitState();
     });
 
   // Upload zone
@@ -91,6 +93,8 @@
     uploadPreview.style.display = 'none';
     updateSubmitState();
   });
+
+  styleSelect.addEventListener('change', updateSubmitState);
 
   function handleFile(file) {
     if (file.size > 10 * 1024 * 1024) {
