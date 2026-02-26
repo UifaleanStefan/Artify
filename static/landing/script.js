@@ -30,19 +30,14 @@
   }
   window.addEventListener('scroll', onScroll);
 
-  /* Header scroll fade: blend at top, solid on scroll */
+  /* Header scroll fade: transparent at top, solid once scrolled */
   var mainHeader = document.getElementById('main-header');
-  var heroSection = document.querySelector('.hero');
   if (mainHeader && mainHeader.classList.contains('header-scroll-fade')) {
     var SCROLL_THRESHOLD = 20;
     function updateHeaderScroll() {
-      if (window.scrollY > SCROLL_THRESHOLD) {
-        mainHeader.classList.add('header-scrolled');
-        if (heroSection) heroSection.classList.add('hero--scrolled');
-      } else {
-        mainHeader.classList.remove('header-scrolled');
-        if (heroSection) heroSection.classList.remove('hero--scrolled');
-      }
+      var atTop = window.scrollY <= SCROLL_THRESHOLD;
+      mainHeader.classList.toggle('header-scrolled', !atTop);
+      document.body.classList.toggle('has-hero-fade', atTop);
     }
     updateHeaderScroll();
     window.addEventListener('scroll', updateHeaderScroll, { passive: true });
@@ -59,56 +54,58 @@
     });
   });
 
-  /* Demo cards: auto-nudge on mobile to hint horizontal scroll */
-  function nudgeScroll(el, distance, duration) {
-    if (!el) return;
+  /* Demo cards: auto-sweep slider on mobile to show how comparison works */
+  function sweepSlider(wrap, fromPct, toPct, duration, onDone) {
     var start = null;
-    var startLeft = el.scrollLeft;
     function step(ts) {
       if (!start) start = ts;
-      var progress = Math.min((ts - start) / duration, 1);
-      // ease in-out
-      var ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
-      el.scrollLeft = startLeft + distance * ease;
-      if (progress < 1) requestAnimationFrame(step);
-      else {
-        // scroll back
-        var start2 = null;
-        var fromLeft = el.scrollLeft;
-        function stepBack(ts2) {
-          if (!start2) start2 = ts2;
-          var p2 = Math.min((ts2 - start2) / duration, 1);
-          var e2 = p2 < 0.5 ? 2 * p2 * p2 : -1 + (4 - 2 * p2) * p2;
-          el.scrollLeft = fromLeft - distance * e2;
-          if (p2 < 1) requestAnimationFrame(stepBack);
-        }
-        requestAnimationFrame(stepBack);
-      }
+      var p = Math.min((ts - start) / duration, 1);
+      var ease = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+      var pct = fromPct + (toPct - fromPct) * ease;
+      wrap.style.setProperty('--compare-pct', String(pct));
+      if (p < 1) requestAnimationFrame(step);
+      else if (onDone) onDone();
     }
     requestAnimationFrame(step);
   }
 
-  function initDemoNudge() {
-    var demoCards = document.querySelector('.demo-cards');
-    if (!demoCards) return;
-    // Only nudge on mobile (horizontal scroll layout)
-    if (window.innerWidth > 900) return;
-    // Use IntersectionObserver so nudge fires when section scrolls into view
+  function autoAnimateCompare(wrap) {
+    // Start at 50%, sweep to 20% (show artistic), then to 80% (show original), back to 50%
+    wrap.style.setProperty('--compare-pct', '50');
+    setTimeout(function() {
+      sweepSlider(wrap, 50, 20, 900, function() {
+        setTimeout(function() {
+          sweepSlider(wrap, 20, 80, 1400, function() {
+            setTimeout(function() {
+              sweepSlider(wrap, 80, 50, 700);
+            }, 400);
+          });
+        }, 300);
+      });
+    }, 500);
+  }
+
+  function initDemoAutoAnimate() {
+    if (window.innerWidth > 900) return; // desktop users drag manually
+    var wraps = document.querySelectorAll('.compare-wrap');
+    if (!wraps.length) return;
     if ('IntersectionObserver' in window) {
-      var nudgeDone = false;
-      var obs = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting && !nudgeDone) {
-            nudgeDone = true;
-            setTimeout(function() { nudgeScroll(demoCards, 80, 500); }, 400);
-            obs.disconnect();
-          }
-        });
-      }, { threshold: 0.4 });
-      obs.observe(demoCards);
+      wraps.forEach(function(wrap) {
+        var animated = false;
+        var obs = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting && !animated) {
+              animated = true;
+              autoAnimateCompare(wrap);
+              obs.unobserve(wrap);
+            }
+          });
+        }, { threshold: 0.5 });
+        obs.observe(wrap);
+      });
     }
   }
-  initDemoNudge();
+  initDemoAutoAnimate();
 
   /* Hamburger menu */
   var hamburgerBtn = document.getElementById('hamburger-btn');

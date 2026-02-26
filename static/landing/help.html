@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ro">
 <head>
   <meta charset="UTF-8" />
@@ -41,197 +41,395 @@
       </div>
     </div>
   </div>
-    <div class="help-search-wrap">
-      <svg class="help-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" class="help-search" id="help-search" placeholder="Caută întrebări..." aria-label="Caută în întrebări frecvente" />
+
+  <header class="header" id="main-header">
+    <a href="/" class="logo">
+      <span class="logo-icon">🎨</span>
+      <span class="logo-text">Artify</span>
+    </a>
+    <nav class="nav">
+      <a href="/#how-it-works">Cum funcționează</a>
+      <a href="/styles">Stiluri</a>
+      <a href="/#pricing">Prețuri</a>
+      <a href="/styles" class="btn btn-primary btn-sm">Creează acum →</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <div class="help-hero">
+    <div class="help-hero-bg"></div>
+    <div class="help-hero-inner">
+      <span class="help-hero-pill">🎨 Ghiduri și Tutoriale</span>
+      <h1 class="help-hero-title">Cum te putem <span class="help-gradient">ajuta?</span></h1>
+      <p class="help-hero-sub">Găsește răspunsuri și soluții pas cu pas pentru orice problemă</p>
+      <div class="help-search-wrap">
+        <svg class="help-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="help-search" id="help-search" placeholder="Caută în ghiduri..." aria-label="Caută în ghiduri" />
+      </div>
+      <div class="help-hero-stats">
+        <div class="help-hero-stat">
+          <span class="help-hero-stat-icon">⚡</span>
+          <span class="help-hero-stat-value">5 min</span>
+          <span class="help-hero-stat-label">Timp răspuns</span>
+        </div>
+        <div class="help-hero-stat">
+          <span class="help-hero-stat-icon">✅</span>
+          <span class="help-hero-stat-value">99%</span>
+          <span class="help-hero-stat-label">Probleme rezolvate</span>
+        </div>
+        <div class="help-hero-stat">
+          <span class="help-hero-stat-icon">📖</span>
+          <span class="help-hero-stat-value">13+</span>
+          <span class="help-hero-stat-label">Ghiduri utile</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="help-page">
+
+    <!-- CATEGORY CARDS -->
+    <div class="help-cat-section">
+      <h2 class="help-cat-title">Selectează o categorie</h2>
+      <div class="help-cat-cards">
+        <button type="button" class="help-cat-card help-cat-card--blue active" data-category="portrete">
+          <div class="help-cat-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="12" cy="10" r="3"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/></svg>
+          </div>
+          <span class="help-cat-card-name">Portrete &amp; Stil</span>
+          <span class="help-cat-card-desc">Nu ai primit portretele sau ai probleme cu stilul?</span>
+        </button>
+        <button type="button" class="help-cat-card help-cat-card--green" data-category="plata">
+          <div class="help-cat-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <span class="help-cat-card-name">Plată și prețuri</span>
+          <span class="help-cat-card-desc">Cum funcționează plata și cât costă?</span>
+        </button>
+        <button type="button" class="help-cat-card help-cat-card--orange" data-category="modificari">
+          <div class="help-cat-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          </div>
+          <span class="help-cat-card-name">Modificări și Rambursări</span>
+          <span class="help-cat-card-desc">Vrei să modifici comanda sau să ceri rambursare?</span>
+        </button>
+        <button type="button" class="help-cat-card help-cat-card--red" data-category="tehnic">
+          <div class="help-cat-card-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <span class="help-cat-card-name">Probleme Tehnice</span>
+          <span class="help-cat-card-desc">Erori sau probleme cu site-ul?</span>
+        </button>
+      </div>
     </div>
 
-    <div class="help-info-cards">
-      <div class="help-info-card">
-        <span class="help-info-card-icon">⏱</span>
-        <span class="help-info-card-value">5 min</span>
-        <span class="help-info-card-label">Timp livrare</span>
-      </div>
-      <div class="help-info-card">
-        <span class="help-info-card-icon">🎨</span>
-        <span class="help-info-card-value">5–15</span>
-        <span class="help-info-card-label">Portrete incluse</span>
-      </div>
-      <div class="help-info-card">
-        <span class="help-info-card-icon">📥</span>
-        <span class="help-info-card-value">14 zile</span>
-        <span class="help-info-card-label">Acces descărcare</span>
-      </div>
-    </div>
-
-    <div class="help-categories">
-      <button type="button" class="help-cat-btn active" data-category="serviciu">
-        <svg class="help-cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
-        Despre serviciu
-      </button>
-      <button type="button" class="help-cat-btn" data-category="plata">
-        <svg class="help-cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Plată și prețuri
-      </button>
-      <button type="button" class="help-cat-btn" data-category="livrare">
-        <svg class="help-cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Livrare și acces
-      </button>
-    </div>
-
-    <section class="help-qa-section" id="qa-serviciu">
+    <!-- FAQ: PORTRETE & STIL -->
+    <section class="help-qa-section" id="qa-portrete">
       <div class="help-qa-header">
-        <svg class="help-qa-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
-        <h2>Despre serviciu</h2>
-        <span class="help-qa-count">5 întrebări</span>
+        <div class="help-qa-header-icon help-qa-icon--blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="12" cy="10" r="3"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/></svg>
+        </div>
+        <div>
+          <h2 class="help-qa-header-title">Portrete &amp; Stil</h2>
+          <p class="help-qa-header-sub">Rezolvă problemele legate de primirea și stilul portretelor</p>
+        </div>
       </div>
+
       <div class="help-q-item is-open" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="true">
           <span>Cum funcționează serviciul?</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Încarci o poză cu fața ta, alegi un stil din galerie (un pachet), plătești și primești o galerie de portrete în acel stil. Procesul durează câteva minute; vei primi un email când galeria e gata.</p>
+          <ol class="help-a-steps">
+            <li>Încarci o fotografie clară cu fața ta vizibilă</li>
+            <li>Alegi un stil artistic din galerie (Maeștri, Impresionism, Modern)</li>
+            <li>Plătești pachetul ales (5 sau 15 portrete)</li>
+            <li>Primești portretele pe email în aproximativ 5 minute</li>
+            <li>Descarci imaginile direct din linkul trimis</li>
+          </ol>
         </div>
       </div>
-      <div class="help-q-item" data-faq>
-        <button type="button" class="help-q-btn" aria-expanded="false">
-          <span>Ce înseamnă un pachet?</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="help-a-wrap">
-          <p class="help-a">Un pachet este un stil artistic (de ex. Maeștri, Impresionism, Modern & Abstract). Poți alege pachetul de 5 portrete (9,99 Lei) sau pachetul complet de 15 portrete (19,99 Lei). Primești portretele cu fața ta în acel stil, în rezoluție mare, gata de print sau partajat.</p>
-        </div>
-      </div>
+
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
           <span>Ce tip de poză trebuie să încarc?</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Încarcă o fotografie clară cu fața ta vizibilă, preferabil frontală și bine luminată. Evită pozele blur, cu ochelari de soare sau cu fața parțial acoperită. Cu cât poza e mai bună, cu atât rezultatul va fi mai frumos.</p>
+          <ol class="help-a-steps">
+            <li>Fotografie clară cu fața complet vizibilă</li>
+            <li>Preferabil frontală și bine luminată</li>
+            <li>Evită pozele blur sau cu ochelari de soare</li>
+            <li>Evită fața parțial acoperită sau în umbră</li>
+            <li>Cu cât poza e mai bună, cu atât rezultatul va fi mai frumos</li>
+          </ol>
         </div>
       </div>
+
+      <div class="help-q-item" data-faq>
+        <button type="button" class="help-q-btn" aria-expanded="false">
+          <span>Nu am primit portretele pe email</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="help-a-wrap">
+          <ol class="help-a-steps">
+            <li>Verifică folderul Spam sau Junk din email</li>
+            <li>Asigură-te că adresa de email introdusă este corectă</li>
+            <li>Așteaptă până la 5 minute de la confirmarea plății</li>
+            <li>Verifică pagina de status a comenzii (link-ul din emailul de confirmare)</li>
+            <li>Dacă problema persistă, contactează-ne cu ID-ul comenzii</li>
+          </ol>
+        </div>
+      </div>
+
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
           <span>Portretele sunt în rezoluție mare?</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Da. Toate portretele sunt livrate în rezoluție mare, potrivite pentru print, partajare pe social media sau utilizare personală. Le poți descărca direct din linkul trimis pe email.</p>
+          <ol class="help-a-steps">
+            <li>Da, toate portretele sunt livrate în rezoluție mare</li>
+            <li>Sunt potrivite pentru print, partajare pe social media sau utilizare personală</li>
+            <li>Formatul este JPEG de înaltă calitate</li>
+            <li>Le poți descărca direct din linkul trimis pe email</li>
+          </ol>
         </div>
       </div>
+
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
-          <span>Pot anula sau modifica o comandă?</span>
+          <span>Ce înseamnă un pachet de stiluri?</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Dacă comanda nu a fost încă procesată, poți contacta echipa noastră la artify.system@gmail.com și vom încerca să te ajutăm. Odată ce procesarea a început, nu mai putem modifica sau anula comanda.</p>
+          <ol class="help-a-steps">
+            <li>Un pachet este un stil artistic (Maeștri, Impresionism, Modern &amp; Abstract)</li>
+            <li>Pachetul de 5 portrete costă 9,99 Lei</li>
+            <li>Pachetul complet de 15 portrete costă 19,99 Lei</li>
+            <li>Primești portretele cu fața ta în stilul ales, în rezoluție mare</li>
+          </ol>
         </div>
       </div>
     </section>
 
+    <!-- FAQ: PLATA SI PRETURI -->
     <section class="help-qa-section hidden" id="qa-plata">
       <div class="help-qa-header">
-        <svg class="help-qa-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        <h2>Plată și prețuri</h2>
-        <span class="help-qa-count">4 întrebări</span>
+        <div class="help-qa-header-icon help-qa-icon--green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        </div>
+        <div>
+          <h2 class="help-qa-header-title">Plată și prețuri</h2>
+          <p class="help-qa-header-sub">Informații complete despre plată, prețuri și facturare</p>
+        </div>
       </div>
+
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
           <span>Ce metode de plată acceptați?</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Plata se face online prin Stripe, cu card bancar (Visa, Mastercard). Procesul este securizat și nu stocăm datele cardului tău.</p>
+          <ol class="help-a-steps">
+            <li>Plata se face online prin Stripe, cu card bancar</li>
+            <li>Acceptăm Visa și Mastercard</li>
+            <li>Procesul este securizat — nu stocăm datele cardului tău</li>
+            <li>Vei primi o confirmare de plată pe email imediat</li>
+          </ol>
         </div>
       </div>
+
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
-          <span>Prețul include TVA?</span>
+          <span>Prețul include toate taxele?</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Prețurile afișate sunt finale, totul inclus. Nu există taxe ascunse sau abonamente. Plătești o singură dată pentru pachetul ales.</p>
+          <ol class="help-a-steps">
+            <li>Da, prețurile afișate sunt finale, totul inclus</li>
+            <li>Nu există taxe ascunse sau abonamente</li>
+            <li>Plătești o singură dată pentru pachetul ales</li>
+          </ol>
         </div>
       </div>
+
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
           <span>Pot obține o factură?</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Da. La finalizarea comenzii poți completa datele de facturare. Factura îți va fi trimisă pe email după ce plata este confirmată.</p>
+          <ol class="help-a-steps">
+            <li>Da, poți completa datele de facturare la finalizarea comenzii</li>
+            <li>Factura îți va fi trimisă pe email după confirmarea plății</li>
+            <li>Contactează-ne la artify.system@gmail.com pentru orice ajutor</li>
+          </ol>
         </div>
       </div>
+
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
-          <span>Este posibil să returnez sau să cer banii înapoi?</span>
+          <span>Plata nu a fost procesată</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Serviciul nostru generează conținut digital personalizat. Dacă ai o problemă cu rezultatul (ex. eroare tehnică, imagine necorespunzătoare), contactează-ne la artify.system@gmail.com și vom căuta o soluție.</p>
+          <ol class="help-a-steps">
+            <li>Verifică să ai fonduri suficiente pe card</li>
+            <li>Asigură-te că datele cardului sunt corecte</li>
+            <li>Încearcă cu un alt card</li>
+            <li>Contactează banca pentru deblocare plăți online</li>
+            <li>Dacă banii au fost retrași dar comanda nu apare, contactează-ne</li>
+          </ol>
         </div>
       </div>
     </section>
 
-    <section class="help-qa-section hidden" id="qa-livrare">
+    <!-- FAQ: MODIFICARI SI RAMBURSARI -->
+    <section class="help-qa-section hidden" id="qa-modificari">
       <div class="help-qa-header">
-        <svg class="help-qa-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <h2>Livrare și acces</h2>
-        <span class="help-qa-count">4 întrebări</span>
-      </div>
-      <div class="help-q-item" data-faq>
-        <button type="button" class="help-q-btn" aria-expanded="false">
-          <span>Cât durează să primesc portretele?</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="help-a-wrap">
-          <p class="help-a">De obicei 2–5 minute. Îți trimitem un email când galeria e gata, cu link pentru vizualizare și descărcare.</p>
+        <div class="help-qa-header-icon help-qa-icon--orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+        </div>
+        <div>
+          <h2 class="help-qa-header-title">Modificări și Rambursări</h2>
+          <p class="help-qa-header-sub">Informații despre modificarea comenzilor și rambursări</p>
         </div>
       </div>
+
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
-          <span>Pot descărca imaginile mai târziu?</span>
+          <span>Pot modifica comanda după plată?</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Da. Linkurile din email și de pe pagina comenzii rămân valabile 14 zile. Descarcă imaginile sau salvează-le pe device în acest interval.</p>
+          <ol class="help-a-steps">
+            <li>Din păcate, comenzile nu pot fi modificate după plată</li>
+            <li>Portretele se generează automat imediat după confirmare</li>
+            <li>Verifică cu atenție datele înainte de a plăti</li>
+            <li>Pentru greșeli majore, contactează-ne cât mai repede pentru soluții</li>
+          </ol>
         </div>
       </div>
+
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
-          <span>În ce format primesc imaginile?</span>
+          <span>Cum solicit rambursarea?</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Portretele sunt livrate în format JPEG, de înaltă calitate. Le poți descărca individual sau în arhivă, direct din linkul trimis pe email.</p>
+          <ol class="help-a-steps">
+            <li>Trimite un email la artify.system@gmail.com</li>
+            <li>Include ID-ul comenzii și motivul solicitării</li>
+            <li>Răspundem în maxim 24 de ore</li>
+            <li>Rambursările se procesează în 5–10 zile lucrătoare</li>
+          </ol>
         </div>
       </div>
+
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
-          <span>Ce se întâmplă dacă nu primesc emailul?</span>
+          <span>Am plătit dar nu văd comanda</span>
           <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Verifică folderul Spam/Junk. Dacă tot nu găsești emailul, accesează pagina de status a comenzii (linkul din emailul de confirmare a plății) sau contactează-ne la artify.system@gmail.com cu numărul comenzii.</p>
+          <ol class="help-a-steps">
+            <li>Verifică email-ul pentru confirmarea plății</li>
+            <li>Plățile se confirmă în câteva secunde/minute</li>
+            <li>Caută în Spam dacă nu vezi email-ul</li>
+            <li>Contactează-ne cu dovada plății (screenshot)</li>
+          </ol>
         </div>
       </div>
     </section>
 
+    <!-- FAQ: PROBLEME TEHNICE -->
+    <section class="help-qa-section hidden" id="qa-tehnic">
+      <div class="help-qa-header">
+        <div class="help-qa-header-icon help-qa-icon--red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <h2 class="help-qa-header-title">Probleme Tehnice</h2>
+          <p class="help-qa-header-sub">Rezolvă problemele tehnice și erorile</p>
+        </div>
+      </div>
+
+      <div class="help-q-item" data-faq>
+        <button type="button" class="help-q-btn" aria-expanded="false">
+          <span>Site-ul nu funcționează corect</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="help-a-wrap">
+          <ol class="help-a-steps">
+            <li>Reîncarcă pagina (Ctrl+R sau Cmd+R)</li>
+            <li>Șterge cache-ul și cookie-urile browserului</li>
+            <li>Încearcă într-un browser diferit</li>
+            <li>Dezactivează extensiile de browser</li>
+            <li>Verifică dacă ai JavaScript activat</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="help-q-item" data-faq>
+        <button type="button" class="help-q-btn" aria-expanded="false">
+          <span>Nu pot încărca poza</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="help-a-wrap">
+          <ol class="help-a-steps">
+            <li>Asigură-te că fișierul este JPG, PNG sau WEBP</li>
+            <li>Dimensiunea maximă acceptată este 10 MB</li>
+            <li>Încearcă să comprimi poza dacă este prea mare</li>
+            <li>Încearcă din alt browser sau dispozitiv</li>
+            <li>Contactează-ne dacă problema persistă</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="help-q-item" data-faq>
+        <button type="button" class="help-q-btn" aria-expanded="false">
+          <span>Link-ul de descărcare nu funcționează</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="help-a-wrap">
+          <ol class="help-a-steps">
+            <li>Link-urile sunt valide 14 zile de la generare</li>
+            <li>Dacă a expirat, contactează-ne pentru un link nou</li>
+            <li>Încearcă să deschizi link-ul într-un alt browser</li>
+            <li>Verifică să nu ai probleme cu conexiunea la internet</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA BLOCK -->
     <div class="help-cta-card">
-      <svg class="help-cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <h3 class="help-cta-title">Nu ai găsit ce căutai?</h3>
-      <p class="help-cta-desc">Echipa noastră este aici să te ajute. Scrie-ne și îți vom răspunde în cel mai scurt timp posibil.</p>
+      <div class="help-cta-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h3 class="help-cta-title">Încă ai nevoie de ajutor?</h3>
+      <p class="help-cta-desc">Nu am putut rezolva problema ta? Echipa noastră este pregătită să te ajute personal.</p>
       <div class="help-cta-btns">
-        <a href="/contact" class="btn btn-primary btn-lg">Contactează-ne <span class="btn-arrow">→</span></a>
-        <a href="/styles" class="btn btn-outline btn-lg">✨ Alege un stil</a>
+        <a href="/contact" class="btn btn-primary btn-lg help-cta-btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Contactează-ne →
+        </a>
+        <button type="button" class="btn btn-outline btn-lg help-cta-btn-secondary" id="help-cta-faq-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Întrebări Frecvente
+        </button>
+      </div>
+      <div class="help-cta-extra">
+        Sau dacă ești gata să creezi:
+        <a href="/styles" class="help-cta-create-link">🎨 Alege un stil →</a>
       </div>
     </div>
+
   </main>
 
-    <footer class="footer">
+  <footer class="footer">
     <div class="footer-grid">
       <div class="footer-col footer-brand">
         <a href="/" class="logo">
@@ -286,12 +484,13 @@
       <span>🎨 Pentru iubitorii de artă.</span>
     </div>
   </footer>
+
   <script>
     (function() {
       var searchInput = document.getElementById('help-search');
-      var catBtns = document.querySelectorAll('.help-cat-btn');
+      var catCards = document.querySelectorAll('.help-cat-card');
       var qaSections = document.querySelectorAll('.help-qa-section');
-      var activeCategory = 'serviciu';
+      var activeCategory = 'portrete';
 
       function filterBySearch(term) {
         term = (term || '').toLowerCase().trim();
@@ -301,8 +500,10 @@
           var visible = 0;
           section.querySelectorAll('.help-q-item').forEach(function(item) {
             var q = (item.querySelector('.help-q-btn span') || {}).textContent || '';
-            var a = (item.querySelector('.help-a') || {}).textContent || '';
-            var match = !term || q.toLowerCase().indexOf(term) >= 0 || a.toLowerCase().indexOf(term) >= 0;
+            var steps = item.querySelectorAll('.help-a-steps li');
+            var aText = '';
+            steps.forEach(function(li) { aText += li.textContent + ' '; });
+            var match = !term || q.toLowerCase().indexOf(term) >= 0 || aText.toLowerCase().indexOf(term) >= 0;
             item.style.display = match ? '' : 'none';
             if (match) visible++;
           });
@@ -320,10 +521,10 @@
         searchInput.addEventListener('input', function() { filterBySearch(this.value); });
       }
 
-      catBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
+      catCards.forEach(function(card) {
+        card.addEventListener('click', function() {
           var cat = this.getAttribute('data-category');
-          catBtns.forEach(function(b) { b.classList.remove('active'); });
+          catCards.forEach(function(c) { c.classList.remove('active'); });
           this.classList.add('active');
           updateCategory(cat);
         });
@@ -338,6 +539,14 @@
           btn.setAttribute('aria-expanded', !isOpen);
         });
       });
+
+      // CTA "Întrebări Frecvente" scrolls back to top of page
+      var ctaFaqBtn = document.getElementById('help-cta-faq-btn');
+      if (ctaFaqBtn) {
+        ctaFaqBtn.addEventListener('click', function() {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
     })();
   </script>
 </body>
