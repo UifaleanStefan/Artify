@@ -321,6 +321,11 @@ async def help_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "landing" / "help.html", headers=_HTML_HEADERS)
 
 
+@app.get("/contact")
+async def contact_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "landing" / "contact.html", headers=_HTML_HEADERS)
+
+
 @app.get("/terms")
 async def terms_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "landing" / "terms.html", headers=_HTML_HEADERS)
@@ -1222,6 +1227,12 @@ async def create_order(
         style_image_urls = json.dumps([_resolve_style_image_url(p) for p in ROYALTY_PORTRAITS_PACK_PATHS])
         if not style_image_url:
             style_image_url = _resolve_style_image_url(ROYALTY_PORTRAITS_PACK_PATHS[0])
+    # Limit to first 5 images for pack_tier 5 (9.99 Lei)
+    pack_tier = order_data.pack_tier if order_data.pack_tier in (5, 15) else 5
+    if style_image_urls and pack_tier == 5:
+        urls_list = json.loads(style_image_urls)
+        style_image_urls = json.dumps(urls_list[:5])
+    amount = 9.99 if pack_tier == 5 else 19.99
     # Fail fast if style URLs are not public HTTPS (Replicate requires this)
     def _must_be_https(name: str, url: Optional[str]) -> None:
         if not url or not url.strip():
@@ -1261,7 +1272,7 @@ async def create_order(
         portrait_mode=portrait_mode,
         style_image_url=style_image_url,
         style_image_urls=style_image_urls,
-        amount=9.99,
+        amount=amount,
         billing_name=order_data.billing_name,
         billing_address=order_data.billing_address,
         billing_city=order_data.billing_city,

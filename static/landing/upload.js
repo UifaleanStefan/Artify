@@ -6,6 +6,8 @@
   var data = window.STYLES_DATA || [];
   var params = new URLSearchParams(window.location.search);
   var styleId = params.get('style');
+  var pack = params.get('pack') || '5';
+  if (pack !== '5' && pack !== '15') pack = '5';
   var style = null;
   var photoFile = null;
 
@@ -111,7 +113,7 @@
           var imageUrl = res.data && res.data.image_url;
           if (!imageUrl) throw new Error('Server did not return a photo URL.');
           var portraitMode = (document.querySelector('input[name="portrait_mode"]:checked') || {}).value || 'realistic';
-          window.location.href = '/details?style=' + encodeURIComponent(style.id) + '&image_url=' + encodeURIComponent(imageUrl) + '&portrait_mode=' + encodeURIComponent(portraitMode);
+          window.location.href = '/details?style=' + encodeURIComponent(style.id) + '&image_url=' + encodeURIComponent(imageUrl) + '&portrait_mode=' + encodeURIComponent(portraitMode) + '&pack=' + encodeURIComponent(pack);
         })
         .catch(function (err) {
           createBtn.disabled = false;
@@ -126,12 +128,12 @@
     var id = parseInt(styleId, 10);
     style = data.find(function (s) { return s.id === id; });
     if (style && style.comingSoon) {
-      window.location.href = '/styles';
+      window.location.href = '/styles' + (pack === '15' ? '?pack=15' : '');
       return;
     }
   }
   if (!style) {
-    if (styleCard) styleCard.innerHTML = '<p>Niciun stil ales. <a href="/styles">Alege un stil</a> mai întâi.</p>';
+    if (styleCard) styleCard.innerHTML = '<p>Niciun stil ales. <a href="/styles' + (pack === '15' ? '?pack=15' : '') + '">Alege un stil</a> mai întâi.</p>';
     if (createBtn) createBtn.disabled = true;
   } else {
     if (createBtn) createBtn.disabled = true;
@@ -175,5 +177,7 @@
     if (styleTitle) styleTitle.textContent = style.title;
     if (styleArtist) styleArtist.textContent = style.artist;
     if (styleDesc) styleDesc.textContent = style.description || '';
+    var changeLink = document.querySelector('.upload-change-link');
+    if (changeLink) changeLink.href = '/styles' + (pack === '15' ? '?pack=15' : '');
   }
 })();

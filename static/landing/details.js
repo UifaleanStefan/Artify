@@ -5,6 +5,8 @@
   var styleId = params.get('style');
   var imageUrl = params.get('image_url');
   var portraitMode = params.get('portrait_mode') || 'realistic';
+  var pack = params.get('pack') || '5';
+  if (pack !== '5' && pack !== '15') pack = '5';
   var style = null;
 
   if (styleId) { var id = parseInt(styleId, 10); style = data.find(function (s) { return s.id === id; }); }
@@ -53,7 +55,7 @@
   if (imageUrl && photoPreview) {
     photoPreview.innerHTML = '<img src="' + imageUrl + '" alt="Poză ta" />';
   }
-  if (backLink) { backLink.href = '/upload?style=' + encodeURIComponent(styleId || ''); }
+  if (backLink) { backLink.href = '/upload?style=' + encodeURIComponent(styleId || '') + '&pack=' + encodeURIComponent(pack); }
 
   var form = document.getElementById('details-form');
   var errorEl = document.getElementById('details-form-error');
@@ -66,7 +68,7 @@
       if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
       if (!email) { if (errorEl) { errorEl.textContent = 'Adresa de email este obligatorie.'; errorEl.style.display = 'block'; } return; }
       if (email !== confirm) { if (errorEl) { errorEl.textContent = 'Adresele de email nu coincid.'; errorEl.style.display = 'block'; } return; }
-      var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&portrait_mode=' + encodeURIComponent(portraitMode) + '&email=' + encodeURIComponent(email);
+      var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&portrait_mode=' + encodeURIComponent(portraitMode) + '&email=' + encodeURIComponent(email) + '&pack=' + encodeURIComponent(pack);
       window.location.href = '/billing' + q;
     });
   }

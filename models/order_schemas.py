@@ -8,6 +8,7 @@ class OrderCreateRequest(BaseModel):
     style_id: int
     image_url: str
     portrait_mode: Optional[str] = "realistic"  # "realistic" -> 0.55, "artistic" -> 0.8
+    pack_tier: Optional[int] = 5  # 5 portraits (9.99) or 15 portraits (19.99)
     billing_name: Optional[str] = None
     billing_address: Optional[str] = None
     billing_city: Optional[str] = None

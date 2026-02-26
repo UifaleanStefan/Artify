@@ -6,6 +6,8 @@
   var imageUrl = params.get('image_url');
   var portraitMode = params.get('portrait_mode') || 'realistic';
   var email = params.get('email') || '';
+  var pack = params.get('pack') || '5';
+  if (pack !== '5' && pack !== '15') pack = '5';
   var style = null;
 
   if (styleId) { var id = parseInt(styleId, 10); style = data.find(function (s) { return s.id === id; }); }
@@ -52,8 +54,11 @@
     if (styleArtist) styleArtist.textContent = style.artist;
   }
   if (emailEl) emailEl.textContent = email || '—';
+  var priceStr = pack === '15' ? '19,99 Lei' : '9,99 Lei';
+  var billingTotalEl = document.getElementById('billing-total');
+  if (billingTotalEl) billingTotalEl.textContent = priceStr;
   if (backLink) {
-    var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&portrait_mode=' + encodeURIComponent(portraitMode);
+    var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&portrait_mode=' + encodeURIComponent(portraitMode) + '&pack=' + encodeURIComponent(pack);
     backLink.href = '/details' + q;
   }
 
@@ -75,7 +80,7 @@
         if (errorEl) { errorEl.textContent = 'Completează toate câmpurile obligatorii.'; errorEl.style.display = 'block'; } return;
       }
       sessionStorage.setItem('billingInfo', JSON.stringify({ fullName: fullName, address1: address1, address2: address2, city: city, state: state, zip: zip, country: country }));
-      var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&portrait_mode=' + encodeURIComponent(portraitMode) + '&email=' + encodeURIComponent(email);
+      var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&portrait_mode=' + encodeURIComponent(portraitMode) + '&email=' + encodeURIComponent(email) + '&pack=' + encodeURIComponent(pack);
       window.location.href = '/payment' + q;
     });
   }

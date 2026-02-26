@@ -6,6 +6,9 @@
   var searchInput = document.getElementById('styles-search');
   var filtersWrap = document.getElementById('styles-filters');
   var activeCategory = 'all';
+  var params = new URLSearchParams(window.location.search);
+  var pack = params.get('pack') || '5';
+  if (pack !== '5' && pack !== '15') pack = '5';
 
   function tagClass(cat) {
     var map = {
@@ -44,7 +47,7 @@
       var isComingSoon = s.comingSoon === true;
       var card = document.createElement(isComingSoon ? 'div' : 'a');
       card.className = 'gallery-card' + (isComingSoon ? ' gallery-card--coming-soon' : '');
-      if (!isComingSoon) card.href = '/upload?style=' + s.id;
+      if (!isComingSoon) card.href = '/upload?style=' + s.id + '&pack=' + pack;
       card.innerHTML =
         '<div class="gallery-card-thumb">' +
           '<div class="gallery-card-thumb-bg ' + (s.preview && s.styleImageUrl ? '' : (s.thumbnailClass || '')) + '"' + (s.preview && s.styleImageUrl ? ' style="' + thumbStyle(s) + '"' : '') + '></div>' +

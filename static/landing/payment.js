@@ -6,6 +6,9 @@
   var imageUrl = params.get('image_url');
   var portraitMode = params.get('portrait_mode') || 'realistic';
   var email = params.get('email') || '';
+  var pack = params.get('pack') || '5';
+  if (pack !== '5' && pack !== '15') pack = '5';
+  var priceStr = pack === '15' ? '19,99 Lei' : '9,99 Lei';
   var style = null;
 
   if (styleId) { var id = parseInt(styleId, 10); style = data.find(function (s) { return s.id === id; }); }
@@ -53,8 +56,13 @@
     if (name) name.textContent = style.title;
   }
   if (deliveryEl) deliveryEl.textContent = email || '—';
+  var paymentPriceEl = document.getElementById('payment-price');
+  var paymentTotalEl = document.getElementById('payment-total');
+  if (paymentPriceEl) paymentPriceEl.textContent = priceStr;
+  if (paymentTotalEl) paymentTotalEl.textContent = priceStr;
+  if (payBtn) payBtn.textContent = 'Plătește ' + priceStr;
   if (backLink) {
-    var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&portrait_mode=' + encodeURIComponent(portraitMode) + '&email=' + encodeURIComponent(email);
+    var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&portrait_mode=' + encodeURIComponent(portraitMode) + '&email=' + encodeURIComponent(email) + '&pack=' + encodeURIComponent(pack);
     backLink.href = '/billing' + q;
   }
 
@@ -76,6 +84,7 @@
           style_id: parseInt(styleId, 10),
           image_url: imageUrl,
           portrait_mode: portraitMode,
+          pack_tier: parseInt(pack, 10) || 5,
           billing_name: billingInfo.fullName,
           billing_address: billingInfo.address1 + (billingInfo.address2 ? ', ' + billingInfo.address2 : ''),
           billing_city: billingInfo.city,
@@ -101,7 +110,7 @@
         window.location.href = '/create/done' + q;
       })
       .catch(function (err) {
-        payBtn.disabled = false; payBtn.textContent = 'Plătește 9,99 Lei';
+        payBtn.disabled = false; payBtn.textContent = 'Plătește ' + priceStr;
         alert(err.message || 'Ceva nu a mers bine.');
       });
     });

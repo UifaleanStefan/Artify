@@ -107,10 +107,12 @@ body.museum-mode .footer {
 }
 body.museum-mode .footer-brand p,
 body.museum-mode .footer-links a,
+body.museum-mode .footer-contact-item,
 body.museum-mode .footer-bottom span {
   color: #94a3b8;
 }
-body.museum-mode .footer-links a:hover {
+body.museum-mode .footer-links a:hover,
+body.museum-mode .footer-contact-item:hover {
   color: #ffffff;
 }
 body.museum-mode .footer-brand .logo-text {

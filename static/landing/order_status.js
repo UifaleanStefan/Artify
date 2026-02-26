@@ -46,12 +46,14 @@
         
         var file = new File([blob], 'artify-portret.' + ext, { type: blob.type });
 
+        var siteUrl = window.location.origin;
+        var shareData = {
+          files: [file],
+          title: tTitle,
+          text: 'Priviți noul meu portret artistic creat cu Artify! 🎨 ' + siteUrl
+        };
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: tTitle,
-            text: 'Priviți noul meu portret artistic creat cu Artify! 🎨'
-          });
+          await navigator.share(shareData);
         } else {
           // Fallback: trigger download
           var a = document.createElement('a');

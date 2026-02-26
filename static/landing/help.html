@@ -5,32 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Centru de ajutor – Artify</title>
   <link rel="stylesheet" href="/static/landing/styles.css" />
+  <link rel="stylesheet" href="/static/landing/help.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
-  <style>
-    .help-page { max-width: 720px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
-    .help-page h1 { font-size: 1.75rem; color: var(--text); margin: 0 0 0.5rem; }
-    .help-page .lead { color: var(--text-muted); margin: 0 0 2rem; font-size: 1.0625rem; }
-    .help-qa { margin-bottom: 2.5rem; }
-    .help-qa h2 { font-size: 1.125rem; color: var(--primary); margin: 0 0 1rem; font-weight: 600; }
-    .help-q-item { margin-bottom: 0.5rem; border-radius: var(--radius); border: 1px solid #e2e8f0; background: #fff; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
-    .help-q-item:hover { border-color: rgba(37, 99, 235, 0.25); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-    .help-q-item.is-open { border-color: rgba(37, 99, 235, 0.35); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08); }
-    .help-q-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 1rem 1.25rem; border: none; background: none; cursor: pointer; text-align: left; font-family: inherit; font-weight: 600; color: var(--text); font-size: 0.9375rem; }
-    .help-q-btn:hover { color: var(--primary); }
-    .help-q-btn .chevron { flex-shrink: 0; width: 1.25rem; height: 1.25rem; color: var(--primary); transition: transform 0.25s ease; }
-    .help-q-item.is-open .help-q-btn .chevron { transform: rotate(180deg); }
-    .help-a-wrap { overflow: hidden; }
-    .help-a { color: var(--text-muted); font-size: 0.9375rem; line-height: 1.5; margin: 0; padding: 0 1.25rem 1rem; border-top: 1px solid #f1f5f9; }
-    .help-q-item .help-a { padding-top: 0.75rem; transition: opacity 0.2s ease; }
-    .help-q-item:not(.is-open) .help-a-wrap { display: none; }
-    .help-contact { background: var(--bg-light); border-radius: var(--radius-lg); padding: 1.5rem; border: 1px solid rgba(37, 99, 235, 0.12); }
-    .help-contact h2 { font-size: 1.125rem; color: var(--text); margin: 0 0 0.5rem; font-weight: 600; }
-    .help-contact p { margin: 0; font-size: 0.9375rem; color: var(--text-muted); line-height: 1.5; }
-    .help-contact a { color: var(--primary); font-weight: 500; text-decoration: none; }
-    .help-contact a:hover { text-decoration: underline; }
-  </style>
 </head>
 <body>
   <header class="header header-with-border">
@@ -44,15 +22,60 @@
   </header>
 
   <main class="help-page">
-    <h1>Centru de ajutor</h1>
-    <p class="lead">Întrebări frecvente și informații de contact.</p>
+    <div class="help-header">
+      <span class="help-header-pill">🕐 Centru de ajutor</span>
+      <h1 class="help-header-title">Cum te putem ajuta?</h1>
+      <p class="help-header-subtitle">Găsește rapid răspunsuri la întrebările tale despre serviciul nostru.</p>
+    </div>
 
-    <section class="help-qa">
-      <h2>Întrebări frecvente</h2>
+    <div class="help-search-wrap">
+      <svg class="help-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" class="help-search" id="help-search" placeholder="Caută întrebări..." aria-label="Caută în întrebări frecvente" />
+    </div>
+
+    <div class="help-info-cards">
+      <div class="help-info-card">
+        <span class="help-info-card-icon">⏱</span>
+        <span class="help-info-card-value">5 min</span>
+        <span class="help-info-card-label">Timp livrare</span>
+      </div>
+      <div class="help-info-card">
+        <span class="help-info-card-icon">🎨</span>
+        <span class="help-info-card-value">5–15</span>
+        <span class="help-info-card-label">Portrete incluse</span>
+      </div>
+      <div class="help-info-card">
+        <span class="help-info-card-icon">📥</span>
+        <span class="help-info-card-value">14 zile</span>
+        <span class="help-info-card-label">Acces descărcare</span>
+      </div>
+    </div>
+
+    <div class="help-categories">
+      <button type="button" class="help-cat-btn active" data-category="serviciu">
+        <svg class="help-cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+        Despre serviciu
+      </button>
+      <button type="button" class="help-cat-btn" data-category="plata">
+        <svg class="help-cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Plată și prețuri
+      </button>
+      <button type="button" class="help-cat-btn" data-category="livrare">
+        <svg class="help-cat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Livrare și acces
+      </button>
+    </div>
+
+    <section class="help-qa-section" id="qa-serviciu">
+      <div class="help-qa-header">
+        <svg class="help-qa-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+        <h2>Despre serviciu</h2>
+        <span class="help-qa-count">2 întrebări</span>
+      </div>
       <div class="help-q-item is-open" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="true">
           <span>Cum funcționează serviciul?</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
           <p class="help-a">Încarci o poză cu fața ta, alegi un stil din galerie (un pachet), plătești și primești o galerie de portrete în acel stil. Procesul durează câteva minute; vei primi un email când galeria e gata.</p>
@@ -61,16 +84,41 @@
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
           <span>Ce înseamnă un pachet?</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
-          <p class="help-a">Un pachet este un stil artistic (de ex. Maeștri, Impresionism, Modern & Abstract). Când alegi un pachet, primești un set complet de portrete cu fața ta în acel stil, în rezoluție mare, gata de print sau partajat.</p>
+          <p class="help-a">Un pachet este un stil artistic (de ex. Maeștri, Impresionism, Modern & Abstract). Poți alege pachetul de 5 portrete (9,99 Lei) sau pachetul complet de 15 portrete (19,99 Lei). Primești portretele cu fața ta în acel stil, în rezoluție mare, gata de print sau partajat.</p>
         </div>
+      </div>
+    </section>
+
+    <section class="help-qa-section hidden" id="qa-plata">
+      <div class="help-qa-header">
+        <svg class="help-qa-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <h2>Plată și prețuri</h2>
+        <span class="help-qa-count">1 întrebare</span>
+      </div>
+      <div class="help-q-item" data-faq>
+        <button type="button" class="help-q-btn" aria-expanded="false">
+          <span>Ce metode de plată acceptați?</span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="help-a-wrap">
+          <p class="help-a">Plata se face online, în siguranță. Detaliile exacte sunt afișate pe pagina de plată.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="help-qa-section hidden" id="qa-livrare">
+      <div class="help-qa-header">
+        <svg class="help-qa-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <h2>Livrare și acces</h2>
+        <span class="help-qa-count">2 întrebări</span>
       </div>
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
           <span>Cât durează să primesc portretele?</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
           <p class="help-a">De obicei 2–5 minute. Îți trimitem un email când galeria e gata, cu link pentru vizualizare și descărcare.</p>
@@ -79,55 +127,64 @@
       <div class="help-q-item" data-faq>
         <button type="button" class="help-q-btn" aria-expanded="false">
           <span>Pot descărca imaginile mai târziu?</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
         </button>
         <div class="help-a-wrap">
           <p class="help-a">Da. Linkurile din email și de pe pagina comenzii rămân valabile 14 zile. Descarcă imaginile sau salvează-le pe device în acest interval.</p>
         </div>
       </div>
-      <div class="help-q-item" data-faq>
-        <button type="button" class="help-q-btn" aria-expanded="false">
-          <span>Ce metode de plată acceptați?</span>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-        <div class="help-a-wrap">
-          <p class="help-a">Plata se face online, în siguranță. Detaliile exacte sunt afișate pe pagina de plată.</p>
-        </div>
-      </div>
     </section>
 
-    <section class="help-contact">
-      <h2>Plângeri sau întrebări?</h2>
-      <p>Pentru orice problemă cu comanda, facturare sau alte întrebări, scrie-ne la <a href="mailto:artify.system@gmail.com">artify.system@gmail.com</a>. Răspundem în cel mai scurt timp.</p>
-    </section>
+    <div class="help-cta-card">
+      <svg class="help-cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <h3 class="help-cta-title">Nu ai găsit ce căutai?</h3>
+      <p class="help-cta-desc">Echipa noastră este aici să te ajute. Scrie-ne și îți vom răspunde în cel mai scurt timp posibil.</p>
+      <div class="help-cta-btns">
+        <a href="/contact" class="btn btn-primary btn-lg">Contactează-ne <span class="btn-arrow">→</span></a>
+        <a href="/styles" class="btn btn-outline btn-lg">✨ Alege un stil</a>
+      </div>
+    </div>
   </main>
 
   <footer class="footer">
     <div class="footer-grid">
-      <div class="footer-brand">
+      <div class="footer-col footer-brand">
         <a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a>
         <p>Poză → artă. Fii pictat în orice epocă.</p>
-      </div>
-      <div class="footer-links">
-        <h4>Produs</h4>
-        <a href="/#how-it-works">Cum funcționează</a>
-        <a href="/styles">Galeria de stiluri</a>
-        <a href="/#pricing">Prețuri</a>
-      </div>
-      <div class="footer-links">
-        <h4>Suport</h4>
-        <a href="/help">Centru de ajutor</a>
-        <a href="/terms">Termeni și condiții</a>
-        <a href="/privacy">Politica de confidențialitate</a>
-        <a href="/help">Contact</a>
-      </div>
-      <div class="footer-links footer-social">
-        <h4>Urmărește-ne</h4>
-        <div class="social-icons">
-          <a href="https://instagram.com/artify.ro" target="_blank" rel="noopener noreferrer" class="social-instagram-link">Vezi portofoliul pe Instagram</a>
-          <a href="#" aria-label="Facebook">f</a>
-          <a href="#" aria-label="Twitter">𝕏</a>
+        <div class="footer-social">
+          <h4>Urmărește-ne</h4>
+          <div class="social-icons">
+            <a href="https://instagram.com/artify.ro" target="_blank" rel="noopener noreferrer" class="social-instagram-link">Instagram</a>
+            <a href="#" aria-label="Facebook">f</a>
+            <a href="https://tiktok.com/@artify.ro" target="_blank" rel="noopener noreferrer" aria-label="TikTok">TikTok</a>
+          </div>
         </div>
+      </div>
+      <div class="footer-col footer-nav">
+        <div class="footer-links">
+          <h4>Produs</h4>
+          <a href="/#how-it-works">Cum funcționează</a>
+          <a href="/styles">Galeria de stiluri</a>
+          <a href="/#pricing">Prețuri</a>
+        </div>
+        <div class="footer-links">
+          <h4>Suport</h4>
+          <a href="/help">Centru de ajutor</a>
+          <a href="/contact">Contact</a>
+          <a href="/terms">Termeni și condiții</a>
+          <a href="/privacy">Politica de confidențialitate</a>
+        </div>
+      </div>
+      <div class="footer-col footer-contact">
+        <h4>Contact</h4>
+        <a href="mailto:artify.system@gmail.com" class="footer-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          artify.system@gmail.com
+        </a>
+        <a href="tel:+40758972277" class="footer-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          0758 972 277
+        </a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -136,15 +193,58 @@
     </div>
   </footer>
   <script>
-    document.querySelectorAll('[data-faq]').forEach(function (item) {
-      var btn = item.querySelector('.help-q-btn');
-      if (!btn) return;
-      btn.addEventListener('click', function () {
-        var isOpen = item.classList.contains('is-open');
-        item.classList.toggle('is-open', !isOpen);
-        btn.setAttribute('aria-expanded', !isOpen);
+    (function() {
+      var searchInput = document.getElementById('help-search');
+      var catBtns = document.querySelectorAll('.help-cat-btn');
+      var qaSections = document.querySelectorAll('.help-qa-section');
+      var activeCategory = 'serviciu';
+
+      function filterBySearch(term) {
+        term = (term || '').toLowerCase().trim();
+        qaSections.forEach(function(section) {
+          var sectionId = section.id;
+          var isActiveCat = sectionId === 'qa-' + activeCategory;
+          var visible = 0;
+          section.querySelectorAll('.help-q-item').forEach(function(item) {
+            var q = (item.querySelector('.help-q-btn span') || {}).textContent || '';
+            var a = (item.querySelector('.help-a') || {}).textContent || '';
+            var match = !term || q.toLowerCase().indexOf(term) >= 0 || a.toLowerCase().indexOf(term) >= 0;
+            item.style.display = match ? '' : 'none';
+            if (match) visible++;
+          });
+          var showSection = term ? visible > 0 : isActiveCat;
+          section.classList.toggle('hidden', !showSection);
+        });
+      }
+
+      function updateCategory(cat) {
+        activeCategory = cat;
+        filterBySearch(searchInput ? searchInput.value : '');
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener('input', function() { filterBySearch(this.value); });
+      }
+
+      catBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var cat = this.getAttribute('data-category');
+          catBtns.forEach(function(b) { b.classList.remove('active'); });
+          this.classList.add('active');
+          updateCategory(cat);
+        });
       });
-    });
+
+      document.querySelectorAll('[data-faq]').forEach(function(item) {
+        var btn = item.querySelector('.help-q-btn');
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+          var isOpen = item.classList.contains('is-open');
+          item.classList.toggle('is-open', !isOpen);
+          btn.setAttribute('aria-expanded', !isOpen);
+        });
+      });
+    })();
   </script>
 </body>
 </html>
