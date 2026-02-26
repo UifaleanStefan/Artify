@@ -37,37 +37,37 @@ html { scroll-behavior: smooth; }
 /* Firefox (no gradient support, use primary) */
 html, body { scrollbar-width: thin; scrollbar-color: var(--primary) var(--bg-light); }
 
-/* Promo banner – scrolling marquee, alternating Part1 and Part2 */
+/* Promo banner – scrolling marquee announcement bar */
 .promo-banner {
   background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary) 25%, var(--accent) 50%, var(--primary) 75%, var(--primary-dark) 100%);
   background-color: var(--primary);
   color: white;
-  padding: 0.5rem 0;
-  min-height: 2.5rem;
-  display: flex;
-  align-items: center;
+  height: 2.5rem;
+  display: block;
   overflow: hidden;
+  position: relative;
+  white-space: nowrap;
 }
 .promo-banner-marquee-wrap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
   overflow: hidden;
-  overflow-x: hidden;
   width: 100%;
-  flex: 1;
 }
 .promo-banner-marquee {
-  display: flex;
-  align-items: center;
-  width: max-content;
-  animation: promo-marquee 20s linear infinite;
-  -webkit-animation: promo-marquee 20s linear infinite;
+  display: inline-block;
+  white-space: nowrap;
+  height: 2.5rem;
+  line-height: 2.5rem;
+  animation: promo-marquee 25s linear infinite;
+  -webkit-animation: promo-marquee 25s linear infinite;
   will-change: transform;
-  animation-play-state: running;
 }
 .promo-banner-track {
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  flex-shrink: 0;
+  display: inline-block;
+  padding-right: 0.75rem;
 }
 .promo-banner-text {
   font-size: 0.9375rem;
@@ -76,23 +76,23 @@ html, body { scrollbar-width: thin; scrollbar-color: var(--primary) var(--bg-lig
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 .promo-banner-sep {
-  margin: 0 0.75rem;
+  margin: 0 1.5rem;
   opacity: 0.9;
 }
 @keyframes promo-marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 @-webkit-keyframes promo-marquee {
-  0% { -webkit-transform: translateX(0); transform: translateX(0); }
-  100% { -webkit-transform: translateX(-50%); transform: translateX(-50%); }
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
   .promo-banner-marquee { animation: none; }
 }
 @media (max-width: 480px) {
   .promo-banner-text { font-size: 0.8125rem; }
-  .promo-banner-marquee { animation-duration: 30s; }
+  .promo-banner-marquee { animation-duration: 35s; }
 }
 
 body {
@@ -404,7 +404,6 @@ img { max-width: 100%; height: auto; }
   -webkit-appearance: none;
   appearance: none;
   position: relative;
-  overflow: hidden;
   background-clip: padding-box;
 }
 .btn:hover { transform: translateY(-1px); }
@@ -442,12 +441,17 @@ img { max-width: 100%; height: auto; }
   isolation: isolate;
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
+  position: relative;
+  overflow: hidden;
 }
 .btn-cta-prominent::before,
 .btn-hero-cta::before {
   content: '';
   position: absolute;
-  inset: 0;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
   border-radius: inherit;
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--accent) 100%);
   z-index: -1;
@@ -863,26 +867,19 @@ img { max-width: 100%; height: auto; }
 
 /* How it works – reference layout: white panel, gradient progress bar, numbered steps */
 .how-section {
-  padding: 0;
+  padding: 3rem 1rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 .how-panel {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
-  background: white;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  padding: 2rem 2rem 2.5rem;
+  padding: 2rem 1rem 3rem;
   position: relative;
-  overflow: hidden;
 }
 .how-progress-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary) 30%, var(--accent-3) 70%, rgba(236, 72, 153, 0.3) 100%);
-  border-radius: 0;
+  display: none;
 }
 .how-panel .section-title {
   margin-top: 0.5rem;
@@ -901,7 +898,7 @@ img { max-width: 100%; height: auto; }
   flex-direction: row;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 1.5rem;
   position: relative;
 }
 .how-step {
@@ -912,66 +909,72 @@ img { max-width: 100%; height: auto; }
   min-width: 0;
 }
 .how-step .step-number {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 3rem;
+  height: 3rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-3) 100%);
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
   color: white;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   z-index: 1;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
 }
 .how-step .step-card {
-  background: var(--bg);
+  background: white;
   padding: 1.5rem;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  text-align: center;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  text-align: left;
   width: 100%;
-  border: 1px solid rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 .how-step .step-icon {
   width: 2.5rem;
   height: 2.5rem;
-  margin: 0 auto 0.75rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  margin: 0 0 1rem 0;
+  border-radius: 8px;
+  background: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
 }
-.how-step:nth-child(2) .step-icon { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); }
-.how-step:nth-child(3) .step-icon { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); }
+.how-step:nth-child(2) .step-number { background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%); }
+.how-step:nth-child(3) .step-number { background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%); }
+
+.how-step:nth-child(2) .step-icon { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+.how-step:nth-child(3) .step-icon { background: rgba(236, 72, 153, 0.1); color: #ec4899; }
+
 .how-step .step-card h3 {
   font-size: 1.0625rem;
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.5rem;
   color: var(--text);
-  font-weight: 600;
+  font-weight: 700;
 }
 .how-step .step-card p {
   margin: 0;
   color: var(--text-muted);
-  font-size: 0.8125rem;
-  line-height: 1.45;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 /* Horizontal connector line between step numbers (desktop) */
 .how-steps::before {
   content: '';
   position: absolute;
-  top: 1.25rem;
-  left: 20%;
-  right: 20%;
-  height: 3px;
-  background: linear-gradient(90deg, var(--primary) 0%, var(--accent-3) 100%);
+  top: 1.5rem;
+  left: 16%;
+  right: 16%;
+  height: 2px;
+  background: linear-gradient(90deg, #a855f7 0%, #ec4899 100%);
   border-radius: 2px;
-  opacity: 0.6;
+  opacity: 0.4;
   pointer-events: none;
 }
 
@@ -1525,17 +1528,19 @@ a.style-card:hover .style-card-bg {
   z-index: 1;
 }
 .pricing-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
-  align-items: start;
+  align-items: center;
 }
-.pricing-cards--single { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
+.pricing-cards--single { max-width: 380px; margin: 0 auto; }
 .pricing-section .pricing-cards {
-  max-width: 960px;
+  max-width: 1000px;
   margin-left: auto;
   margin-right: auto;
-  grid-template-columns: repeat(3, minmax(200px, 1fr));
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
 }
 .pricing-card--single { text-align: center; }
 .pricing-card--secondary {
@@ -1552,20 +1557,40 @@ a.style-card:hover .style-card-bg {
   z-index: 2;
   box-shadow: 0 10px 30px rgba(37, 99, 235, 0.15);
 }
-.pricing-card--popular:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(37, 99, 235, 0.2);
+@media (min-width: 901px) {
+  .pricing-card--popular {
+    transform: scale(1.05);
+    z-index: 3;
+  }
+  .pricing-card--popular:hover {
+    transform: scale(1.05) translateY(-4px);
+    box-shadow: 0 16px 40px rgba(37, 99, 235, 0.2);
+  }
 }
 @media (max-width: 768px) {
+  .pricing-card--popular:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(37, 99, 235, 0.2);
+  }
+}
+
+@media (max-width: 900px) {
   .pricing-section .pricing-cards {
-    grid-template-columns: 1fr;
-    display: flex;
     flex-direction: column;
+    align-items: center;
+  }
+  .pricing-card {
+    width: 100%;
+    max-width: 380px;
   }
   /* 9.99 Lei pack first on phone */
   .pricing-card--order-1 { order: 1; }
   .pricing-card--order-2 { order: 2; }
   .pricing-card--order-3 { order: 3; }
+  
+  .pricing-card--popular {
+    transform: none !important;
+  }
 }
 .pricing-card--coming-soon {
   opacity: 0.95;
@@ -1631,6 +1656,8 @@ a.style-card:hover .style-card-bg {
 }
 .pricing-old { font-size: 1.25rem; font-weight: 500; color: var(--text-muted); text-decoration: line-through; margin-right: 0.5rem; -webkit-text-fill-color: var(--text-muted); }
 .pricing-card {
+  flex: 1;
+  min-width: 0;
   position: relative;
   background: white;
   padding: 2rem;
@@ -1825,41 +1852,36 @@ a.style-card:hover .style-card-bg {
   /* Fewer lines on mobile: hide title lines too */
   .section-line,
   .section-line--top { display: none; }
-  .how-panel { padding: 1.5rem 1.25rem 2rem; }
+  .how-panel { padding: 1.5rem 0rem 2rem; }
   /* Mobile: vertical layout – number on left, vertical line, card on right */
+  /* Mobile: stack vertically, numbers centered, looking like second image framework */
   .how-steps {
     flex-direction: column;
-    align-items: stretch;
-    gap: 1.5rem;
+    align-items: center;
+    gap: 2rem;
   }
   .how-steps::before {
-    top: 1.25rem;
-    bottom: 1.25rem;
-    left: calc(1.25rem - 1.5px);
-    right: auto;
-    width: 3px;
-    height: auto;
-    background: linear-gradient(180deg, var(--primary) 0%, var(--accent-3) 100%);
-    opacity: 0.5;
+    display: none; /* Hide connecting line on mobile to keep it clean */
   }
   .how-step {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 1rem;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
   }
   .how-step .step-number {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 0.9375rem;
-    margin-bottom: 0;
-    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.125rem;
+    margin-bottom: 1.5rem;
   }
   .how-step .step-card {
-    padding: 1.25rem 1rem;
+    padding: 1.5rem 1.25rem;
     text-align: left;
   }
   .how-step .step-icon {
-    margin: 0 0 0.75rem;
+    margin: 0 0 1rem 0;
   }
   .how-cta-wrap { margin-top: 1.5rem; }
   .styles-header { flex-direction: column; align-items: stretch; text-align: center; }
@@ -1869,8 +1891,16 @@ a.style-card:hover .style-card-bg {
   .style-card { width: min(320px, 90vw); min-width: 240px; min-height: 240px; padding: 1.25rem; }
   .pricing-section .pricing-cards { max-width: 100%; }
   .pricing-card { padding: 1.5rem; }
-  .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
-  .footer-nav { flex-direction: column; gap: 1.5rem; }
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: center;
+  }
+  .footer-brand .logo { margin-left: auto; margin-right: auto; }
+  .footer-brand p { margin-left: auto; margin-right: auto; }
+  .footer-brand .social-icons { justify-content: center; }
+  .footer-contact-item { justify-content: center; }
+  .footer-bottom { flex-direction: column; align-items: center; gap: 0.75rem; text-align: center; }
   .demo-flow { flex-direction: column; gap: 1.5rem; }
   .demo-connector { transform: rotate(90deg); }
   .compare-divider { width: 72px; margin-left: -36px; }
