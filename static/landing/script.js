@@ -32,13 +32,16 @@
 
   /* Header scroll fade: blend at top, solid on scroll */
   var mainHeader = document.getElementById('main-header');
+  var heroSection = document.querySelector('.hero');
   if (mainHeader && mainHeader.classList.contains('header-scroll-fade')) {
     var SCROLL_THRESHOLD = 20;
     function updateHeaderScroll() {
       if (window.scrollY > SCROLL_THRESHOLD) {
         mainHeader.classList.add('header-scrolled');
+        if (heroSection) heroSection.classList.add('hero--scrolled');
       } else {
         mainHeader.classList.remove('header-scrolled');
+        if (heroSection) heroSection.classList.remove('hero--scrolled');
       }
     }
     updateHeaderScroll();

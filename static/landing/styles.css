@@ -626,10 +626,29 @@ img { max-width: 100%; height: auto; }
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 80% 50% at 0% 0%, rgba(37, 99, 235, 0.22) 0%, transparent 50%),
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(245, 158, 11, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 50% at 0% 0%, rgba(37, 99, 235, 0.32) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(245, 158, 11, 0.28) 0%, transparent 50%),
     radial-gradient(ellipse 50% 35% at 50% 100%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
     radial-gradient(ellipse 40% 30% at 100% 80%, rgba(16, 185, 129, 0.12) 0%, transparent 50%);
+}
+/* Extend hero gradient behind the sticky header so transparent header blends in */
+.hero::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(2.5rem + 4.5rem); /* promo bar + header height */
+  pointer-events: none;
+  z-index: 99; /* just below header (z-index 100) */
+  background:
+    radial-gradient(ellipse 120% 100% at 0% 0%, rgba(37, 99, 235, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 100% at 100% 0%, rgba(245, 158, 11, 0.15) 0%, transparent 60%);
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+.hero--scrolled::before {
+  opacity: 0;
 }
 
 /* ── Hero painting cards ── */
@@ -1685,7 +1704,7 @@ a.style-card:hover .style-card-bg {
 
 /* Popular card – dark */
 .pricing-card--popular {
-  background: #1e293b;
+  background: #263348;
   border-color: transparent;
   box-shadow: 0 12px 40px rgba(15, 23, 42, 0.25);
   z-index: 2;
@@ -1763,7 +1782,7 @@ a.style-card:hover .style-card-bg {
 .pc-label--light { color: rgba(203,213,225,1); }
 
 .pc-title { font-size: 1.625rem; font-weight: 800; color: var(--text); margin: 0 0 0.75rem; line-height: 1.1; }
-.pc-title--light { color: #fff; }
+.pc-title--light { color: #f1f5f9; font-size: 1.875rem; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
 
 .pc-sub { font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1.25rem; line-height: 1.55; }
 .pc-sub--light { color: rgba(226,232,240,0.95); }
