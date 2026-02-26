@@ -688,162 +688,271 @@ async def upload_image(file: UploadFile = File(...)) -> JSONResponse:
 # Masters pack: one style, 15 reference images (user gets photo in all 15)
 STYLE_ID_MASTERS_PACK = 13
 MASTERS_PACK_PATHS = [
-    f"/static/landing/styles/masters/masters-{i:02d}.jpg" for i in range(1, 16)
+    # Best 5 first (used for 5-pack tier)
+    "/static/landing/styles/masters/masters-02.jpg",  # Mona Lisa
+    "/static/landing/styles/masters/masters-04.jpg",  # The Scream
+    "/static/landing/styles/masters/masters-15.jpg",  # Persistence of Memory
+    "/static/landing/styles/masters/masters-01.jpg",  # Creation of Adam
+    "/static/landing/styles/masters/masters-13.jpg",  # Sunflowers
+    # Remaining 10
+    "/static/landing/styles/masters/masters-03.jpg",
+    "/static/landing/styles/masters/masters-05.jpg",
+    "/static/landing/styles/masters/masters-06.jpg",
+    "/static/landing/styles/masters/masters-07.jpg",
+    "/static/landing/styles/masters/masters-08.jpg",
+    "/static/landing/styles/masters/masters-09.jpg",
+    "/static/landing/styles/masters/masters-10.jpg",
+    "/static/landing/styles/masters/masters-11.jpg",
+    "/static/landing/styles/masters/masters-12.jpg",
+    "/static/landing/styles/masters/masters-14.jpg",
 ]
 
 # Impression & Color pack: 15 reference images
 STYLE_ID_IMPRESSION_COLOR_PACK = 14
 IMPRESSION_COLOR_PACK_PATHS = [
-    f"/static/landing/styles/impression-color/impression-color-{i:02d}.jpg" for i in range(1, 16)
+    # Best 5 first (used for 5-pack tier)
+    "/static/landing/styles/impression-color/impression-color-13.jpg",  # Starry Night
+    "/static/landing/styles/impression-color/impression-color-02.jpg",  # Water Lilies
+    "/static/landing/styles/impression-color/impression-color-01.jpg",  # Night city (Van Gogh)
+    "/static/landing/styles/impression-color/impression-color-08.jpg",  # Irises
+    "/static/landing/styles/impression-color/impression-color-11.jpg",  # Bal du Moulin de la Galette
+    # Remaining 10
+    "/static/landing/styles/impression-color/impression-color-03.jpg",
+    "/static/landing/styles/impression-color/impression-color-04.jpg",
+    "/static/landing/styles/impression-color/impression-color-05.jpg",
+    "/static/landing/styles/impression-color/impression-color-06.jpg",
+    "/static/landing/styles/impression-color/impression-color-07.jpg",
+    "/static/landing/styles/impression-color/impression-color-09.jpg",
+    "/static/landing/styles/impression-color/impression-color-10.jpg",
+    "/static/landing/styles/impression-color/impression-color-12.jpg",
+    "/static/landing/styles/impression-color/impression-color-14.jpg",
+    "/static/landing/styles/impression-color/impression-color-15.jpg",
 ]
 
 # Modern & Abstract pack: 15 reference images (modern-abstract-01.jpg … 13.png … 15.jpg)
 STYLE_ID_MODERN_ABSTRACT_PACK = 15
 MODERN_ABSTRACT_PACK_PATHS = [
-    *[f"/static/landing/styles/modern-abstract/modern-abstract-{i:02d}.jpg" for i in range(1, 13)],
+    # Best 5 first (used for 5-pack tier)
+    "/static/landing/styles/modern-abstract/modern-abstract-09.jpg",   # The Scream (Munch)
+    "/static/landing/styles/modern-abstract/modern-abstract-12.jpg",   # Persistence of Memory (Dalí)
+    "/static/landing/styles/modern-abstract/modern-abstract-03.jpg",   # Pollock drip
+    "/static/landing/styles/modern-abstract/modern-abstract-02.jpg",   # Rothko color fields
+    "/static/landing/styles/modern-abstract/modern-abstract-15.jpg",   # Les Demoiselles (Picasso)
+    # Remaining 10
+    "/static/landing/styles/modern-abstract/modern-abstract-01.jpg",
+    "/static/landing/styles/modern-abstract/modern-abstract-04.jpg",
+    "/static/landing/styles/modern-abstract/modern-abstract-05.jpg",
+    "/static/landing/styles/modern-abstract/modern-abstract-06.jpg",
+    "/static/landing/styles/modern-abstract/modern-abstract-07.jpg",
+    "/static/landing/styles/modern-abstract/modern-abstract-08.jpg",
+    "/static/landing/styles/modern-abstract/modern-abstract-10.jpg",
+    "/static/landing/styles/modern-abstract/modern-abstract-11.jpg",
     "/static/landing/styles/modern-abstract/modern-abstract-13.png",
-    *[f"/static/landing/styles/modern-abstract/modern-abstract-{i:02d}.jpg" for i in range(14, 16)],
+    "/static/landing/styles/modern-abstract/modern-abstract-14.jpg",
 ]
 
 # Ancient Worlds pack: 15 reference images (oldest in Downloads = 01, newest = 15)
 STYLE_ID_ANCIENT_WORLDS_PACK = 16
 ANCIENT_WORLDS_PACK_PATHS = [
-    f"/static/landing/styles/ancient-worlds/ancient-worlds-{i:02d}.jpg" for i in range(1, 16)
+    # Best 5 first (used for 5-pack tier)
+    "/static/landing/styles/ancient-worlds/ancient-worlds-11.jpg",  # Fayum Mummy Portraits
+    "/static/landing/styles/ancient-worlds/ancient-worlds-01.jpg",  # Egyptian tomb painting
+    "/static/landing/styles/ancient-worlds/ancient-worlds-08.jpg",  # Alexander Mosaic (Rome)
+    "/static/landing/styles/ancient-worlds/ancient-worlds-05.jpg",  # Greek black-figure amphora
+    "/static/landing/styles/ancient-worlds/ancient-worlds-13.jpg",  # Ishtar Gate (Babylon)
+    # Remaining 10
+    "/static/landing/styles/ancient-worlds/ancient-worlds-02.jpg",
+    "/static/landing/styles/ancient-worlds/ancient-worlds-03.jpg",
+    "/static/landing/styles/ancient-worlds/ancient-worlds-04.jpg",
+    "/static/landing/styles/ancient-worlds/ancient-worlds-06.jpg",
+    "/static/landing/styles/ancient-worlds/ancient-worlds-07.jpg",
+    "/static/landing/styles/ancient-worlds/ancient-worlds-09.jpg",
+    "/static/landing/styles/ancient-worlds/ancient-worlds-10.jpg",
+    "/static/landing/styles/ancient-worlds/ancient-worlds-12.jpg",
+    "/static/landing/styles/ancient-worlds/ancient-worlds-14.jpg",
+    "/static/landing/styles/ancient-worlds/ancient-worlds-15.jpg",
 ]
 
 # Evolution of Portraits pack: 15 reference images (oldest in Downloads = 01, newest = 15)
 STYLE_ID_EVOLUTION_PORTRAITS_PACK = 17
 EVOLUTION_PORTRAITS_PACK_PATHS = [
-    f"/static/landing/styles/evolution-portraits/evolution-portraits-{i:02d}.jpg" if i != 4 else "/static/landing/styles/evolution-portraits/evolution-portraits-04.png"
-    for i in range(1, 16)
+    # Best 5 first (used for 5-pack tier)
+    "/static/landing/styles/evolution-portraits/evolution-portraits-08.jpg",  # Girl with a Pearl Earring
+    "/static/landing/styles/evolution-portraits/evolution-portraits-05.jpg",  # Mona Lisa (Leonardo)
+    "/static/landing/styles/evolution-portraits/evolution-portraits-15.jpg",  # Marilyn Diptych (Warhol)
+    "/static/landing/styles/evolution-portraits/evolution-portraits-14.jpg",  # Frida Kahlo
+    "/static/landing/styles/evolution-portraits/evolution-portraits-11.jpg",  # Van Gogh self-portrait
+    # Remaining 10
+    "/static/landing/styles/evolution-portraits/evolution-portraits-01.jpg",
+    "/static/landing/styles/evolution-portraits/evolution-portraits-02.jpg",
+    "/static/landing/styles/evolution-portraits/evolution-portraits-03.jpg",
+    "/static/landing/styles/evolution-portraits/evolution-portraits-04.png",
+    "/static/landing/styles/evolution-portraits/evolution-portraits-06.jpg",
+    "/static/landing/styles/evolution-portraits/evolution-portraits-07.jpg",
+    "/static/landing/styles/evolution-portraits/evolution-portraits-09.jpg",
+    "/static/landing/styles/evolution-portraits/evolution-portraits-10.jpg",
+    "/static/landing/styles/evolution-portraits/evolution-portraits-12.jpg",
+    "/static/landing/styles/evolution-portraits/evolution-portraits-13.jpg",
 ]
 
 # Royalty & Power Portraits pack: 15 reference images (oldest in Downloads = 01, newest = 15)
 STYLE_ID_ROYALTY_PORTRAITS_PACK = 18
 ROYALTY_PORTRAITS_PACK_PATHS = [
-    f"/static/landing/styles/royalty-portraits/royalty-portraits-{i:02d}.jpg" for i in range(1, 16)
+    # Best 5 first (used for 5-pack tier)
+    "/static/landing/styles/royalty-portraits/royalty-portraits-01.jpg",  # Napoleon Crossing the Alps
+    "/static/landing/styles/royalty-portraits/royalty-portraits-03.jpg",  # Henry VIII (Holbein)
+    "/static/landing/styles/royalty-portraits/royalty-portraits-12.jpg",  # Arcimboldo Vertumnus
+    "/static/landing/styles/royalty-portraits/royalty-portraits-02.jpg",  # Louis XIV (Rigaud)
+    "/static/landing/styles/royalty-portraits/royalty-portraits-09.jpg",  # The Blue Boy (Gainsborough)
+    # Remaining 10
+    "/static/landing/styles/royalty-portraits/royalty-portraits-04.jpg",
+    "/static/landing/styles/royalty-portraits/royalty-portraits-05.jpg",
+    "/static/landing/styles/royalty-portraits/royalty-portraits-06.jpg",
+    "/static/landing/styles/royalty-portraits/royalty-portraits-07.jpg",
+    "/static/landing/styles/royalty-portraits/royalty-portraits-08.jpg",
+    "/static/landing/styles/royalty-portraits/royalty-portraits-10.jpg",
+    "/static/landing/styles/royalty-portraits/royalty-portraits-11.jpg",
+    "/static/landing/styles/royalty-portraits/royalty-portraits-13.jpg",
+    "/static/landing/styles/royalty-portraits/royalty-portraits-14.jpg",
+    "/static/landing/styles/royalty-portraits/royalty-portraits-15.jpg",
 ]
 
 # Per-image (painting title, artist) for email captions.
 # Masters pack: 15 reference images (masters-01.jpg … masters-15.jpg); each result image gets the label at the same index.
 # Verified 2025-02: labels match actual images in pack.
 MASTERS_PACK_LABELS: list[tuple[str, str]] = [
-    ("Crearea lui Adam", "Michelangelo"),                    # 01
+    # Best 5 first (used for 5-pack tier)
     ("Mona Lisa", "Leonardo da Vinci"),                      # 02
-    ("Compoziție cu grile", "Piet Mondrian"),                # 03
     ("Strigătul", "Edvard Munch"),                           # 04
+    ("Persistența memoriei", "Salvador Dalí"),               # 15
+    ("Crearea lui Adam", "Michelangelo"),                    # 01
+    ("Flori de floarea-soarelui", "Vincent van Gogh"),        # 13
+    # Remaining 10
+    ("Compoziție cu grile", "Piet Mondrian"),                # 03
     ("3 Mai 1808", "Francisco Goya"),                        # 05
     ("Judith și Holoferne", "Caravaggio"),                   # 06
     ("Străjirea de noapte", "Rembrandt van Rijn"),            # 07
     ("Las Meninas", "Diego Velázquez"),                      # 08
-    ("Stilul clarobscur", "Rembrandt van Rijn"),              # 09 - verify image
+    ("Stilul clarobscur", "Rembrandt van Rijn"),              # 09
     ("Compoziția VIII", "Wassily Kandinsky"),                 # 10
     ("Impresie, răsărit de soare", "Claude Monet"),          # 11
     ("Pranzul la barcă", "Pierre-Auguste Renoir"),            # 12
-    ("Flori de floarea-soarelui", "Vincent van Gogh"),        # 13 - verify image
     ("Domnișoarele din Avignon", "Pablo Picasso"),            # 14
-    ("Persistența memoriei", "Salvador Dalí"),               # 15
 ]
 # Impression & Color pack: verified 2025-02 - labels match actual images.
 IMPRESSION_COLOR_PACK_LABELS: list[tuple[str, str]] = [
-    ("Noapte înstelată", "Vincent van Gogh"),                # 01 - city street at night
+    # Best 5 first (used for 5-pack tier)
+    ("Noapte înstelată", "Vincent van Gogh"),                # 13 - Starry Night
     ("Nufări", "Claude Monet"),                              # 02
+    ("Noapte înstelată (stradă)", "Vincent van Gogh"),       # 01 - night city street
+    ("Irisi", "Vincent van Gogh"),                           # 08
+    ("Balul de la Moulin de la Galette", "Pierre-Auguste Renoir"),  # 11
+    # Remaining 10
     ("Clasa de balet", "Edgar Degas"),                       # 03
     ("D'où venons-nous...", "Paul Gauguin"),                 # 04
-    ("Femeie cu perdeau", "Claude Monet"),                   # 05 - Woman with Parasol
+    ("Femeie cu perdeau", "Claude Monet"),                   # 05
     ("Podul japonez", "Claude Monet"),                       # 06
     ("Impresie, răsărit de soare", "Claude Monet"),          # 07
-    ("Irisi", "Vincent van Gogh"),                           # 08
     ("Muntele Sainte-Victoire", "Paul Cézanne"),             # 09
-    ("Pranzul la barcă", "Pierre-Auguste Renoir"),          # 10
-    ("Balul de la Moulin de la Galette", "Pierre-Auguste Renoir"),  # 11
-    ("Leagănul", "Pierre-Auguste Renoir"),                   # 12 - The Swing
-    ("Noapte înstelată", "Vincent van Gogh"),                # 13 - Starry Night
-    ("Terasa cafenelei noaptea", "Vincent van Gogh"),        # 14 - Café Terrace at Night
+    ("Pranzul la barcă", "Pierre-Auguste Renoir"),           # 10
+    ("Leagănul", "Pierre-Auguste Renoir"),                   # 12
+    ("Terasa cafenelei noaptea", "Vincent van Gogh"),        # 14
     ("Flori de floarea-soarelui", "Vincent van Gogh"),       # 15
 ]
 # Modern & Abstract pack: (titlu operă, artist) per imagine, verificate vizual
 # 01–15 = modern-abstract-01.jpg … 13.png … 15.jpg
 MODERN_ABSTRACT_PACK_LABELS: list[tuple[str, str]] = [
-    ("Composition VIII", "Wassily Kandinsky"),           # 01
-    ("Orange and Yellow", "Mark Rothko"),                # 02
+    # Best 5 first (used for 5-pack tier)
+    ("The Scream", "Edvard Munch"),                       # 09
+    ("The Persistence of Memory", "Salvador Dalí"),       # 12
     ("Convergence", "Jackson Pollock"),                   # 03
+    ("Orange and Yellow", "Mark Rothko"),                 # 02
+    ("Les Demoiselles d'Avignon", "Pablo Picasso"),       # 15
+    # Remaining 10
+    ("Composition VIII", "Wassily Kandinsky"),            # 01
     ("Black Square", "Kazimir Malevich"),                 # 04
     ("Broadway Boogie Woogie", "Piet Mondrian"),          # 05
     ("Woman I", "Willem de Kooning"),                     # 06
-    ("Street, Dresden", "Ernst Ludwig Kirchner"),         # 07 - Die Straße
+    ("Street, Dresden", "Ernst Ludwig Kirchner"),         # 07
     ("Blue Horse I", "Franz Marc"),                       # 08
-    ("The Scream", "Edvard Munch"),                       # 09
     ("The Lovers", "René Magritte"),                      # 10
     ("The Elephants", "Salvador Dalí"),                   # 11
-    ("The Persistence of Memory", "Salvador Dalí"),       # 12
     ("Man with a Guitar", "Georges Braque"),              # 13
-    ("Girl with a Mandolin", "Pablo Picasso"),             # 14
-    ("Les Demoiselles d'Avignon", "Pablo Picasso"),       # 15
+    ("Girl with a Mandolin", "Pablo Picasso"),            # 14
 ]
 # Ancient Worlds pack: 01 = first downloaded … 15 = last downloaded (see setup_ancient_worlds_pack.py)
 ANCIENT_WORLDS_PACK_LABELS: list[tuple[str, str]] = [
-    ("Nebamun Hunting in the Marshes", "Ancient Egypt"),           # 01
-    ("Akhenaten and Nefertiti with their Children", "Egypt (Amarna)"),  # 02
-    ("Book of the Dead of Hunefer", "Egypt"),                      # 03
-    ("Tomb of Ramesses I Wall Paintings", "Egypt"),                # 04
+    # Best 5 first (used for 5-pack tier)
+    ("Fayum Mummy Portraits", "Roman Egypt"),                       # 11
+    ("Nebamun Hunting in the Marshes", "Ancient Egypt"),            # 01
+    ("Alexander Mosaic", "Rome"),                                   # 08
     ("Achilles and Ajax Playing Dice Amphora", "Greece"),           # 05
+    ("Ishtar Gate Reliefs", "Babylon"),                             # 13
+    # Remaining 10
+    ("Akhenaten and Nefertiti with their Children", "Egypt (Amarna)"),  # 02
+    ("Book of the Dead of Hunefer", "Egypt"),                       # 03
+    ("Tomb of Ramesses I Wall Paintings", "Egypt"),                 # 04
     ("The Berlin Painter Amphora", "Greece"),                       # 06
     ("The Francois Vase", "Greece"),                                # 07
-    ("Alexander Mosaic", "Rome"),                                   # 08
     ("Villa of Livia Garden Room", "Rome"),                         # 09
     ("Pompeii Fresco of Bacchus", "Rome"),                          # 10
-    ("Fayum Mummy Portraits", "Roman Egypt"),                       # 11
-    ("Standard of Ur", "Mesopotamia"),                               # 12
-    ("Ishtar Gate Reliefs", "Babylon"),                             # 13
+    ("Standard of Ur", "Mesopotamia"),                              # 12
     ("Ajanta Cave Paintings", "India"),                             # 14
     ("Han Dynasty Silk Paintings", "Ancient China"),                # 15
 ]
 # Evolution of Portraits pack: 01 = first downloaded … 15 = last downloaded (see setup_evolution_portraits_pack.py)
 EVOLUTION_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
-    ("Fayum Mummy Portraits", "Roman Egypt"),                           # 01
+    # Best 5 first (used for 5-pack tier)
+    ("Girl with a Pearl Earring", "Johannes Vermeer"),                   # 08
+    ("Mona Lisa", "Leonardo da Vinci"),                                  # 05
+    ("Marilyn Diptych", "Andy Warhol"),                                  # 15
+    ("Self-Portrait with Thorn Necklace and Hummingbird", "Frida Kahlo"), # 14
+    ("Self-Portrait with Bandaged Ear", "Vincent van Gogh"),             # 11
+    # Remaining 10
+    ("Fayum Mummy Portraits", "Roman Egypt"),                            # 01
     ("Nefertari in the Tomb of Nefertari", "Egypt"),                     # 02
     ("Portrait of a Young Woman", "Medieval"),                           # 03
     ("Christ Pantocrator", "Byzantine"),                                 # 04
-    ("Mona Lisa", "Leonardo da Vinci"),                                  # 05
     ("Portrait of Baldassare Castiglione", "Raphael"),                   # 06
-    ("Self-Portrait", "Albrecht Dürer"),                                  # 07
-    ("Girl with a Pearl Earring", "Johannes Vermeer"),                   # 08
+    ("Self-Portrait", "Albrecht Dürer"),                                 # 07
     ("Self-Portrait with Two Circles", "Rembrandt"),                     # 09
     ("Portrait of Madame X", "John Singer Sargent"),                     # 10
-    ("Self-Portrait with Bandaged Ear", "Vincent van Gogh"),             # 11
     ("Les Demoiselles d'Avignon", "Pablo Picasso"),                      # 12
     ("Portrait of Dora Maar", "Pablo Picasso"),                          # 13
-    ("Self-Portrait with Thorn Necklace and Hummingbird", "Frida Kahlo"), # 14
-    ("Marilyn Diptych", "Andy Warhol"),                                  # 15
 ]
 # Royalty & Power Portraits pack: 01 = first downloaded … 15 = last downloaded (see setup_royalty_portraits_pack.py)
 ROYALTY_PORTRAITS_PACK_LABELS: list[tuple[str, str]] = [
+    # Best 5 first (used for 5-pack tier)
     ("Napoleon Crossing the Alps", "Jacques-Louis David"),                    # 01
-    ("Portrait of Louis XIV", "Hyacinthe Rigaud"),                             # 02
-    ("Portrait of Henry VIII", "Hans Holbein the Younger"),                    # 03
-    ("Queen Elizabeth I Armada Portrait", "George Gower"),                     # 04
-    ("Equestrian Portrait of Charles I", "Anthony van Dyck"),                  # 05
-    ("Portrait of Pope Innocent X", "Diego Velázquez"),                         # 06
-    ("Philip IV in Brown and Silver", "Diego Velázquez"),                       # 07
-    ("Portrait of Madame de Pompadour", "François Boucher"),                    # 08
-    ("The Blue Boy", "Thomas Gainsborough"),                                   # 09
-    ("Portrait of the Duke of Wellington", "Francisco Goya"),                    # 10
-    ("Self-Portrait as a Nobleman", "Lorenzo Lippi"),                           # 11
-    ("Portrait of Emperor Rudolf II as Vertumnus", "Giuseppe Arcimboldo"),        # 12
-    ("Emperor Qianlong in Court Dress", "Giuseppe Castiglione"),                 # 13
-    ("Shah Jahan on a Terrace", "Mughal School"),                                # 14
-    ("Portrait of Empress Catherine II", "Fyodor Rokotov"),                      # 15
+    ("Portrait of Henry VIII", "Hans Holbein the Younger"),                   # 03
+    ("Portrait of Emperor Rudolf II as Vertumnus", "Giuseppe Arcimboldo"),    # 12
+    ("Portrait of Louis XIV", "Hyacinthe Rigaud"),                            # 02
+    ("The Blue Boy", "Thomas Gainsborough"),                                  # 09
+    # Remaining 10
+    ("Queen Elizabeth I Armada Portrait", "George Gower"),                    # 04
+    ("Equestrian Portrait of Charles I", "Anthony van Dyck"),                 # 05
+    ("Portrait of Pope Innocent X", "Diego Velázquez"),                       # 06
+    ("Philip IV in Brown and Silver", "Diego Velázquez"),                     # 07
+    ("Portrait of Madame de Pompadour", "François Boucher"),                  # 08
+    ("Portrait of the Duke of Wellington", "Francisco Goya"),                 # 10
+    ("Self-Portrait as a Nobleman", "Lorenzo Lippi"),                         # 11
+    ("Emperor Qianlong in Court Dress", "Giuseppe Castiglione"),              # 13
+    ("Shah Jahan on a Terrace", "Mughal School"),                             # 14
+    ("Portrait of Empress Catherine II", "Fyodor Rokotov"),                   # 15
 ]
 
 # Detailed style prompts for OpenAI (mode="prompt"). One per artwork; preserve face/identity.
 # Each prompt explicitly describes brushwork, color palette, and technique for accurate results.
 # Verified 2025-02: prompts match actual images in Masters pack.
 MASTERS_PACK_PROMPTS: list[str] = [
-    "in the style of Michelangelo's The Creation of Adam: fresco technique with soft, blended brushwork, warm flesh tones (peach, terracotta), cool blue-grey background, idealized Renaissance anatomy, divine touch gesture. Preserve the subject's face, identity, and likeness.",
+    # Best 5 first (used for 5-pack tier)
     "in the style of Leonardo da Vinci's Mona Lisa: sfumato—soft, blended strokes with no hard edges, muted earth palette (umber, ochre, olive green), warm golden-brown skin tones, hazy atmospheric background. Preserve the subject's face and identity.",
-    "in the style of Piet Mondrian's geometric abstraction: flat, hard-edge color blocks, primary palette (red, yellow, blue) on white, black grid lines, no brush texture—clean geometric planes. Preserve the subject's face and likeness.",
     "in the style of Edvard Munch's The Scream: swirling, wavy brushstrokes in sky, orange and yellow undulating sky, blue-green water, distorted perspective, expressionist anxiety. Preserve the subject's face and identity.",
+    "in the style of Salvador Dalí's The Persistence of Memory: smooth, meticulous brushwork, soft melting forms, warm desert palette (sand, blue sky), surrealist dreamscape. Preserve the subject's face and identity.",
+    "in the style of Michelangelo's The Creation of Adam: fresco technique with soft, blended brushwork, warm flesh tones (peach, terracotta), cool blue-grey background, idealized Renaissance anatomy, divine touch gesture. Preserve the subject's face, identity, and likeness.",
+    "in the style of Vincent van Gogh's Sunflowers: thick impasto brushstrokes in visible directions, vibrant yellows and ochres, green stems, textured paint surface, post-impressionist. Preserve the subject's face and identity.",
+    # Remaining 10
+    "in the style of Piet Mondrian's geometric abstraction: flat, hard-edge color blocks, primary palette (red, yellow, blue) on white, black grid lines, no brush texture—clean geometric planes. Preserve the subject's face and likeness.",
     "in the style of Francisco Goya's The Third of May 1808: dramatic chiaroscuro, dark browns and blacks, stark white shirt, warm lantern light, loose brushwork for crowd, tight detail on central figure. Preserve the subject's face and identity.",
     "in the style of Caravaggio's Judith Beheading Holofernes: tenebrist lighting—deep black shadows, single light source, rich red fabric, creamy flesh tones, precise brushwork on faces. Preserve the subject's face and likeness.",
     "in the style of Rembrandt's The Night Watch: Dutch Golden Age chiaroscuro, warm amber and browns, golden highlights on faces, deep shadows, visible brushwork, group portrait composition. Preserve the subject's face and identity.",
@@ -852,92 +961,100 @@ MASTERS_PACK_PROMPTS: list[str] = [
     "in the style of Wassily Kandinsky's Composition VIII: flat geometric shapes, primary colors (red, blue, yellow) plus black and white, crisp edges, abstract circles and lines, no realistic texture. Preserve the subject's face and likeness.",
     "in the style of Claude Monet's Impression, Sunrise: short, broken brushstrokes, orange and pink sunrise, blue-grey harbor, soft hazy atmosphere, loose impressionist technique. Preserve the subject's face and identity.",
     "in the style of Pierre-Auguste Renoir's Luncheon of the Boating Party: soft, blended impressionist strokes, warm skin tones, white and cream fabrics, dappled sunlight, vibrant blues and greens. Preserve the subject's face and likeness.",
-    "in the style of Vincent van Gogh's Sunflowers: thick impasto brushstrokes in visible directions, vibrant yellows and ochres, green stems, textured paint surface, post-impressionist. Preserve the subject's face and identity.",
     "in the style of Pablo Picasso's Les Demoiselles d'Avignon: angular geometric planes, ochre and pink palette, African mask influence, fragmented cubist forms, bold outlines. Preserve the subject's face and likeness.",
-    "in the style of Salvador Dalí's The Persistence of Memory: smooth, meticulous brushwork, soft melting forms, warm desert palette (sand, blue sky), surrealist dreamscape. Preserve the subject's face and identity.",
 ]
 # Impression & Color pack: verified 2025-02 - prompts match actual images.
 IMPRESSION_COLOR_PACK_PROMPTS: list[str] = [
-    "in the style of Vincent van Gogh's night city scenes: short thick brushstrokes, warm yellows and oranges for street lamps, deep blue night sky, cobblestone texture. Preserve the subject's face and identity.",
+    # Best 5 first (used for 5-pack tier)
+    "in the style of Vincent van Gogh's Starry Night: thick swirling impasto strokes, deep cobalt blue sky, bright yellow and orange stars, swirling cypress in dark green, visible brush texture throughout. Preserve the subject's face and identity.",
     "in the style of Claude Monet's Water Lilies: soft, broken brushstrokes, pastel greens and pinks, lavender reflections on water, dappled light, no hard edges. Preserve the subject's face and likeness.",
+    "in the style of Vincent van Gogh's night city scenes: short thick brushstrokes, warm yellows and oranges for street lamps, deep blue night sky, cobblestone texture. Preserve the subject's face and identity.",
+    "in the style of Vincent van Gogh's Irises: thick directional brushstrokes, vibrant blues and purples, green foliage, yellow accents, expressive texture. Preserve the subject's face and likeness.",
+    "in the style of Pierre-Auguste Renoir's Bal du moulin de la Galette: impressionist dappled light, warm skin tones, blue and white dresses, outdoor cafe. Preserve the subject's face and identity.",
+    # Remaining 10
     "in the style of Edgar Degas's ballet class: soft pastel brushwork, peach and cream tones, tutus in white and pink, rehearsal studio atmosphere. Preserve the subject's face and identity.",
     "in the style of Paul Gauguin's Where Do We Come From: flat color blocks, Tahitian palette (rich greens, oranges, golds), bold outlines, simplified forms. Preserve the subject's face and likeness.",
     "in the style of Claude Monet's Woman with a Parasol: loose impressionist strokes, sky blue and white, soft greens, dappled sunlight, flowing dress. Preserve the subject's face and identity.",
     "in the style of Claude Monet's Japanese Bridge: wisteria purples and greens, arched bridge, water lily pond, soft blended strokes. Preserve the subject's face and likeness.",
     "in the style of Claude Monet's Impression, Sunrise: short strokes, orange and pink sun, blue-grey harbor, hazy atmosphere. Preserve the subject's face and identity.",
-    "in the style of Vincent van Gogh's Irises: thick directional brushstrokes, vibrant blues and purples, green foliage, yellow accents, expressive texture. Preserve the subject's face and likeness.",
     "in the style of Paul Cézanne's Mont Sainte-Victoire: structured brushwork, geometric planes, ochre and blue palette, post-impressionist. Preserve the subject's face and identity.",
     "in the style of Pierre-Auguste Renoir's Luncheon of the Boating Party: soft blended strokes, warm skin tones, white and cream, dappled sunlight. Preserve the subject's face and likeness.",
-    "in the style of Pierre-Auguste Renoir's Bal du moulin de la Galette: impressionist dappled light, warm skin tones, blue and white dresses, outdoor cafe. Preserve the subject's face and identity.",
     "in the style of Pierre-Auguste Renoir's The Swing: soft forest greens, dappled light, woman in white dress. Preserve the subject's face and likeness.",
-    "in the style of Vincent van Gogh's Starry Night: thick swirling impasto strokes, deep cobalt blue sky, bright yellow and orange stars, swirling cypress in dark green, visible brush texture throughout. Preserve the subject's face and identity.",
     "in the style of Vincent van Gogh's Café Terrace at Night: bright yellow awning, starry blue sky, warm orange cafe glow, cobblestone, thick brushstrokes. Preserve the subject's face and likeness.",
     "in the style of Vincent van Gogh's Sunflowers: thick impasto brushstrokes, vibrant yellows and ochres, green stems, textured paint. Preserve the subject's face and identity.",
 ]
 MODERN_ABSTRACT_PACK_PROMPTS: list[str] = [
-    "in the style of Wassily Kandinsky's Composition VIII: flat geometric shapes, primary colors (red, blue, yellow) plus black, crisp edges, circles and abstract forms. Preserve the subject's face and identity.",
-    "in the style of Mark Rothko's color fields: large blocks of color, soft blurred edges, orange and yellow or warm tones, contemplative. Preserve the subject's face and likeness.",
+    # Best 5 first (used for 5-pack tier)
+    "in the style of Edvard Munch's The Scream: swirling orange and yellow sky, blue water, expressionist distortion. Preserve the subject's face and identity.",
+    "in the style of Salvador Dalí's Persistence of Memory: smooth melting forms, warm desert palette, surrealist. Preserve the subject's face and likeness.",
     "in the style of Jackson Pollock's drip painting: splattered and dripped paint lines, black and white with color accents, energetic web, abstract expressionist. Preserve the subject's face and identity.",
+    "in the style of Mark Rothko's color fields: large blocks of color, soft blurred edges, orange and yellow or warm tones, contemplative. Preserve the subject's face and likeness.",
+    "in the style of Pablo Picasso's Les Demoiselles d'Avignon: angular geometric planes, ochre and pink, proto-cubist. Preserve the subject's face and identity.",
+    # Remaining 10
+    "in the style of Wassily Kandinsky's Composition VIII: flat geometric shapes, primary colors (red, blue, yellow) plus black, crisp edges, circles and abstract forms. Preserve the subject's face and identity.",
     "in the style of Kazimir Malevich's Black Square: suprematist, geometric shapes, black on white, bold contrast, minimal. Preserve the subject's face and likeness.",
     "in the style of Piet Mondrian's Broadway Boogie Woogie: grid of primary colors, yellow, red, blue squares, black lines, geometric. Preserve the subject's face and identity.",
     "in the style of Willem de Kooning's Woman I: aggressive brushwork, flesh pinks and yellows, distorted forms, abstract expressionist. Preserve the subject's face and likeness.",
     "in the style of Ernst Ludwig Kirchner's Street Dresden: angular brushstrokes, bold pink and purple, yellow and green, German expressionist urban. Preserve the subject's face and identity.",
     "in the style of Franz Marc's Blue Horse I: bold blue animal form, expressionist, geometric simplification. Preserve the subject's face and likeness.",
-    "in the style of Edvard Munch's The Scream: swirling orange and yellow sky, blue water, expressionist distortion. Preserve the subject's face and identity.",
     "in the style of René Magritte's The Lovers: smooth surrealist brushwork, cloth draped over faces, mysterious. Preserve the subject's face and likeness.",
     "in the style of Salvador Dalí's The Elephants: surrealist, elongated legs, dreamlike desert, meticulous detail. Preserve the subject's face and identity.",
-    "in the style of Salvador Dalí's Persistence of Memory: smooth melting forms, warm desert palette, surrealist. Preserve the subject's face and likeness.",
     "in the style of Georges Braque's Cubism: fragmented geometric planes, muted browns and greys, analytical cubist. Preserve the subject's face and identity.",
     "in the style of Pablo Picasso's Girl with a Mandolin: cubist geometric planes, ochre and brown palette, fragmented forms. Preserve the subject's face and likeness.",
-    "in the style of Pablo Picasso's Les Demoiselles d'Avignon: angular geometric planes, ochre and pink, proto-cubist. Preserve the subject's face and identity.",
 ]
 ANCIENT_WORLDS_PACK_PROMPTS: list[str] = [
+    # Best 5 first (used for 5-pack tier)
+    "in the style of Fayum mummy portraits: encaustic wax, Roman Egypt, realistic faces, warm skin tones. Preserve the subject's face and identity.",
     "in the style of Ancient Egyptian tomb painting: flat figures in profile, warm earth tones (ochre, terracotta), black outlines, hieroglyphic aesthetic. Preserve the subject's face and identity.",
+    "in the style of Roman Alexander Mosaic: tessellated stone, battle scene, warm earth tones. Preserve the subject's face and likeness.",
+    "in the style of Greek black-figure pottery: black figures on red clay, mythological scenes, amphora form. Preserve the subject's face and identity.",
+    "in the style of Babylonian Ishtar Gate: blue glaze tiles, lion relief, turquoise and gold. Preserve the subject's face and identity.",
+    # Remaining 10
     "in the style of Amarna period Egyptian art: elongated forms, warm gold and blue, sun disk motifs, naturalistic. Preserve the subject's face and likeness.",
     "in the style of Egyptian Book of the Dead: papyrus cream background, flat figures, red and black ink, symbolic imagery. Preserve the subject's face and identity.",
     "in the style of Egyptian tomb wall paintings: Ramesside period, warm ochre and blue, ceremonial scenes. Preserve the subject's face and likeness.",
-    "in the style of Greek black-figure pottery: black figures on red clay, mythological scenes, amphora form. Preserve the subject's face and identity.",
     "in the style of Greek red-figure pottery: red figures on black, elegant line work, classical. Preserve the subject's face and likeness.",
     "in the style of Greek Francois Vase: black-figure, narrative friezes, terracotta. Preserve the subject's face and identity.",
-    "in the style of Roman Alexander Mosaic: tessellated stone, battle scene, warm earth tones. Preserve the subject's face and likeness.",
     "in the style of Roman Villa of Livia fresco: garden room, lush green foliage, naturalistic, warm stone. Preserve the subject's face and identity.",
     "in the style of Pompeii fresco: Bacchus, Roman wall painting, warm red and ochre. Preserve the subject's face and likeness.",
-    "in the style of Fayum mummy portraits: encaustic wax, Roman Egypt, realistic faces, warm skin tones. Preserve the subject's face and identity.",
     "in the style of Mesopotamian Standard of Ur: lapis lazuli blue, gold, mosaic panels. Preserve the subject's face and likeness.",
-    "in the style of Babylonian Ishtar Gate: blue glaze tiles, lion relief, turquoise and gold. Preserve the subject's face and identity.",
     "in the style of Ajanta cave paintings: Indian Buddhist, flowing lines, rich reds and greens. Preserve the subject's face and likeness.",
     "in the style of Han Dynasty silk paintings: delicate brushwork, muted earth tones, flowing. Preserve the subject's face and identity.",
 ]
 EVOLUTION_PORTRAITS_PACK_PROMPTS: list[str] = [
+    # Best 5 first (used for 5-pack tier)
+    "in the style of Johannes Vermeer's Girl with a Pearl Earring: soft diffused light, pearl earring, blue and yellow turban. Preserve the subject's face and likeness.",
+    "in the style of Leonardo da Vinci's Mona Lisa: sfumato soft blending, muted earth tones, enigmatic smile. Preserve the subject's face and identity.",
+    "in the style of Andy Warhol's Marilyn: Pop Art screen print, bold pink and yellow, repeated image. Preserve the subject's face and identity.",
+    "in the style of Frida Kahlo's self-portrait: thorn necklace, Mexican folk colors, symbolic. Preserve the subject's face and likeness.",
+    "in the style of Vincent van Gogh's self-portrait: bandaged ear, thick directional brushstrokes, greens and ochres. Preserve the subject's face and identity.",
+    # Remaining 10
     "in the style of Fayum mummy portraits: encaustic wax, Roman Egypt, realistic faces, warm skin tones, dark eyes. Preserve the subject's face and identity.",
     "in the style of Egyptian tomb of Nefertari: warm ochre and blue, flat figures, hieroglyphic aesthetic. Preserve the subject's face and likeness.",
     "in the style of Medieval portrait: flat iconic style, gold leaf background, rich blues and reds. Preserve the subject's face and identity.",
     "in the style of Byzantine Christ Pantocrator: gold background, solemn face, dark robes, iconic. Preserve the subject's face and likeness.",
-    "in the style of Leonardo da Vinci's Mona Lisa: sfumato soft blending, muted earth tones, enigmatic smile. Preserve the subject's face and identity.",
     "in the style of Raphael's portrait: Renaissance soft modeling, warm skin, dark background. Preserve the subject's face and likeness.",
     "in the style of Albrecht Dürer's self-portrait: Northern Renaissance, meticulous detail, fur collar. Preserve the subject's face and identity.",
-    "in the style of Johannes Vermeer's Girl with a Pearl Earring: soft diffused light, pearl earring, blue and yellow turban. Preserve the subject's face and likeness.",
     "in the style of Rembrandt's self-portrait: chiaroscuro, warm amber and brown, thick brushwork in light. Preserve the subject's face and identity.",
     "in the style of John Singer Sargent's Madame X: elegant black dress, pale skin, dramatic pose. Preserve the subject's face and likeness.",
-    "in the style of Vincent van Gogh's self-portrait: bandaged ear, thick directional brushstrokes, greens and ochres. Preserve the subject's face and identity.",
     "in the style of Pablo Picasso's Les Demoiselles: proto-cubist angular planes, ochre and pink. Preserve the subject's face and likeness.",
     "in the style of Pablo Picasso's portrait of Dora Maar: cubist fragmented planes, muted palette. Preserve the subject's face and identity.",
-    "in the style of Frida Kahlo's self-portrait: thorn necklace, Mexican folk colors, symbolic. Preserve the subject's face and likeness.",
-    "in the style of Andy Warhol's Marilyn: Pop Art screen print, bold pink and yellow, repeated image. Preserve the subject's face and identity.",
 ]
 ROYALTY_PORTRAITS_PACK_PROMPTS: list[str] = [
+    # Best 5 first (used for 5-pack tier)
     "in the style of Jacques-Louis David's Napoleon Crossing the Alps: neoclassical, heroic equestrian, red cape, grey horse, dramatic sky. Preserve the subject's face and identity.",
-    "in the style of Hyacinthe Rigaud's Louis XIV: baroque, royal blue and gold, ermine, grand pose. Preserve the subject's face and likeness.",
     "in the style of Hans Holbein's Henry VIII: Tudor portrait, rich red and gold fabrics, imposing. Preserve the subject's face and identity.",
+    "in the style of Giuseppe Arcimboldo's Vertumnus: composite portrait, fruits and vegetables, autumn palette. Preserve the subject's face and likeness.",
+    "in the style of Hyacinthe Rigaud's Louis XIV: baroque, royal blue and gold, ermine, grand pose. Preserve the subject's face and likeness.",
+    "in the style of Thomas Gainsborough's Blue Boy: blue satin costume, aristocratic, 18th century. Preserve the subject's face and identity.",
+    # Remaining 10
     "in the style of Elizabethan Armada portrait: jeweled, pearl necklace, black dress, royal. Preserve the subject's face and likeness.",
     "in the style of Anthony van Dyck's equestrian portrait: baroque, noble pose, rich fabrics. Preserve the subject's face and identity.",
     "in the style of Diego Velázquez's Pope Innocent X: baroque chiaroscuro, red silk, dramatic lighting. Preserve the subject's face and likeness.",
     "in the style of Velázquez's Philip IV: Spanish court, brown and silver, rich fabrics. Preserve the subject's face and identity.",
     "in the style of François Boucher's Madame de Pompadour: rococo, pastel pink and blue, decorative. Preserve the subject's face and likeness.",
-    "in the style of Thomas Gainsborough's Blue Boy: blue satin costume, aristocratic, 18th century. Preserve the subject's face and identity.",
     "in the style of Francisco Goya's portrait: Spanish master, dark brown tones, psychological. Preserve the subject's face and likeness.",
     "in the style of Lorenzo Lippi's nobleman portrait: baroque, aristocratic, dark background. Preserve the subject's face and identity.",
-    "in the style of Giuseppe Arcimboldo's Vertumnus: composite portrait, fruits and vegetables, autumn palette. Preserve the subject's face and likeness.",
     "in the style of Giuseppe Castiglione's Qianlong: Chinese-European fusion, imperial yellow, detailed. Preserve the subject's face and identity.",
     "in the style of Mughal miniature Shah Jahan: jewel tones, intricate detail, lapis and gold. Preserve the subject's face and likeness.",
     "in the style of Fyodor Rokotov's Catherine II: Russian imperial, elegant, soft brushwork. Preserve the subject's face and identity.",
@@ -1232,7 +1349,7 @@ async def create_order(
     if style_image_urls and pack_tier == 5:
         urls_list = json.loads(style_image_urls)
         style_image_urls = json.dumps(urls_list[:5])
-    amount = 9.99 if pack_tier == 5 else 19.99
+    amount = 9.99 if pack_tier == 5 else 79.99
     # Fail fast if style URLs are not public HTTPS (Replicate requires this)
     def _must_be_https(name: str, url: Optional[str]) -> None:
         if not url or not url.strip():
@@ -1572,7 +1689,12 @@ def _run_style_transfer_sync(order_id: str) -> None:
             artistic_suffix = (
                 " Make the result strongly artistic and painterly. Emphasize visible brushwork, "
                 "bold impasto texture, and pronounced brushstrokes. The output must look like a "
-                "real oil painting with thick, expressive paint application—not smooth or digital."
+                "real oil painting with thick, expressive paint application—not smooth or digital. "
+                "Paint the subject fully in the style of this artwork: reimagine their clothing, "
+                "setting, lighting, and pose as if they were an original subject of this painting. "
+                "Take full artistic liberties to make the portrait feel authentically part of this "
+                "artistic tradition—do not simply apply a filter, but truly render them as a "
+                "painted subject in this style."
                 if portrait_mode == "artistic" else None
             )
             remaining_style_urls = style_urls[skip:]

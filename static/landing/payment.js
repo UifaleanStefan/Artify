@@ -8,7 +8,7 @@
   var email = params.get('email') || '';
   var pack = params.get('pack') || '5';
   if (pack !== '5' && pack !== '15') pack = '5';
-  var priceStr = pack === '15' ? '19,99 Lei' : '9,99 Lei';
+  var priceStr = pack === '15' ? '79,99 Lei' : '9,99 Lei';
   var style = null;
 
   if (styleId) { var id = parseInt(styleId, 10); style = data.find(function (s) { return s.id === id; }); }

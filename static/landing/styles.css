@@ -744,13 +744,36 @@ img { max-width: 100%; height: auto; }
   opacity: 0.8;
 }
 
-/* Hide side cards on small screens to avoid overlap */
+/* Mobile: 4 cards in a row at the very bottom, no overlap with text */
 @media (max-width: 768px) {
+  /* Hide 4 of the 8 cards */
   .pc-3, .pc-4, .pc-7, .pc-8 { display: none; }
-  .pc-1 { width: 75px; height: 95px; left: 1%; bottom: 15%; }
-  .pc-2 { width: 65px; height: 82px; left: 2%; bottom: 5%; }
-  .pc-5 { width: 75px; height: 95px; right: 1%; bottom: 15%; }
-  .pc-6 { width: 65px; height: 82px; right: 2%; bottom: 5%; }
+
+  /* Reposition remaining 4 into a bottom strip */
+  .pc-1 {
+    width: 72px; height: 90px;
+    left: 2%; bottom: 1.5%;
+    --rot: -8deg;
+    opacity: 0.92;
+  }
+  .pc-2 {
+    width: 72px; height: 90px;
+    left: 24%; bottom: 1%;
+    --rot: 5deg;
+    opacity: 0.88;
+  }
+  .pc-5 {
+    width: 72px; height: 90px;
+    right: 24%; bottom: 1%;
+    --rot: -5deg;
+    opacity: 0.88;
+  }
+  .pc-6 {
+    width: 72px; height: 90px;
+    right: 2%; bottom: 1.5%;
+    --rot: 9deg;
+    opacity: 0.92;
+  }
 }
 .hero-content { position: relative; z-index: 1; max-width: 720px; text-align: center; }
 .hero-pill {
@@ -2061,7 +2084,7 @@ a.style-card:hover .style-card-bg {
   .header { padding: 1rem; flex-wrap: wrap; gap: 0.75rem; }
   .header .nav { gap: 0.75rem; flex-wrap: wrap; }
   .nav a { font-size: 0.875rem; }
-  .hero { padding: 2rem 1rem; min-height: 100vh; min-height: 100dvh; }
+  .hero { padding: 2rem 1rem 7rem; min-height: 100vh; min-height: 100dvh; }
   .hero-cta { flex-direction: column; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; }
   .hero-cta .btn { width: 100%; }
   .review-summary-box { flex-wrap: wrap; justify-content: center; padding: 0.5rem 1rem; }
@@ -2075,28 +2098,53 @@ a.style-card:hover .style-card-bg {
   /* Mobile: stack vertically, numbers centered, looking like second image framework */
   .how-steps {
     flex-direction: column;
-    align-items: center;
-    gap: 2rem;
+    align-items: stretch;
+    gap: 0;
   }
   .how-steps::before {
-    display: none; /* Hide connecting line on mobile to keep it clean */
+    display: none;
   }
+  /* Each step: number on left with vertical line, card on right */
   .how-step {
-    flex-direction: column;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    grid-template-rows: auto 1fr;
+    column-gap: 1rem;
+    align-items: start;
     width: 100%;
-    max-width: 380px;
-    margin: 0 auto;
+    position: relative;
   }
+  /* Number circle stays in column 1, row 1 */
   .how-step .step-number {
+    grid-column: 1;
+    grid-row: 1;
     width: 3rem;
     height: 3rem;
     font-size: 1.125rem;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 1;
+  }
+  /* Card sits in column 2, row 1, with bottom margin for spacing */
+  .how-step .step-card {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 1.25rem;
+    text-align: left;
     margin-bottom: 1.5rem;
   }
-  .how-step .step-card {
-    padding: 1.5rem 1.25rem;
-    text-align: left;
+  /* Vertical connector line: sits in column 1, row 2, below the number */
+  .how-step:not(:last-child)::after {
+    content: '';
+    grid-column: 1;
+    grid-row: 2;
+    width: 2px;
+    height: 1.5rem;
+    background: linear-gradient(180deg, var(--primary) 0%, var(--accent-3) 50%, var(--accent) 100%);
+    border-radius: 2px;
+    opacity: 0.4;
+    margin: 0 auto;
+    display: block;
   }
   .how-step .step-icon {
     margin: 0 0 1rem 0;
@@ -2138,7 +2186,7 @@ a.style-card:hover .style-card-bg {
 @media (max-width: 480px) {
   .header { padding: 0.75rem 1rem; }
   .logo-text { font-size: 1.125rem; }
-  .hero { padding: 1.5rem 1rem; min-height: 100vh; min-height: 100dvh; }
+  .hero { padding: 1.5rem 1rem 7rem; min-height: 100vh; min-height: 100dvh; }
   .hero-title { font-size: clamp(1.75rem, 8vw, 2.5rem); }
   .section { padding: 2rem 1rem; }
   .review-summary-box { font-size: 0.8125rem; }
