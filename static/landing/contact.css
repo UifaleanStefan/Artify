@@ -58,8 +58,12 @@
   box-shadow: var(--shadow);
   min-width: 120px;
 }
-.contact-highlight-icon {
-  font-size: 1.25rem;
+.contact-highlight-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: 0.7;
 }
 .contact-highlight-value {
   font-size: 1.25rem;
@@ -94,17 +98,18 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 .contact-method-icon-wrap {
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
+  border-radius: 10px;
   margin-bottom: 1rem;
 }
 .contact-method-icon {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
 }
 .contact-method-email {
   background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(236, 72, 153, 0.06) 100%);
