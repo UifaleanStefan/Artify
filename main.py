@@ -18,6 +18,7 @@ from typing import AsyncGenerator, Optional
 from urllib.parse import urlparse
 
 import httpx
+import stripe
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -310,6 +311,14 @@ async def billing_page() -> FileResponse:
 @app.get("/payment")
 async def payment_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "landing" / "payment.html", headers=_HTML_HEADERS)
+
+@app.get("/payment/success")
+async def payment_success_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "landing" / "payment_success.html", headers=_HTML_HEADERS)
+
+@app.get("/payment/cancel")
+async def payment_cancel_page() -> FileResponse:
+    return FileResponse(STATIC_DIR / "landing" / "payment_cancel.html", headers=_HTML_HEADERS)
 
 @app.get("/create/done")
 async def done_page() -> FileResponse:
@@ -1566,6 +1575,111 @@ async def download_all_results(order_id: str, db: Session = Depends(get_db)):
     )
 
 
+@app.post("/api/orders/{order_id}/checkout")
+async def create_checkout_session(
+    order_id: str,
+    db: Session = Depends(get_db),
+):
+    """Create a Stripe Checkout session for an order and return the redirect URL."""
+    settings = get_settings()
+    if not settings.stripe_secret_key:
+        raise HTTPException(status_code=500, detail="Stripe is not configured.")
+
+    stripe.api_key = settings.stripe_secret_key
+
+    order = db.query(Order).filter(Order.order_id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order.status != OrderStatus.PENDING.value:
+        raise HTTPException(status_code=400, detail="Order already processed")
+
+    base_url = (settings.public_base_url or "http://localhost:8000").rstrip("/")
+    pack_label = "15 portrete" if (order.amount and order.amount > 10) else "5 portrete"
+    style_name = order.style_name or "Portret artistic"
+    amount_cents = int(round(float(order.amount or 9.99) * 100))
+
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "ron",
+                    "unit_amount": amount_cents,
+                    "product_data": {
+                        "name": f"Artify – {style_name} ({pack_label})",
+                        "description": f"Portretul tău pictat în {pack_label} stiluri artistice.",
+                        "images": [],
+                    },
+                },
+                "quantity": 1,
+            }],
+            mode="payment",
+            customer_email=order.email or None,
+            success_url=f"{base_url}/payment/success?order_id={order_id}&session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{base_url}/payment/cancel?order_id={order_id}",
+            metadata={"order_id": order_id},
+        )
+    except stripe.StripeError as e:
+        logger.error(f"Stripe checkout creation failed for {order_id}: {e}")
+        raise HTTPException(status_code=502, detail=f"Stripe error: {str(e)}")
+
+    # Store the session ID on the order so we can verify it in the webhook
+    order.payment_transaction_id = session.id
+    order.payment_provider = "stripe"
+    db.commit()
+
+    return {"checkout_url": session.url, "session_id": session.id}
+
+
+@app.post("/api/stripe/webhook")
+async def stripe_webhook(request: Request, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Handle Stripe webhook events to mark orders as paid and trigger processing."""
+    settings = get_settings()
+    stripe.api_key = settings.stripe_secret_key
+
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+
+    try:
+        if settings.stripe_webhook_secret:
+            event = stripe.Webhook.construct_event(payload, sig_header, settings.stripe_webhook_secret)
+        else:
+            # No webhook secret configured – parse without verification (dev only)
+            event = stripe.Event.construct_from(json.loads(payload), stripe.api_key)
+    except (ValueError, stripe.SignatureVerificationError) as e:
+        logger.warning(f"Stripe webhook signature failed: {e}")
+        raise HTTPException(status_code=400, detail="Invalid webhook signature")
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        order_id = session.get("metadata", {}).get("order_id")
+        session_id = session.get("id")
+        payment_intent = session.get("payment_intent", "")
+
+        if not order_id:
+            logger.warning(f"Stripe webhook: no order_id in session metadata {session_id}")
+            return {"status": "ignored"}
+
+        order = db.query(Order).filter(Order.order_id == order_id).first()
+        if not order:
+            logger.warning(f"Stripe webhook: order not found {order_id}")
+            return {"status": "ignored"}
+
+        if order.status == OrderStatus.PENDING.value:
+            order.status = OrderStatus.PAID.value
+            order.payment_status = "paid"
+            order.payment_provider = "stripe"
+            order.payment_transaction_id = payment_intent or session_id
+            order.paid_at = datetime.utcnow()
+            db.commit()
+            background_tasks.add_task(process_order_style_transfer, order_id)
+            logger.info(f"Stripe payment confirmed, processing started: {order_id}")
+        else:
+            logger.info(f"Stripe webhook: order {order_id} already in status {order.status}, skipping")
+
+    return {"status": "ok"}
+
+
 @app.post("/api/orders/{order_id}/pay")
 async def pay_order(
     order_id: str,
@@ -1573,6 +1687,7 @@ async def pay_order(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ):
+    """Legacy endpoint kept for internal/admin use only. Real payments go through Stripe webhook."""
     order = db.query(Order).filter(Order.order_id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
@@ -1588,7 +1703,7 @@ async def pay_order(
     db.commit()
 
     background_tasks.add_task(process_order_style_transfer, order_id)
-    logger.info(f"Order paid, processing started: {order_id}")
+    logger.info(f"Order paid (legacy endpoint), processing started: {order_id}")
     return {"status": "ok", "order_id": order_id}
 
 

@@ -46,6 +46,11 @@ class Settings(BaseSettings):
     database_url: Optional[str] = None
     result_image_ttl_days: int = 14  # Delete result image blobs from DB after this many days
 
+    # Stripe payments
+    stripe_secret_key: Optional[str] = None        # sk_live_... or sk_test_...
+    stripe_publishable_key: Optional[str] = None   # pk_live_... or pk_test_...
+    stripe_webhook_secret: Optional[str] = None    # whsec_... from Stripe dashboard
+
     # Email (use HTTP APIs first – SMTP often blocked on Render)
     resend_api_key: Optional[str] = None  # Free: 100/day @ resend.com
     sendgrid_api_key: Optional[str] = None  # Free: 100/day @ sendgrid.com

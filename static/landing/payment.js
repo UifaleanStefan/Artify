@@ -24,7 +24,7 @@
 
   function fillPackThumb(el, s, prevBtn, nextBtn) {
     var isMasters = Number(s.id) === 13;
-    var mastersUrls = ['/static/landing/styles/masters/masters-01.jpg', '/static/landing/styles/masters/masters-02.jpg', '/static/landing/styles/masters/masters-03.jpg', '/static/landing/styles/masters/masters-04.jpg', '/static/landing/styles/masters/masters-05.jpg'];
+    var mastersUrls = ['/static/landing/styles/masters/masters-02.jpg', '/static/landing/styles/masters/masters-04.jpg', '/static/landing/styles/masters/masters-15.jpg', '/static/landing/styles/masters/masters-01.jpg', '/static/landing/styles/masters/masters-13.jpg'];
     var previewUrls = (s.previewImageUrls && s.previewImageUrls.length) ? s.previewImageUrls : (isMasters ? mastersUrls : null);
     if (previewUrls && previewUrls.length) {
       el.className = 'payment-style-thumb style-thumb-h-scroll';
@@ -60,7 +60,7 @@
   var paymentTotalEl = document.getElementById('payment-total');
   if (paymentPriceEl) paymentPriceEl.textContent = priceStr;
   if (paymentTotalEl) paymentTotalEl.textContent = priceStr;
-  if (payBtn) payBtn.textContent = 'Plătește ' + priceStr;
+  if (payBtn) payBtn.textContent = 'Plătește ' + priceStr + ' →';
   if (backLink) {
     var q = '?style=' + encodeURIComponent(styleId || '') + '&image_url=' + encodeURIComponent(imageUrl || '') + '&portrait_mode=' + encodeURIComponent(portraitMode) + '&email=' + encodeURIComponent(email) + '&pack=' + encodeURIComponent(pack);
     backLink.href = '/billing' + q;
@@ -74,8 +74,10 @@
       var billingInfoStr = sessionStorage.getItem('billingInfo');
       if (!billingInfoStr) { alert('Lipsesc datele de facturare. Revino la Facturare.'); return; }
       var billingInfo = JSON.parse(billingInfoStr);
-      payBtn.disabled = true; payBtn.textContent = 'Se procesează…';
+      payBtn.disabled = true;
+      payBtn.textContent = 'Se pregătește plata…';
 
+      // Step 1: Create the order in our DB
       fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -98,20 +100,24 @@
         if (!res.ok) throw new Error((res.data && res.data.detail) || 'Crearea comenzii a eșuat.');
         var orderId = res.data && res.data.order_id;
         if (!orderId) throw new Error('Comanda a fost creată dar nu s-a returnat order_id.');
-        return fetch('/api/orders/' + encodeURIComponent(orderId) + '/pay', {
+
+        // Step 2: Create a Stripe Checkout session and redirect
+        return fetch('/api/orders/' + encodeURIComponent(orderId) + '/checkout', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ payment_provider: 'stripe', transaction_id: 'TXN-' + Date.now() })
-        }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, data: d, orderId: orderId }; }); });
+          headers: { 'Content-Type': 'application/json' }
+        }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, data: d }; }); });
       })
       .then(function (res) {
-        if (!res.ok) throw new Error((res.data && res.data.detail) || 'Plata a eșuat.');
-        var q = '?order_id=' + encodeURIComponent(res.orderId) + '&style=' + encodeURIComponent(styleId) + '&email=' + encodeURIComponent(email);
-        window.location.href = '/create/done' + q;
+        if (!res.ok) throw new Error((res.data && res.data.detail) || 'Inițializarea plății a eșuat.');
+        var checkoutUrl = res.data && res.data.checkout_url;
+        if (!checkoutUrl) throw new Error('Nu s-a putut obține link-ul de plată.');
+        // Redirect to Stripe Checkout
+        window.location.href = checkoutUrl;
       })
       .catch(function (err) {
-        payBtn.disabled = false; payBtn.textContent = 'Plătește ' + priceStr;
-        alert(err.message || 'Ceva nu a mers bine.');
+        payBtn.disabled = false;
+        payBtn.textContent = 'Plătește ' + priceStr + ' →';
+        alert(err.message || 'Ceva nu a mers bine. Te rugăm să încerci din nou.');
       });
     });
   }

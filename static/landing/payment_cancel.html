@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plată anulată – Artify</title>
+  <link rel="stylesheet" href="/static/landing/styles.css" />
+  <link rel="stylesheet" href="/static/landing/create_done.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+<body>
+  <header class="header header-with-border">
+    <a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a>
+    <nav class="nav"><a href="/#how-it-works">Cum funcționează</a><a href="/styles">Stiluri</a><a href="/#pricing">Prețuri</a><a href="/styles" class="btn btn-primary btn-header">Transformă acum</a></nav>
+  </header>
+  <main class="done-main">
+    <div class="done-card" style="text-align:center">
+      <div class="done-icon">😔</div>
+      <h1 class="done-title">Plata a fost anulată</h1>
+      <p class="done-subtitle">Nu ai fost debitat. Poți relua comanda oricând.</p>
+      <div style="margin-top:1.5rem; display:flex; flex-direction:column; gap:0.75rem; align-items:center;">
+        <a id="retry-link" href="/styles" class="btn btn-primary btn-lg">Încearcă din nou</a>
+        <a href="/" class="done-home-link">← Înapoi la pagina principală</a>
+      </div>
+      <p style="margin-top:2rem; font-size:0.875rem; color:var(--color-muted,#6b7280);">
+        Ai o problemă? Contactează-ne la
+        <a href="mailto:artify.system@gmail.com">artify.system@gmail.com</a>
+      </p>
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-col footer-brand"><a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a><p>Poză → artă. Fii pictat în orice epocă.</p></div>
+      <div class="footer-col footer-nav"><div class="footer-links"><h4>Suport</h4><a href="/help">Centru de ajutor</a><a href="/contact">Contact</a></div></div>
+      <div class="footer-col footer-contact"><h4>Contact</h4><a href="mailto:artify.system@gmail.com" class="footer-contact-item">artify.system@gmail.com</a><a href="tel:+40758972277" class="footer-contact-item">0758 972 277</a></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 Artify. Toate drepturile rezervate.</span></div>
+  </footer>
+  <script>
+  (function () {
+    // If we have order_id, pre-fill the retry link with order context
+    // (order is still PENDING in DB so they can attempt a fresh checkout)
+    var params = new URLSearchParams(window.location.search);
+    var orderId = params.get('order_id');
+    if (orderId) {
+      // Nothing special to do here — the order stays PENDING.
+      // When they restart from /styles they will create a new order.
+    }
+  })();
+  </script>
+</body>
+</html>

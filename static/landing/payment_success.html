@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plată confirmată – Artify</title>
+  <link rel="stylesheet" href="/static/landing/styles.css" />
+  <link rel="stylesheet" href="/static/landing/create_done.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet" />
+  <style>
+    .success-spinner {
+      display: inline-block;
+      width: 2.5rem;
+      height: 2.5rem;
+      border: 3px solid rgba(37,99,235,0.15);
+      border-top-color: var(--color-primary, #2563eb);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .success-check {
+      font-size: 3.5rem;
+      margin-bottom: 0.5rem;
+      display: none;
+    }
+    #status-msg {
+      color: var(--color-muted, #6b7280);
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="header header-with-border">
+    <a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a>
+    <nav class="nav"><a href="/#how-it-works">Cum funcționează</a><a href="/styles">Stiluri</a><a href="/#pricing">Prețuri</a><a href="/styles" class="btn btn-primary btn-header">Transformă acum</a></nav>
+  </header>
+  <main class="done-main">
+    <div class="done-card" style="text-align:center">
+      <div class="success-check" id="success-check">✅</div>
+      <div class="success-spinner" id="success-spinner"></div>
+      <h1 class="done-title" id="success-title">Se confirmă plata…</h1>
+      <p class="done-subtitle" id="success-subtitle">Procesăm plata ta în siguranță. Te rugăm să aștepți câteva secunde.</p>
+      <p id="status-msg"></p>
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-col footer-brand"><a href="/" class="logo"><span class="logo-icon">🎨</span><span class="logo-text">Artify</span></a><p>Poză → artă. Fii pictat în orice epocă.</p></div>
+      <div class="footer-col footer-nav"><div class="footer-links"><h4>Suport</h4><a href="/help">Centru de ajutor</a><a href="/contact">Contact</a></div></div>
+      <div class="footer-col footer-contact"><h4>Contact</h4><a href="mailto:artify.system@gmail.com" class="footer-contact-item">artify.system@gmail.com</a><a href="tel:+40758972277" class="footer-contact-item">0758 972 277</a></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 Artify. Toate drepturile rezervate.</span></div>
+  </footer>
+  <script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var orderId = params.get('order_id');
+    var statusMsg = document.getElementById('status-msg');
+
+    if (!orderId) {
+      document.getElementById('success-title').textContent = 'Ceva nu a mers bine';
+      document.getElementById('success-subtitle').textContent = 'Nu am putut identifica comanda. Contactează-ne la artify.system@gmail.com';
+      document.getElementById('success-spinner').style.display = 'none';
+      return;
+    }
+
+    var attempts = 0;
+    var maxAttempts = 20; // 20 × 3s = 60s max
+    var styleId = null;
+    var email = null;
+
+    function pollOrder() {
+      attempts++;
+      fetch('/api/orders/' + encodeURIComponent(orderId))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          styleId = styleId || data.style_id;
+          email = email || data.email;
+
+          var status = data.status || data.payment_status;
+          if (status === 'paid' || status === 'processing' || status === 'completed') {
+            // Payment confirmed – go to the done page
+            document.getElementById('success-spinner').style.display = 'none';
+            document.getElementById('success-check').style.display = 'block';
+            document.getElementById('success-title').textContent = 'Plată confirmată! 🎨';
+            document.getElementById('success-subtitle').textContent = 'Portretul tău se creează acum. Te redirecționăm…';
+            setTimeout(function () {
+              var q = '?order_id=' + encodeURIComponent(orderId);
+              if (styleId) q += '&style=' + encodeURIComponent(styleId);
+              if (email) q += '&email=' + encodeURIComponent(email);
+              window.location.href = '/create/done' + q;
+            }, 1500);
+          } else if (attempts < maxAttempts) {
+            statusMsg.textContent = 'Verificăm statusul comenzii… (' + attempts + ')';
+            setTimeout(pollOrder, 3000);
+          } else {
+            document.getElementById('success-spinner').style.display = 'none';
+            document.getElementById('success-title').textContent = 'Plata este în curs de verificare';
+            document.getElementById('success-subtitle').textContent = 'Dacă ai fost debitat, vei primi portretul pe email în câteva minute. Comanda ta: ' + orderId;
+          }
+        })
+        .catch(function () {
+          if (attempts < maxAttempts) {
+            setTimeout(pollOrder, 3000);
+          }
+        });
+    }
+
+    // Give the webhook a moment to fire before first poll
+    setTimeout(pollOrder, 2000);
+  })();
+  </script>
+</body>
+</html>
