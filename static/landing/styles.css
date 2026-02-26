@@ -112,7 +112,7 @@ img { max-width: 100%; height: auto; }
   position: sticky;
   top: 2.5rem;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   display: flex;
@@ -123,36 +123,23 @@ img { max-width: 100%; height: auto; }
   box-sizing: border-box;
   border-bottom: 1px solid rgba(37, 99, 235, 0.08);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: background 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
 }
-/* At top: fully transparent, blends with hero */
+/* At top: fully transparent, blends with page below */
 .header-scroll-fade {
-  background: transparent !important;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  background: rgba(255, 255, 255, 0) !important;
+  backdrop-filter: blur(0px) !important;
+  -webkit-backdrop-filter: blur(0px) !important;
   box-shadow: none !important;
   border-bottom-color: transparent !important;
-}
-/* Nav links white when header is transparent */
-.header-scroll-fade .nav a:not(.btn) {
-  color: rgba(30, 41, 59, 0.75);
-}
-.header-scroll-fade .nav a:not(.btn):hover {
-  color: var(--text);
 }
 /* On scroll: solid white with shadow */
 .header-scroll-fade.header-scrolled {
   background: rgba(255, 255, 255, 0.97) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07) !important;
   border-bottom-color: rgba(37, 99, 235, 0.08) !important;
-}
-.header-scroll-fade.header-scrolled .nav a:not(.btn) {
-  color: var(--text-muted);
-}
-.header-scroll-fade.header-scrolled .nav a:not(.btn):hover {
-  color: var(--text);
 }
 .header-with-border { border-bottom: 1px solid rgba(37, 99, 235, 0.1); }
 .logo {
@@ -1696,9 +1683,9 @@ a.style-card:hover .style-card-bg {
 
 /* Popular card – dark */
 .pricing-card--popular {
-  background: #0f172a;
+  background: #1e293b;
   border-color: transparent;
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.35);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.25);
   z-index: 2;
 }
 @media (min-width: 901px) {
@@ -1716,7 +1703,7 @@ a.style-card:hover .style-card-bg {
   border-radius: 22px;
   background: linear-gradient(135deg, var(--primary) 0%, var(--accent-3) 50%, var(--accent) 100%);
   z-index: -1;
-  opacity: 0.7;
+  opacity: 0.3;
   filter: blur(0px);
 }
 
@@ -1732,7 +1719,25 @@ a.style-card:hover .style-card-bg {
 .pc-header--dark { background: rgba(255,255,255,0.04); border-bottom-color: rgba(255,255,255,0.07); }
 .pc-header--canvas { background: linear-gradient(135deg, rgba(245,158,11,0.06) 0%, rgba(236,72,153,0.04) 100%); }
 
-.pc-icon { font-size: 1.75rem; line-height: 1; }
+.pc-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.7);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.pricing-card--popular .pc-icon {
+  background: rgba(255,255,255,0.12);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.pricing-card--coming-soon .pc-icon {
+  background: rgba(245,158,11,0.1);
+}
 
 /* Badges */
 .pc-badge {
@@ -1744,7 +1749,7 @@ a.style-card:hover .style-card-bg {
   text-transform: uppercase;
   white-space: nowrap;
 }
-.pc-badge--discount { background: #fef3c7; color: #92400e; }
+.pc-badge--discount { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; }
 .pc-badge--popular { background: linear-gradient(135deg, var(--primary) 0%, var(--accent-3) 100%); color: #fff; }
 .pc-badge--soon { background: rgba(100,116,139,0.12); color: var(--text-muted); }
 
@@ -1832,24 +1837,25 @@ a.style-card:hover .style-card-bg {
   border: none;
 }
 .pc-btn--primary {
-  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f9a8d4 100%);
+  background: var(--primary);
   color: #fff !important;
   -webkit-text-fill-color: #fff !important;
-  box-shadow: 0 6px 20px rgba(99,102,241,0.4);
+  box-shadow: 0 4px 16px rgba(37,99,235,0.35);
 }
 .pc-btn--primary:hover {
-  box-shadow: 0 10px 28px rgba(99,102,241,0.55);
+  background: #1d4ed8;
+  box-shadow: 0 8px 24px rgba(37,99,235,0.45);
   transform: translateY(-1px);
 }
 .pc-btn--outline {
-  background: transparent;
-  color: var(--primary) !important;
-  -webkit-text-fill-color: var(--primary) !important;
-  border: 2px solid rgba(37,99,235,0.25);
+  background: var(--primary);
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  border: 2px solid var(--primary);
 }
 .pc-btn--outline:hover {
-  background: rgba(37,99,235,0.05);
-  border-color: var(--primary);
+  background: #1d4ed8;
+  border-color: #1d4ed8;
 }
 .pc-btn--disabled {
   background: rgba(100,116,139,0.1);
@@ -2119,15 +2125,27 @@ a.style-card:hover .style-card-bg {
   .how-steps::before {
     display: none;
   }
-  /* Each step: number on left with vertical line, card on right */
+  /* Each step: number on left, card on right */
   .how-step {
     display: grid;
     grid-template-columns: 3.25rem 1fr;
-    grid-template-rows: auto 1fr;
     column-gap: 1rem;
     align-items: start;
     width: 100%;
     position: relative;
+    padding-bottom: 1.5rem;
+  }
+  /* Vertical connector line: absolutely positioned, runs from bottom of number to bottom of step */
+  .how-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: calc(3.25rem / 2 - 1px);
+    top: 3.25rem;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--primary) 0%, var(--accent-3) 50%, var(--accent) 100%);
+    border-radius: 2px;
+    opacity: 0.35;
   }
   /* Number circle: finger-sized touch target with press feedback */
   .how-step .step-number {
@@ -2156,26 +2174,12 @@ a.style-card:hover .style-card-bg {
   .step-card--flash {
     animation: step-card-flash 0.55s ease-out forwards;
   }
-  /* Card sits in column 2, row 1, with bottom margin for spacing */
+  /* Card sits in column 2 */
   .how-step .step-card {
     grid-column: 2;
     grid-row: 1;
     padding: 1.25rem;
     text-align: left;
-    margin-bottom: 1.5rem;
-  }
-  /* Vertical connector line: sits in column 1, row 2, below the number */
-  .how-step:not(:last-child)::after {
-    content: '';
-    grid-column: 1;
-    grid-row: 2;
-    width: 2px;
-    height: 1.5rem;
-    background: linear-gradient(180deg, var(--primary) 0%, var(--accent-3) 50%, var(--accent) 100%);
-    border-radius: 2px;
-    opacity: 0.4;
-    margin: 0 auto;
-    display: block;
   }
   .how-step .step-icon {
     margin: 0 0 1rem 0;
@@ -2190,12 +2194,16 @@ a.style-card:hover .style-card-bg {
   .pricing-card { padding: 1.5rem; }
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: 2.5rem;
+    gap: 2rem;
     text-align: center;
   }
+  .footer-brand { display: flex; flex-direction: column; align-items: center; }
   .footer-brand .logo { margin-left: auto; margin-right: auto; }
-  .footer-brand p { margin-left: auto; margin-right: auto; }
+  .footer-brand p { margin-left: auto; margin-right: auto; text-align: center; }
   .footer-brand .social-icons { justify-content: center; }
+  .footer-nav { flex-direction: column; align-items: center; gap: 1.5rem; }
+  .footer-links { text-align: center; }
+  .footer-contact { display: flex; flex-direction: column; align-items: center; }
   .footer-contact-item { justify-content: center; }
   .footer-bottom { flex-direction: column; align-items: center; gap: 0.75rem; text-align: center; }
   .demo-flow { flex-direction: column; gap: 1.5rem; }
@@ -2222,12 +2230,14 @@ a.style-card:hover .style-card-bg {
   .section { padding: 2rem 1rem; }
   .review-summary-box { font-size: 0.8125rem; }
   .review-summary-rating { font-size: 0.9375rem; }
-  .footer-grid { grid-template-columns: 1fr; text-align: center; }
-  .footer-brand p { margin-left: auto; margin-right: auto; }
+  .footer-grid { grid-template-columns: 1fr; gap: 1.75rem; text-align: center; }
+  .footer-brand { align-items: center; }
+  .footer-brand p { margin-left: auto; margin-right: auto; text-align: center; }
   .footer-brand .footer-social { align-items: center; }
   .footer-brand .social-icons { justify-content: center; }
-  .footer-nav { align-items: center; text-align: center; }
-  .footer-contact { text-align: center; }
+  .footer-nav { flex-direction: column; align-items: center; gap: 1.5rem; }
+  .footer-links { text-align: center; }
+  .footer-contact { align-items: center; }
   .footer-contact-item { justify-content: center; }
   .pricing-discount-badge,
   .pricing-coming-soon-badge { font-size: 0.75rem; padding: 0.35rem 0.75rem; right: 0.75rem; }

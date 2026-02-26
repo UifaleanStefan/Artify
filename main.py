@@ -837,7 +837,7 @@ MASTERS_PACK_LABELS: list[tuple[str, str]] = [
     ("Crearea lui Adam", "Michelangelo"),                    # 01
     ("Flori de floarea-soarelui", "Vincent van Gogh"),        # 13
     # Remaining 10
-    ("Compoziție cu grile", "Piet Mondrian"),                # 03
+    ("Broadway Boogie Woogie", "Piet Mondrian"),             # 03
     ("3 Mai 1808", "Francisco Goya"),                        # 05
     ("Judith și Holoferne", "Caravaggio"),                   # 06
     ("Străjirea de noapte", "Rembrandt van Rijn"),            # 07
@@ -853,7 +853,7 @@ IMPRESSION_COLOR_PACK_LABELS: list[tuple[str, str]] = [
     # Best 5 first (used for 5-pack tier)
     ("Noapte înstelată", "Vincent van Gogh"),                # 13 - Starry Night
     ("Nufări", "Claude Monet"),                              # 02
-    ("Noapte înstelată (stradă)", "Vincent van Gogh"),       # 01 - night city street
+    ("Boulevard Montmartre noaptea", "Camille Pissarro"),     # 01 - Boulevard Montmartre at Night
     ("Irisi", "Vincent van Gogh"),                           # 08
     ("Balul de la Moulin de la Galette", "Pierre-Auguste Renoir"),  # 11
     # Remaining 10
@@ -961,7 +961,7 @@ MASTERS_PACK_PROMPTS: list[str] = [
     "in the style of Michelangelo's The Creation of Adam: fresco technique with soft, blended brushwork, warm flesh tones (peach, terracotta), cool blue-grey background, idealized Renaissance anatomy, divine touch gesture. Preserve the subject's face, identity, and likeness.",
     "in the style of Vincent van Gogh's Sunflowers: thick impasto brushstrokes in visible directions, vibrant yellows and ochres, green stems, textured paint surface, post-impressionist. Preserve the subject's face and identity.",
     # Remaining 10
-    "in the style of Piet Mondrian's geometric abstraction: flat, hard-edge color blocks, primary palette (red, yellow, blue) on white, black grid lines, no brush texture—clean geometric planes. Preserve the subject's face and likeness.",
+    "in the style of Piet Mondrian's Broadway Boogie Woogie: dense yellow grid lines (no black outlines) intersected with small squares of red, blue, and grey, vibrant primary colours on white, jazz-rhythm visual energy, crisp hard-edge geometry with no brushwork texture. Preserve the subject's face and likeness.",
     "in the style of Francisco Goya's The Third of May 1808: dramatic chiaroscuro, dark browns and blacks, stark white shirt, warm lantern light, loose brushwork for crowd, tight detail on central figure. Preserve the subject's face and identity.",
     "in the style of Caravaggio's Judith Beheading Holofernes: tenebrist lighting—deep black shadows, single light source, rich red fabric, creamy flesh tones, precise brushwork on faces. Preserve the subject's face and likeness.",
     "in the style of Rembrandt's The Night Watch: Dutch Golden Age chiaroscuro, warm amber and browns, golden highlights on faces, deep shadows, visible brushwork, group portrait composition. Preserve the subject's face and identity.",
@@ -977,7 +977,7 @@ IMPRESSION_COLOR_PACK_PROMPTS: list[str] = [
     # Best 5 first (used for 5-pack tier)
     "in the style of Vincent van Gogh's Starry Night: thick swirling impasto strokes, deep cobalt blue sky, bright yellow and orange stars, swirling cypress in dark green, visible brush texture throughout. Preserve the subject's face and identity.",
     "in the style of Claude Monet's Water Lilies: soft, broken brushstrokes, pastel greens and pinks, lavender reflections on water, dappled light, no hard edges. Preserve the subject's face and likeness.",
-    "in the style of Vincent van Gogh's night city scenes: short thick brushstrokes, warm yellows and oranges for street lamps, deep blue night sky, cobblestone texture. Preserve the subject's face and identity.",
+    "in the style of Camille Pissarro's Boulevard Montmartre at Night: broken impressionist strokes, cool dark navy and grey boulevard, warm golden-yellow lamp glow reflecting on wet cobblestones, misty atmospheric depth, crowds rendered as loose dabs of colour. Preserve the subject's face and identity.",
     "in the style of Vincent van Gogh's Irises: thick directional brushstrokes, vibrant blues and purples, green foliage, yellow accents, expressive texture. Preserve the subject's face and likeness.",
     "in the style of Pierre-Auguste Renoir's Bal du moulin de la Galette: impressionist dappled light, warm skin tones, blue and white dresses, outdoor cafe. Preserve the subject's face and identity.",
     # Remaining 10

@@ -33,7 +33,7 @@
   /* Header scroll fade: blend at top, solid on scroll */
   var mainHeader = document.getElementById('main-header');
   if (mainHeader && mainHeader.classList.contains('header-scroll-fade')) {
-    var SCROLL_THRESHOLD = 60;
+    var SCROLL_THRESHOLD = 20;
     function updateHeaderScroll() {
       if (window.scrollY > SCROLL_THRESHOLD) {
         mainHeader.classList.add('header-scrolled');
