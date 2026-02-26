@@ -627,6 +627,27 @@ img { max-width: 100%; height: auto; }
     radial-gradient(ellipse 50% 35% at 50% 100%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
     radial-gradient(ellipse 40% 30% at 100% 80%, rgba(16, 185, 129, 0.12) 0%, transparent 50%);
 }
+
+.floating-element {
+  position: absolute;
+  opacity: 0.25;
+  pointer-events: none;
+  animation: float-anim 10s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes float-anim {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(10deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+.float-1 { bottom: 15%; left: 8%; animation-delay: 0s; opacity: 0.25; }
+.float-2 { bottom: 35%; left: 12%; animation-delay: 2s; opacity: 0.3; }
+.float-3 { bottom: 20%; right: 8%; animation-delay: 1s; opacity: 0.2; }
+.float-4 { bottom: 40%; right: 15%; animation-delay: 3s; opacity: 0.25; }
+.float-5 { bottom: 10%; left: 25%; animation-delay: 4s; opacity: 0.2; }
+.float-6 { bottom: 12%; right: 28%; animation-delay: 1.5s; opacity: 0.3; }
 .hero-content { position: relative; max-width: 720px; text-align: center; }
 .hero-pill {
   display: inline-flex;
@@ -1541,6 +1562,7 @@ a.style-card:hover .style-card-bg {
   flex-direction: row;
   align-items: stretch;
   justify-content: center;
+  gap: 1.5rem;
 }
 .pricing-card--single { text-align: center; }
 .pricing-card--secondary {
@@ -1602,7 +1624,7 @@ a.style-card:hover .style-card-bg {
 }
 .pricing-coming-soon-badge {
   position: absolute;
-  top: -0.5rem;
+  top: -1rem;
   right: 1.25rem;
   background: var(--text-muted);
   color: #fff;
@@ -1665,6 +1687,11 @@ a.style-card:hover .style-card-bg {
   box-shadow: var(--shadow);
   border: 1px solid rgba(37, 99, 235, 0.08);
   transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+.pricing-card .btn {
+  margin-top: auto;
 }
 .pricing-card:hover {
   transform: translateY(-2px);
@@ -1672,7 +1699,7 @@ a.style-card:hover .style-card-bg {
 }
 .pricing-discount-badge {
   position: absolute;
-  top: -0.5rem;
+  top: -1rem;
   right: 1.25rem;
   background: #FBC02D;
   color: #1a1a1a;
@@ -1702,7 +1729,7 @@ a.style-card:hover .style-card-bg {
 .pricing-sub { margin: 0 0 1rem; font-size: 0.9375rem; color: var(--primary); font-weight: 500; }
 .pricing-price { font-size: 2rem; font-weight: 700; margin: 0 0 1.5rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .pricing-price span { font-size: 1rem; font-weight: 500; color: var(--text-muted); -webkit-text-fill-color: var(--text-muted); }
-.pricing-features { list-style: none; padding: 0; margin: 0 0 1.5rem; }
+.pricing-features { list-style: none; padding: 0; margin: 0 0 1.5rem; flex-grow: 1; }
 .pricing-features li {
   display: flex;
   align-items: center;
