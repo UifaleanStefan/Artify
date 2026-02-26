@@ -54,7 +54,7 @@
     if (styleArtist) styleArtist.textContent = style.artist;
   }
   if (emailEl) emailEl.textContent = email || '—';
-  var priceStr = pack === '15' ? '79,99 Lei' : '9,99 Lei';
+  var priceStr = pack === '15' ? '19,99 Lei' : '9,99 Lei';
   var billingTotalEl = document.getElementById('billing-total');
   if (billingTotalEl) billingTotalEl.textContent = priceStr;
   if (backLink) {

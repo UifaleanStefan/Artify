@@ -312,6 +312,37 @@
         currentIndex = 0;
         showImage(0);
 
+        // Nudge filmstrip to hint it's scrollable
+        (function nudgeFilmstrip() {
+          var el = filmstripEl;
+          if (!el) return;
+          var distance = 120;
+          var duration = 600;
+          setTimeout(function() {
+            var start = null;
+            var startLeft = 0;
+            function stepFwd(ts) {
+              if (!start) start = ts;
+              var p = Math.min((ts - start) / duration, 1);
+              var e = p < 0.5 ? 2*p*p : -1 + (4 - 2*p)*p;
+              el.scrollLeft = startLeft + distance * e;
+              if (p < 1) { requestAnimationFrame(stepFwd); }
+              else {
+                var start2 = null; var fromLeft = el.scrollLeft;
+                function stepBack(ts2) {
+                  if (!start2) start2 = ts2;
+                  var p2 = Math.min((ts2 - start2) / duration, 1);
+                  var e2 = p2 < 0.5 ? 2*p2*p2 : -1 + (4 - 2*p2)*p2;
+                  el.scrollLeft = fromLeft - distance * e2;
+                  if (p2 < 1) requestAnimationFrame(stepBack);
+                }
+                requestAnimationFrame(stepBack);
+              }
+            }
+            requestAnimationFrame(stepFwd);
+          }, 800);
+        })();
+
         if (shareWrapEl) {
           shareWrapEl.style.display = 'block';
         }

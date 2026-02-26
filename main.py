@@ -1349,7 +1349,7 @@ async def create_order(
     if style_image_urls and pack_tier == 5:
         urls_list = json.loads(style_image_urls)
         style_image_urls = json.dumps(urls_list[:5])
-    amount = 9.99 if pack_tier == 5 else 79.99
+    amount = 9.99 if pack_tier == 5 else 19.99
     # Fail fast if style URLs are not public HTTPS (Replicate requires this)
     def _must_be_https(name: str, url: Optional[str]) -> None:
         if not url or not url.strip():

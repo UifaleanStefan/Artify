@@ -1162,7 +1162,22 @@ img { max-width: 100%; height: auto; }
   flex-direction: column;
 }
 @media (max-width: 900px) {
-  .demo-cards { grid-template-columns: 1fr; }
+  .demo-cards {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 1rem;
+    padding: 0.5rem 1rem 1.25rem;
+    scrollbar-width: none;
+  }
+  .demo-cards::-webkit-scrollbar { display: none; }
+  .demo-compare-card {
+    flex: 0 0 82vw;
+    max-width: 340px;
+    scroll-snap-align: center;
+  }
 }
 .compare-wrap {
   position: relative;
