@@ -45,6 +45,17 @@
     window.addEventListener('scroll', updateHeaderScroll, { passive: true });
   }
 
+  /* How-it-works: tap step number to highlight card on mobile */
+  document.querySelectorAll('.how-step .step-number').forEach(function(num) {
+    num.addEventListener('click', function() {
+      var card = num.closest('.how-step').querySelector('.step-card');
+      if (!card) return;
+      card.classList.remove('step-card--flash');
+      void card.offsetWidth; // reflow to restart animation
+      card.classList.add('step-card--flash');
+    });
+  });
+
   /* Demo cards: auto-nudge on mobile to hint horizontal scroll */
   function nudgeScroll(el, distance, duration) {
     if (!el) return;
