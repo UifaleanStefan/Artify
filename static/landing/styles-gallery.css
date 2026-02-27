@@ -1,4 +1,8 @@
 /* Styles gallery page */
+.styles-main {
+  padding-top: 7rem; /* clear the fixed header + promo bar */
+  min-height: 100vh;
+}
 .styles-page-header {
   text-align: center;
   padding: 2rem 0 1.5rem;

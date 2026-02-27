@@ -105,6 +105,59 @@
   }
   initDemoAutoAnimate();
 
+  /* Style cards + testimonial strip: nudge scroll on mobile to hint scrollability */
+  function nudgeScrollWrap(el) {
+    var dist = Math.min(el.scrollWidth * 0.18, 160);
+    var start = null;
+    var dur = 600;
+    var pause = 300;
+    function forward(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      var ease = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+      el.scrollLeft = dist * ease;
+      if (p < 1) requestAnimationFrame(forward);
+      else setTimeout(function() {
+        var start2 = null;
+        function backward(ts2) {
+          if (!start2) start2 = ts2;
+          var p2 = Math.min((ts2 - start2) / dur, 1);
+          var ease2 = p2 < 0.5 ? 2 * p2 * p2 : -1 + (4 - 2 * p2) * p2;
+          el.scrollLeft = dist * (1 - ease2);
+          if (p2 < 1) requestAnimationFrame(backward);
+        }
+        requestAnimationFrame(backward);
+      }, pause);
+    }
+    requestAnimationFrame(forward);
+  }
+
+  function initScrollNudge() {
+    if (window.innerWidth > 900) return;
+    var targets = [
+      document.getElementById('style-cards-track'),
+      document.getElementById('testimonial-track-h')
+    ];
+    if (!('IntersectionObserver' in window)) return;
+    targets.forEach(function(el) {
+      if (!el) return;
+      var nudged = false;
+      // Stop nudge if user manually touches it first
+      el.addEventListener('touchstart', function() { nudged = true; }, { passive: true });
+      var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting && !nudged) {
+            nudged = true;
+            setTimeout(function() { nudgeScrollWrap(el); }, 400);
+            obs.unobserve(el);
+          }
+        });
+      }, { threshold: 0.4 });
+      obs.observe(el);
+    });
+  }
+  initScrollNudge();
+
   /* Hamburger menu */
   var hamburgerBtn = document.getElementById('hamburger-btn');
   var menuOverlay = document.getElementById('menu-overlay');

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ro">
 <head>
   <meta charset="UTF-8" />
@@ -41,6 +41,26 @@
       </div>
     </div>
   </div>
+
+  <header class="header header-scroll-fade" id="main-header">
+    <a href="/" class="logo">
+      <span class="logo-icon">🎨</span>
+      <span class="logo-text">Artify</span>
+    </a>
+    <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Deschide meniul" aria-expanded="false">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+    <nav class="nav">
+      <a href="/#how-it-works">Cum funcționează</a>
+      <a href="/styles" class="nav-styles-link">Stiluri</a>
+      <a href="/#pricing">Prețuri</a>
+      <a href="/styles" class="btn btn-primary btn-header btn-cta-prominent nav-cta">Transformă acum – 9,99 Lei <span class="btn-arrow">→</span></a>
+    </nav>
+  </header>
+
+  <main class="styles-main">
     <div class="styles-toolbar">
       <input type="text" class="styles-search" id="styles-search" placeholder="Caută stiluri sau artiști…" />
       <div class="styles-filters" id="styles-filters">
@@ -114,7 +134,31 @@
     </div>
   </footer>
 
+  <div class="menu-overlay" id="menu-overlay" aria-hidden="true">
+    <div class="menu-panel">
+      <button type="button" class="menu-close" id="menu-close" aria-label="Închide meniul">×</button>
+      <div class="menu-header">
+        <a href="/" class="menu-logo">
+          <span class="menu-logo-icon">🎨</span>
+          <span class="menu-logo-text">Artify</span>
+        </a>
+      </div>
+      <nav class="menu-nav">
+        <a href="/#how-it-works" class="menu-item"><span class="menu-item-icon">⚡</span>Cum funcționează</a>
+        <a href="/styles" class="menu-item"><span class="menu-item-icon">🎨</span>Stiluri</a>
+        <a href="/#pricing" class="menu-item"><span class="menu-item-icon">💰</span>Prețuri</a>
+      </nav>
+      <div class="menu-secondary">
+        <a href="/help" class="menu-secondary-link">Întrebări frecvente</a>
+        <a href="/contact" class="menu-secondary-link">Contact</a>
+      </div>
+      <a href="/styles" class="menu-cta">Transformă acum – 9,99 Lei <span class="btn-arrow">→</span></a>
+      <p class="menu-tagline">✨ Transformă orice poză într-o operă de artă ✨</p>
+    </div>
+  </div>
+
   <script src="/static/landing/styles-data.js"></script>
   <script src="/static/landing/styles-gallery.js"></script>
+  <script src="/static/landing/script.js"></script>
 </body>
 </html>

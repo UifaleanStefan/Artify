@@ -1756,10 +1756,16 @@ a.style-card:hover .style-card-bg {
 .pc-body { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
 
 .pc-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--primary); margin: 0 0 0.35rem; }
-.pc-label--light { color: rgba(203,213,225,1); }
+.pc-label--light { color: rgba(226,232,240,1); letter-spacing: 0.12em; }
 
 .pc-title { font-size: 1.625rem; font-weight: 800; color: var(--text); margin: 0 0 0.75rem; line-height: 1.1; }
-.pc-title--light { color: #ffffff; font-size: 1.875rem; text-shadow: 0 1px 12px rgba(0,0,0,0.6); }
+.pc-title--light {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  font-size: 1.875rem;
+  text-shadow: 0 0 20px rgba(255,255,255,0.25), 0 2px 4px rgba(0,0,0,0.5);
+  letter-spacing: -0.01em;
+}
 
 .pc-sub { font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1.25rem; line-height: 1.55; }
 .pc-sub--light { color: rgba(226,232,240,0.95); }
@@ -1782,12 +1788,12 @@ a.style-card:hover .style-card-bg {
 .pc-price--light sup,
 .pc-price--light small { -webkit-text-fill-color: #ffffff; color: #ffffff; }
 .pc-price--light {
-  background: none;
-  -webkit-background-clip: unset;
-  -webkit-text-fill-color: #ffffff;
-  color: #ffffff;
-  text-shadow: 0 1px 12px rgba(0,0,0,0.5);
-  background-clip: text;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+  text-shadow: 0 0 16px rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.5);
 }
 
 /* Features list */
