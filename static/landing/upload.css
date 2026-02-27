@@ -229,7 +229,7 @@
   .upload-tips-title { font-size: 0.875rem; }
   .upload-tips ul { font-size: 0.8125rem; padding-left: 1rem; }
   .upload-actions {
-    flex-direction: column;
+    flex-direction: column-reverse;
     align-items: stretch;
   }
   .upload-actions .btn { width: 100%; min-height: 48px; }
