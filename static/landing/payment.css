@@ -1,5 +1,6 @@
 /* Payment page */
-.payment-main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 3rem; }
+.payment-main { max-width: 1100px; margin: 0 auto; padding: 7rem 3rem 3rem; box-sizing: border-box; }
+@media (max-width: 768px) { .payment-main { padding: 5.5rem 1.25rem 2rem; } }
 .payment-card-wrap { display: flex; justify-content: center; }
 .payment-card { background: white; border: 1px solid #e5e0d5; border-radius: var(--radius-lg); padding: 2.5rem; box-shadow: var(--shadow-lg); max-width: 520px; width: 100%; }
 .payment-title { margin: 0 0 0.25rem; font-size: 1.5rem; font-weight: 700; }

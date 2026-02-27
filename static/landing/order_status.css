@@ -2,7 +2,8 @@
 .order-status-main {
   max-width: 800px;
   margin: 0 auto;
-  padding: 3rem 1.5rem 4rem;
+  padding: 7rem 1.5rem 4rem;
+  box-sizing: border-box;
   font-family: var(--font);
   background: var(--bg);
   min-height: 60vh;
@@ -604,6 +605,7 @@ body.museum-mode .footer-brand .logo-text {
 }
 
 @media (max-width: 768px) {
+  .order-status-main { padding-top: 5.5rem; }
   .museum-exhibition-wrap {
     flex-wrap: wrap;
   }

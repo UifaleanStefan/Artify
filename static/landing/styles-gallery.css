@@ -1,7 +1,11 @@
 /* Styles gallery page */
 .styles-main {
-  padding-top: 7rem; /* clear the fixed header + promo bar */
+  padding-top: 7rem;
+  padding-bottom: 4rem;
+  padding-left: max(1.5rem, calc((100vw - 1200px) / 2));
+  padding-right: max(1.5rem, calc((100vw - 1200px) / 2));
   min-height: 100vh;
+  box-sizing: border-box;
 }
 .styles-page-header {
   text-align: center;
@@ -25,6 +29,9 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 2rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .styles-search {
@@ -71,11 +78,17 @@
 .styles-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: 1.75rem;
   margin-bottom: 3rem;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
 }
-@media (max-width: 768px) {
-  .styles-grid { grid-template-columns: 1fr; }
+@media (max-width: 900px) {
+  .styles-grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+}
+@media (max-width: 580px) {
+  .styles-grid { grid-template-columns: 1fr; gap: 1rem; }
 }
 
 .gallery-card {
@@ -95,8 +108,11 @@
 }
 .gallery-card-thumb {
   position: relative;
-  height: 200px;
+  height: 220px;
   overflow: hidden;
+}
+@media (min-width: 900px) {
+  .gallery-card-thumb { height: 260px; }
 }
 .gallery-card-thumb-bg {
   position: absolute;
@@ -195,9 +211,15 @@
 }
 
 @media (max-width: 768px) {
+  .styles-main {
+    padding-top: 5.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
   .styles-toolbar {
     flex-direction: column;
     margin-bottom: 1rem;
+    max-width: 100%;
   }
   .styles-search { width: 100%; }
   /* Single scrollable row of tags so packs aren't pushed down; ~3 tags visible */
