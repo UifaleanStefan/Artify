@@ -30,14 +30,12 @@
   }
   window.addEventListener('scroll', onScroll);
 
-  /* Header scroll fade: transparent at top, solid once scrolled */
+  /* Header scroll fade: transparent at top, frosted once scrolled */
   var mainHeader = document.getElementById('main-header');
   if (mainHeader && mainHeader.classList.contains('header-scroll-fade')) {
-    var SCROLL_THRESHOLD = 20;
+    var SCROLL_THRESHOLD = 40;
     function updateHeaderScroll() {
-      var atTop = window.scrollY <= SCROLL_THRESHOLD;
-      mainHeader.classList.toggle('header-scrolled', !atTop);
-      document.body.classList.toggle('has-hero-fade', atTop);
+      mainHeader.classList.toggle('header-scrolled', window.scrollY > SCROLL_THRESHOLD);
     }
     updateHeaderScroll();
     window.addEventListener('scroll', updateHeaderScroll, { passive: true });

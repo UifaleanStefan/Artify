@@ -106,60 +106,38 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
 }
-/* Hero gradient painted on body so it shows through the transparent sticky header */
-body.has-hero-fade {
-  background:
-    radial-gradient(ellipse 90% 35% at 0% 0%, rgba(37,99,235,0.22) 0%, transparent 45%),
-    radial-gradient(ellipse 70% 30% at 100% 0%, rgba(245,158,11,0.18) 0%, transparent 45%),
-    var(--bg);
-}
-@media (max-width: 600px) {
-  body.has-hero-fade {
-    background:
-      radial-gradient(ellipse 120% 25% at 0% 0%, rgba(37,99,235,0.28) 0%, transparent 50%),
-      radial-gradient(ellipse 100% 20% at 100% 0%, rgba(245,158,11,0.22) 0%, transparent 50%),
-      var(--bg);
-  }
-}
-/* Landing page: color the very top of the body so the transparent header blends in */
 body.page-home {
   background:
-    radial-gradient(ellipse 100% 40% at 0% 0%, rgba(37,99,235,0.28) 0%, transparent 45%),
-    radial-gradient(ellipse 80% 35% at 100% 0%, rgba(245,158,11,0.22) 0%, transparent 45%),
+    radial-gradient(ellipse 80% 50% at 0% 0%, rgba(37,99,235,0.32) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(245,158,11,0.28) 0%, transparent 50%),
     var(--bg);
 }
 img { max-width: 100%; height: auto; }
 
 .header {
-  position: sticky;
+  position: fixed;
   top: 2.5rem;
+  left: 0;
+  right: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1rem max(2rem, calc((100vw - 1200px) / 2));
   width: 100%;
   box-sizing: border-box;
-  border-bottom: 1px solid rgba(37, 99, 235, 0.08);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  transition: background 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+  border-bottom: 1px solid transparent;
+  box-shadow: none;
+  transition: background 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease, backdrop-filter 0.35s ease;
 }
-/* At top: fully transparent, blends with page below */
-.header-scroll-fade {
-  background: rgba(255, 255, 255, 0) !important;
-  backdrop-filter: blur(0px) !important;
-  -webkit-backdrop-filter: blur(0px) !important;
-  box-shadow: none !important;
-  border-bottom-color: transparent !important;
-}
-/* On scroll: solid white with shadow */
+/* On scroll: solid frosted glass */
 .header-scroll-fade.header-scrolled {
-  background: rgba(255, 255, 255, 0.97) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07) !important;
   border-bottom-color: rgba(37, 99, 235, 0.08) !important;
 }
@@ -640,7 +618,8 @@ img { max-width: 100%; height: auto; }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
+  /* Push content down past the fixed header (~5rem) so content isn't hidden behind it */
+  padding: 10rem 2rem 4rem;
   overflow: hidden;
 }
 .hero-bg {
@@ -1780,7 +1759,7 @@ a.style-card:hover .style-card-bg {
 .pc-label--light { color: rgba(203,213,225,1); }
 
 .pc-title { font-size: 1.625rem; font-weight: 800; color: var(--text); margin: 0 0 0.75rem; line-height: 1.1; }
-.pc-title--light { color: #f1f5f9; font-size: 1.875rem; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+.pc-title--light { color: #ffffff; font-size: 1.875rem; text-shadow: 0 1px 12px rgba(0,0,0,0.6); }
 
 .pc-sub { font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1.25rem; line-height: 1.55; }
 .pc-sub--light { color: rgba(226,232,240,0.95); }
@@ -1800,10 +1779,14 @@ a.style-card:hover .style-card-bg {
 }
 .pc-price sup { font-size: 1.25rem; font-weight: 700; vertical-align: super; }
 .pc-price small { font-size: 1rem; font-weight: 600; }
+.pc-price--light sup,
+.pc-price--light small { -webkit-text-fill-color: #ffffff; color: #ffffff; }
 .pc-price--light {
-  background: linear-gradient(135deg, #60a5fa 0%, #f9a8d4 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: #ffffff;
+  color: #ffffff;
+  text-shadow: 0 1px 12px rgba(0,0,0,0.5);
   background-clip: text;
 }
 
@@ -2125,7 +2108,7 @@ a.style-card:hover .style-card-bg {
   .header { padding: 1rem; flex-wrap: wrap; gap: 0.75rem; }
   .header .nav { gap: 0.75rem; flex-wrap: wrap; }
   .nav a { font-size: 0.875rem; }
-  .hero { padding: 2rem 1rem 7rem; min-height: 100vh; min-height: 100dvh; }
+  .hero { padding: 9rem 1rem 7rem; min-height: 100vh; min-height: 100dvh; }
   .hero-cta { flex-direction: column; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; }
   .hero-cta .btn { width: 100%; }
   .review-summary-box { flex-wrap: wrap; justify-content: center; padding: 0.5rem 1rem; }
@@ -2245,7 +2228,7 @@ a.style-card:hover .style-card-bg {
 @media (max-width: 480px) {
   .header { padding: 0.75rem 1rem; }
   .logo-text { font-size: 1.125rem; }
-  .hero { padding: 1.5rem 1rem 7rem; min-height: 100vh; min-height: 100dvh; }
+  .hero { padding: 8rem 1rem 7rem; min-height: 100vh; min-height: 100dvh; }
   .hero-title { font-size: clamp(1.75rem, 8vw, 2.5rem); }
   .section { padding: 2rem 1rem; }
   .review-summary-box { font-size: 0.8125rem; }
