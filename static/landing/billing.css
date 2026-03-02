@@ -32,11 +32,11 @@
 .billing-summary h3 { margin: 0 0 1.25rem; font-size: 1.125rem; }
 .billing-summary-item { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid #e5e0d5; }
 .billing-thumb-wrap { flex-shrink: 0; width: 160px; position: relative; min-height: 126px; }
-.billing-summary-thumb { width: 160px; height: 126px; border-radius: 10px; flex-shrink: 0; background: var(--bg-light); background-size: cover; background-position: center; min-height: 126px; overflow: hidden; }
+.billing-summary-thumb { width: 160px; height: 126px; border-radius: 10px; flex-shrink: 0; background: #f0ede8; background-size: contain; background-repeat: no-repeat; background-position: center; min-height: 126px; overflow: hidden; }
 .billing-summary-thumb.style-thumb-h-scroll { width: 160px; min-width: 160px; height: 126px; min-height: 126px; display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; background: #f0ede8; }
-.billing-summary-thumb.style-thumb-h-scroll img { flex-shrink: 0; width: 160px; min-width: 160px; height: 126px; object-fit: cover; border-radius: 10px; scroll-snap-align: start; display: block; }
+.billing-summary-thumb.style-thumb-h-scroll img { flex-shrink: 0; width: 160px; min-width: 160px; height: 126px; object-fit: contain; object-position: center; border-radius: 10px; scroll-snap-align: start; display: block; background-color: #f0ede8; }
 .billing-summary-thumb.style-thumb-single { display: block; }
-.billing-summary-thumb.style-thumb-single img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; display: block; }
+.billing-summary-thumb.style-thumb-single img { width: 100%; height: 100%; object-fit: contain; object-position: center; border-radius: 10px; display: block; background-color: #f0ede8; }
 .billing-thumb-wrap .style-thumb-arrow { width: 2rem; height: 2rem; font-size: 1.2rem; }
 .billing-thumb-wrap .style-thumb-prev { left: 0.2rem; }
 .billing-thumb-wrap .style-thumb-next { right: 0.2rem; }

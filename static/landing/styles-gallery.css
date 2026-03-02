@@ -117,8 +117,10 @@
 .gallery-card-thumb-bg {
   position: absolute;
   inset: 0;
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
+  background-color: #f0ede8;
   transition: transform 0.3s;
 }
 .gallery-card:hover .gallery-card-thumb-bg { transform: scale(1.05); }

@@ -5,8 +5,24 @@
   padding: 7rem 3rem 3rem;
   box-sizing: border-box;
 }
+/* Ensure steps-bar doesn't overlap header */
+.upload-main .steps-bar {
+  margin-top: 0;
+  margin-bottom: 3rem;
+}
 @media (max-width: 768px) {
-  .upload-main { padding: 5.5rem 1.25rem 2rem; }
+  .upload-main { padding: 7rem 1.25rem 2rem; }
+  .upload-main .steps-bar {
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+  }
+}
+@media (max-width: 480px) {
+  .upload-main { padding: 7.5rem 1rem 1.5rem; }
+  .upload-main .steps-bar {
+    margin-top: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
 }
 
 .upload-grid {
@@ -42,13 +58,13 @@
 .upload-thumb-next { right: 0.5rem; }
 .upload-style-thumb {
   width: 100%; aspect-ratio: 9 / 7; border-radius: 8px;
-  background-size: cover; background-position: center;
+  background-size: contain; background-repeat: no-repeat; background-position: center; background-color: #f0ede8;
   overflow: hidden; position: relative; min-height: 160px;
 }
 .upload-style-thumb-with-img { background: #f0ede8; }
 .upload-style-thumb-with-img img {
   position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-  object-fit: cover; border-radius: 8px; display: block;
+  object-fit: contain; object-position: center; border-radius: 8px; display: block; background-color: #f0ede8;
 }
 .upload-style-thumb-h-scroll {
   display: flex; flex-direction: row; gap: 0;
@@ -60,7 +76,7 @@
 .upload-style-thumb-h-scroll::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
 .upload-style-thumb-h-scroll img {
   flex-shrink: 0; width: 100%; min-width: 100%; height: 100%;
-  object-fit: cover; border-radius: 8px; scroll-snap-align: start;
+  object-fit: contain; object-position: center; border-radius: 8px; scroll-snap-align: start; background-color: #f0ede8;
 }
 .upload-style-thumb img {
   display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 8px;
@@ -188,7 +204,7 @@
 
 /* Upload page – mobile */
 @media (max-width: 768px) {
-  .upload-main { padding: 1.5rem 1rem; }
+  .upload-main { padding: 6.5rem 1.25rem 2rem; }
   .upload-grid { gap: 2rem; }
   .upload-section-title { font-size: 1.25rem; margin-bottom: 1rem; }
   .upload-subtitle { font-size: 0.9375rem; margin-bottom: 1rem; }
@@ -236,7 +252,7 @@
   .upload-back-link { text-align: center; }
 }
 @media (max-width: 480px) {
-  .upload-main { padding: 1rem; }
+  .upload-main { padding: 7rem 1rem 1.5rem; }
   .upload-zone-inner { padding: 1.5rem 1rem; }
   .upload-zone-inner p { font-size: 0.875rem; }
   .upload-zone.has-file { min-height: 240px; }

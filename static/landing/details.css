@@ -6,7 +6,7 @@
 .details-section-title { margin: 0 0 1.25rem; font-size: 1.375rem; font-weight: 600; color: var(--text); }
 .details-subtitle { margin: 0 0 1.5rem; font-size: 0.9375rem; color: var(--text-muted); }
 .details-style-card { background: white; border: 1px solid #e5e0d5; border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
-.details-style-thumb { width: 100%; aspect-ratio: 4/3; border-radius: 8px; margin-bottom: 0; background-size: cover; background-position: center; }
+.details-style-thumb { width: 100%; aspect-ratio: 4/3; border-radius: 8px; margin-bottom: 0; background-size: contain; background-repeat: no-repeat; background-position: center; background-color: #f0ede8; }
 /* Pack thumb: keep scroll area visible */
 .details-style-card .details-style-thumb.style-thumb-h-scroll {
   display: flex;
@@ -24,12 +24,14 @@
   min-width: 100%;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   border-radius: 8px;
   scroll-snap-align: start;
+  background-color: #f0ede8;
 }
 .details-style-card .details-style-thumb.style-thumb-single { min-height: 160px; }
-.details-style-card .details-style-thumb.style-thumb-single img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; display: block; }
+.details-style-card .details-style-thumb.style-thumb-single img { width: 100%; height: 100%; object-fit: contain; object-position: center; border-radius: 8px; display: block; background-color: #f0ede8; }
 .details-style-card h3 { margin: 0 0 0.15rem; font-size: 1.125rem; }
 .details-style-artist { margin: 0; font-size: 0.875rem; color: var(--primary); font-weight: 500; }
 .details-photo-card { background: white; border: 1px solid #e5e0d5; border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow); }

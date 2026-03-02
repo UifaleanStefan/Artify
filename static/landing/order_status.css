@@ -266,8 +266,10 @@ body.museum-mode .footer-brand .logo-text {
 .museum-compare-after img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   display: block;
+  background-color: #f0ede8;
 }
 
 .museum-compare-after {
@@ -505,8 +507,10 @@ body.museum-mode .footer-brand .logo-text {
 .filmstrip-item img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   display: block;
+  background-color: #f0ede8;
 }
 
 .filmstrip-item:hover {
