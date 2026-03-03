@@ -548,6 +548,10 @@ MASTERS_PACK_PROMPTS = [
 
 The index in these arrays corresponds to the painting number in the filename (1-based). For example, `masters-02.jpg` → index 1 (0-based) → `MASTERS_PACK_LABELS[1]` → `MASTERS_PACK_PROMPTS[1]`.
 
+> **Alignment contract**: For every pack, `PACK_PATHS[i]`, `PACK_LABELS[i]`, and `PACK_PROMPTS[i]` **must all describe the same artwork** at index `i`. The backend enforces `len(PATHS) == len(LABELS) == len(PROMPTS)` at import time and will raise if any pack is misconfigured.
+>
+> **Debugging**: You can run `python -m scripts.verify_packs` to print a human-readable table for all packs, showing for each index the file name, painting title, artist, and the start of the prompt. Use this to visually confirm that each JPG in `static/landing/styles/**` matches its title/author and prompt.
+
 ### `_style_url_to_prompt(style_image_url)`
 
 This function is critical for OpenAI generation. It:

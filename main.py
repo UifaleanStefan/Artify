@@ -1069,7 +1069,10 @@ ROYALTY_PORTRAITS_PACK_PROMPTS: list[str] = [
     "in the style of Fyodor Rokotov's Catherine II: Russian imperial, elegant, soft brushwork. Preserve the subject's face and identity.",
 ]
 
-# Verify alignment: PACK_PATHS[i] -> PACK_LABELS[i] -> PACK_PROMPTS[i] (index i = file NN where NN = i+1)
+# Verify alignment: PACK_PATHS[i] -> PACK_LABELS[i] -> PACK_PROMPTS[i]
+# Invariant for each pack:
+# - len(PATHS) == len(LABELS) == len(PROMPTS)
+# - PATHS[i], LABELS[i], PROMPTS[i] must all describe the same artwork.
 def _verify_pack_alignment() -> None:
     packs = [
         (MASTERS_PACK_PATHS, MASTERS_PACK_LABELS, MASTERS_PACK_PROMPTS),
@@ -1082,7 +1085,10 @@ def _verify_pack_alignment() -> None:
     for paths, labels, prompts in packs:
         n = len(paths)
         if len(labels) != n or len(prompts) != n:
-            logger.error("Pack alignment error: paths=%d labels=%d prompts=%d", n, len(labels), len(prompts))
+            msg = f"Pack alignment error: paths={n} labels={len(labels)} prompts={len(prompts)}"
+            logger.error(msg)
+            # Fail fast: a misaligned pack risks wrong prompt/name/author for a given image.
+            raise RuntimeError(msg)
 
 
 # Map style_id to paths, labels, and pack names (for marketing selector)
@@ -1130,22 +1136,66 @@ _BRUSHWORK_PHRASE = (
 )
 
 def _style_url_to_prompt(style_url: str, style_id: int) -> str:
-    """Parse style URL to get 1-based index, return the corresponding style prompt.
-    Critical: index from URL must match PACK_PATHS order (01=first, 02=second, ...).
+    """Resolve a style image URL to its detailed style prompt.
+
+    Alignment rules (critical for correctness):
+    - PACK_PATHS[i] ↔ PACK_LABELS[i] ↔ PACK_PROMPTS[i] must describe the same artwork.
+    - For any URL that comes from PACK_PATHS, we FIRST look up its index in PACK_PATHS
+      and use the prompt at the same index in PACK_PROMPTS.
+    - Only if we can't find a matching PACK_PATHS entry do we fall back to parsing the
+      numeric suffix in the filename (..-NN.jpg → index NN-1 in PACK_PROMPTS).
     """
-    # Match paths like .../styles/masters/masters-01.jpg or .../impression-color-05.jpg
-    match = re.search(r"/styles/([^/]+)/\1-(\d{2})\.(?:jpg|jpeg|png|webp)", style_url, re.I)
+    prompts = _STYLE_ID_TO_PROMPTS.get(style_id)
+    if not prompts:
+        logger.warning("No prompts configured for style_id=%s", style_id)
+        return (
+            "in the style of classical portrait painting."
+            + _BRUSHWORK_PHRASE
+            + "Preserve the subject's face and identity."
+        )
+
+    # 1) Primary path-based resolution: use PACK_PATHS index for URLs that originated
+    #    from our own pack definitions. This guarantees 1:1 alignment with labels.
+    paths = _STYLE_ID_TO_PATHS.get(style_id)
+    if paths and style_url:
+        try:
+            url_name = style_url.rsplit("/", 1)[-1].lower()
+        except Exception:  # pragma: no cover - very defensive
+            url_name = ""
+        if url_name:
+            for i, p in enumerate(paths):
+                pack_name = (p or "").rsplit("/", 1)[-1].lower()
+                if pack_name == url_name and 0 <= i < len(prompts):
+                    base = prompts[i]
+                    return base.replace(". Preserve", "." + _BRUSHWORK_PHRASE + "Preserve")
+
+    # 2) Fallback: parse numeric suffix from filename (..-NN.jpg → prompts[NN-1])
+    match = re.search(r"/styles/([^/]+)/\1-(\d{2})\.(?:jpg|jpeg|png|webp)", style_url or "", re.I)
     if not match:
-        match = re.search(r"/([a-z0-9-]+)-(\d{2})\.(?:jpg|jpeg|png|webp)", style_url, re.I)
+        match = re.search(r"/([a-z0-9-]+)-(\d{2})\.(?:jpg|jpeg|png|webp)", style_url or "", re.I)
     if not match:
         logger.warning("Could not parse style index from URL: %s", (style_url or "")[:80])
-        return "in the style of classical portrait painting." + _BRUSHWORK_PHRASE + "Preserve the subject's face and identity."
+        return (
+            "in the style of classical portrait painting."
+            + _BRUSHWORK_PHRASE
+            + "Preserve the subject's face and identity."
+        )
+
     index_str = match.group(2)
     idx = int(index_str)  # 1-based (01 -> 1)
-    prompts = _STYLE_ID_TO_PROMPTS.get(style_id)
-    if not prompts or idx < 1 or idx > len(prompts):
-        logger.warning("Style index %d out of range for style_id %s (prompts len=%d)", idx, style_id, len(prompts or []))
-        return "in the style of classical portrait painting." + _BRUSHWORK_PHRASE + "Preserve the subject's face and identity."
+    if idx < 1 or idx > len(prompts):
+        logger.warning(
+            "Style index %d out of range for style_id %s (prompts len=%d)",
+            idx,
+            style_id,
+            len(prompts),
+        )
+        return (
+            "in the style of classical portrait painting."
+            + _BRUSHWORK_PHRASE
+            + "Preserve the subject's face and identity."
+        )
+
     base = prompts[idx - 1]
     # Insert brushwork phrase before "Preserve" (prompts end with ". Preserve the subject's...")
     return base.replace(". Preserve", "." + _BRUSHWORK_PHRASE + "Preserve")
