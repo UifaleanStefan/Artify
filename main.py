@@ -1954,6 +1954,11 @@ def _run_style_transfer_sync(order_id: str) -> None:
 
             styles = _load_styles_data()
             result_labels = _build_result_labels(order, result_urls_list, styles)
+            # Validate order_id before sending email
+            if not order_id or order_id != order.order_id:
+                logger.error("Order ID mismatch: passed=%s, order.order_id=%s", order_id, order.order_id)
+                order_id = order.order_id  # Use the correct order_id from DB
+            logger.info("Sending result ready email for order %s to %s", order_id, order.email)
             EmailService().send_result_ready(
                 order_id, order.email, result_urls_list, order.style_name, result_labels=result_labels
             )

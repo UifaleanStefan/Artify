@@ -655,10 +655,8 @@ img { max-width: 100%; height: auto; }
 .paint-card img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  object-position: center;
+  object-fit: cover;
   display: block;
-  background-color: #f0ede8;
 }
 
 @keyframes paint-float {
@@ -1351,10 +1349,8 @@ a.style-card:hover { opacity: 0.98; }
 .style-card-bg {
   position: absolute;
   inset: 0;
-  background-size: contain;
-  background-repeat: no-repeat;
+  background-size: cover;
   background-position: center;
-  background-color: #f0ede8;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 a.style-card:hover .style-card-bg {

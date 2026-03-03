@@ -364,16 +364,30 @@
     }
     render('loading');
     fetch('/api/orders/' + encodeURIComponent(orderId) + '/status')
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r.ok) {
+          if (r.status === 404) {
+            render('failed', { error: 'Comandă negăsită. Verifică ID-ul comenzii: ' + orderId });
+          } else {
+            return r.json().then(function(data) {
+              render('failed', { error: data.detail || 'Eroare la încărcarea comenzii.' });
+            });
+          }
+          return;
+        }
+        return r.json();
+      })
       .then(function (data) {
+        if (!data) return; // Already handled error case
         var status = (data.status || '').toLowerCase();
         if (status === 'completed') render('completed', data);
         else if (status === 'failed') render('failed', { error: data.error || 'Comanda a eșuat.' });
         else if (status === 'processing' || status === 'paid' || status === 'pending') render('processing');
-        else render('failed', { error: data.detail || 'Comandă negăsită.' });
+        else render('failed', { error: data.detail || 'Status necunoscut pentru comandă.' });
       })
-      .catch(function () {
-        render('failed', { error: 'Nu s-a putut încărca comanda. Verifică ID-ul și încearcă din nou.' });
+      .catch(function (err) {
+        console.error('Error fetching order status:', err);
+        render('failed', { error: 'Nu s-a putut încărca comanda. Verifică ID-ul și încearcă din nou. ID: ' + (orderId || 'necunoscut') });
       });
   }
 

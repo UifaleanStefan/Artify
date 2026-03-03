@@ -22,9 +22,12 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .success-check {
-      font-size: 3.5rem;
-      margin-bottom: 0.5rem;
+      font-size: 4rem;
+      margin-bottom: 1rem;
       display: none;
+      color: #10b981;
+      font-weight: bold;
+      line-height: 1;
     }
     #status-msg {
       color: var(--color-muted, #6b7280);
@@ -81,6 +84,7 @@
   <main class="done-main">
     <div class="done-card">
       <div class="success-spinner" id="success-spinner"></div>
+      <div class="success-check" id="success-check">✓</div>
       <h1 class="done-title" id="success-title">Se confirmă plata…</h1>
       <p class="done-subtitle" id="success-subtitle">Procesăm plata ta în siguranță. Te rugăm să aștepți câteva secunde.</p>
       <p id="status-msg"></p>
@@ -147,7 +151,6 @@
   (function () {
     var params = new URLSearchParams(window.location.search);
     var orderId = params.get('order_id');
-    var statusMsg = document.getElementById('status-msg');
 
     if (!orderId) {
       document.getElementById('success-title').textContent = 'Ceva nu a mers bine';
@@ -156,50 +159,38 @@
       return;
     }
 
-    var attempts = 0;
-    var maxAttempts = 20; // 20 × 3s = 60s max
+    // Stripe redirected here, so payment was successful - show success immediately
+    document.getElementById('success-spinner').style.display = 'none';
+    document.getElementById('success-check').style.display = 'block';
+    document.getElementById('success-title').textContent = 'Plată confirmată! 🎨';
+    document.getElementById('success-subtitle').textContent = 'Comanda ta a fost plasată cu succes. Portretul tău se creează acum.';
+
     var styleId = null;
     var email = null;
+    var redirectScheduled = false;
 
-    function pollOrder() {
-      attempts++;
-      fetch('/api/orders/' + encodeURIComponent(orderId))
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          styleId = styleId || data.style_id;
-          email = email || data.email;
-
-          var status = data.status || data.payment_status;
-          if (status === 'paid' || status === 'processing' || status === 'completed') {
-            // Payment confirmed – go to the done page
-            document.getElementById('success-spinner').style.display = 'none';
-            document.getElementById('success-check').style.display = 'block';
-            document.getElementById('success-title').textContent = 'Plată confirmată! 🎨';
-            document.getElementById('success-subtitle').textContent = 'Portretul tău se creează acum. Te redirecționăm…';
-            setTimeout(function () {
-              var q = '?order_id=' + encodeURIComponent(orderId);
-              if (styleId) q += '&style=' + encodeURIComponent(styleId);
-              if (email) q += '&email=' + encodeURIComponent(email);
-              window.location.href = '/create/done' + q;
-            }, 1500);
-          } else if (attempts < maxAttempts) {
-            statusMsg.textContent = 'Verificăm statusul comenzii… (' + attempts + ')';
-            setTimeout(pollOrder, 3000);
-          } else {
-            document.getElementById('success-spinner').style.display = 'none';
-            document.getElementById('success-title').textContent = 'Plata este în curs de verificare';
-            document.getElementById('success-subtitle').textContent = 'Dacă ai fost debitat, vei primi portretul pe email în câteva minute. Comanda ta: ' + orderId;
-          }
-        })
-        .catch(function () {
-          if (attempts < maxAttempts) {
-            setTimeout(pollOrder, 3000);
-          }
-        });
+    function redirectToDone() {
+      if (redirectScheduled) return;
+      redirectScheduled = true;
+      var q = '?order_id=' + encodeURIComponent(orderId);
+      if (styleId) q += '&style=' + encodeURIComponent(styleId);
+      if (email) q += '&email=' + encodeURIComponent(email);
+      window.location.href = '/create/done' + q;
     }
 
-    // Give the webhook a moment to fire before first poll
-    setTimeout(pollOrder, 2000);
+    // Fetch order details in the background (non-blocking)
+    fetch('/api/orders/' + encodeURIComponent(orderId))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        styleId = data.style_id || null;
+        email = data.email || null;
+      })
+      .catch(function () {
+        // Ignore errors - we'll redirect anyway
+      });
+
+    // Redirect after 1.5 seconds regardless (payment was successful from Stripe)
+    setTimeout(redirectToDone, 1500);
   })();
   </script>
 </body>

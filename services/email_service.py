@@ -30,6 +30,13 @@ class EmailService:
         result_labels: Optional[list[tuple[str, str]]] = None,
     ):
         """result_labels: optional list of (painting_title, artist) for each result image (same length as result_urls)."""
+        # Validate order_id to prevent sending emails with invalid IDs
+        if not order_id or not isinstance(order_id, str) or len(order_id) < 5 or not order_id.startswith("ART-"):
+            logger.error("Invalid order_id passed to send_result_ready: %s (type: %s)", order_id, type(order_id).__name__)
+            raise ValueError(f"Invalid order_id: {order_id}")
+        
+        logger.info("Sending result ready email for order %s to %s", order_id, email)
+        
         subject = "✨ Galeria ta e gata — descoperă portretele!"
         base = (self.settings.public_base_url or "").rstrip("/")
 
