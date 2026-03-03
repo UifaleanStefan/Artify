@@ -2235,13 +2235,13 @@ a.style-card:hover .style-card-bg {
     position: relative;
     padding-bottom: 1.5rem;
   }
-  /* Vertical connector line: absolutely positioned, runs from center of number to center of next number */
+  /* Vertical connector line: runs from center of this number bubble into the next one */
   .how-step:not(:last-child)::after {
     content: '';
     position: absolute;
     left: calc(3.25rem / 2 - 1px);
     top: 50%;
-    bottom: -1.5rem;
+    bottom: calc(-3.25rem / 2);
     width: 2px;
     background: linear-gradient(180deg, var(--primary) 0%, var(--accent-3) 50%, var(--accent) 100%);
     border-radius: 2px;
