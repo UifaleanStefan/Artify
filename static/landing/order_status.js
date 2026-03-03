@@ -257,20 +257,20 @@
     }
     if (state === 'processing') {
       stateEl.innerHTML = '<p class="order-status-processing">Opera ta se creează. De obicei durează 2–5 minute. Îți trimitem și un email când e gata.</p>';
-      resultsEl.style.display = 'none';
-      infoCardEl.style.display = 'block';
+      if (resultsEl) resultsEl.style.display = 'none';
+      if (infoCardEl) infoCardEl.style.display = 'block';
       document.body.classList.remove('museum-mode');
       return;
     }
     if (state === 'failed') {
       stateEl.innerHTML = '<div class="order-status-error">' + (data.error || 'Ceva nu a mers bine.') + '</div>';
-      resultsEl.style.display = 'none';
-      infoCardEl.style.display = 'block';
+      if (resultsEl) resultsEl.style.display = 'none';
+      if (infoCardEl) infoCardEl.style.display = 'block';
       document.body.classList.remove('museum-mode');
       return;
     }
     if (state === 'completed' && data.result_urls) {
-      infoCardEl.style.display = 'none';
+      if (infoCardEl) infoCardEl.style.display = 'none';
       document.body.classList.add('museum-mode');
 
       try {
