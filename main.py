@@ -143,6 +143,11 @@ IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".bmp"}
 _ACTIVE_ORDER_TASKS: set[str] = set()
 _DB_INIT_STARTED = False
 
+# Max number of orders processed at the same time (backend-only; no UX change).
+# If you run multiple Uvicorn workers, this limit is per process (e.g. 2 workers => up to 16 concurrent).
+_order_concurrency_semaphore: asyncio.Semaphore | None = None
+MAX_CONCURRENT_ORDERS = 8
+
 # Orders older than this are deleted by the TTL cleanup job
 ORDER_TTL_DAYS = 14
 
@@ -189,6 +194,14 @@ def get_replicate_service() -> Optional[StyleTransferService]:
             rate_limit_base_wait=float(settings.replicate_rate_limit_base_wait_seconds),
         )
     )
+
+
+def _get_order_semaphore() -> asyncio.Semaphore:
+    """Lazy-init semaphore so it's created inside the event loop."""
+    global _order_concurrency_semaphore
+    if _order_concurrency_semaphore is None:
+        _order_concurrency_semaphore = asyncio.Semaphore(MAX_CONCURRENT_ORDERS)
+    return _order_concurrency_semaphore
 
 
 @asynccontextmanager
@@ -1758,12 +1771,13 @@ async def pay_order(
 
 
 async def process_order_style_transfer(order_id: str):
-    """Run style transfers in a worker thread so API remains responsive."""
+    """Run style transfers in a worker thread so API remains responsive. Capped at MAX_CONCURRENT_ORDERS."""
     if order_id in _ACTIVE_ORDER_TASKS:
         return
     _ACTIVE_ORDER_TASKS.add(order_id)
     try:
-        await asyncio.to_thread(_run_style_transfer_sync, order_id)
+        async with _get_order_semaphore():
+            await asyncio.to_thread(_run_style_transfer_sync, order_id)
     finally:
         _ACTIVE_ORDER_TASKS.discard(order_id)
 
