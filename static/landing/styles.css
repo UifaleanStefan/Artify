@@ -1182,6 +1182,7 @@ img { max-width: 100%; height: auto; }
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 .compare-after {
@@ -1195,6 +1196,7 @@ img { max-width: 100%; height: auto; }
   position: absolute;
   left: 0;
   top: 0;
+  object-position: center;
 }
 .compare-label {
   position: absolute;
@@ -2235,13 +2237,13 @@ a.style-card:hover .style-card-bg {
     position: relative;
     padding-bottom: 1.5rem;
   }
-  /* Vertical connector line: runs from center of this number bubble well into the next one (slight overshoot so they visually touch) */
+  /* Vertical connector line: from center of this step into the next bubble (overshoot so lines visibly meet) */
   .how-step:not(:last-child)::after {
     content: '';
     position: absolute;
     left: calc(3.25rem / 2 - 1px);
     top: 50%;
-    bottom: -2.5rem;
+    bottom: -4rem;
     width: 2px;
     background: linear-gradient(180deg, var(--primary) 0%, var(--accent-3) 50%, var(--accent) 100%);
     border-radius: 2px;

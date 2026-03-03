@@ -19,8 +19,10 @@ from urllib.parse import urlparse
 
 import httpx
 import stripe
+import secrets
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
@@ -124,7 +126,7 @@ def _persist_result_images(order_id: str, result_items: list) -> list[str]:
 
 from database import Order, OrderResultImage, OrderSourceImage, OrderStatus, get_db, SessionLocal, init_db
 from models import StyleTransferResponse
-from models.order_schemas import OrderCreateRequest, OrderResponse, OrderStatusResponse
+from models.order_schemas import OrderCreateRequest, OrderResponse, OrderStatusResponse, DashboardOrderSummary
 from services import StyleTransferService
 from services.email_service import EmailService
 
@@ -202,6 +204,29 @@ def _get_order_semaphore() -> asyncio.Semaphore:
     if _order_concurrency_semaphore is None:
         _order_concurrency_semaphore = asyncio.Semaphore(MAX_CONCURRENT_ORDERS)
     return _order_concurrency_semaphore
+
+
+_dashboard_basic = HTTPBasic(auto_error=False)
+
+
+async def require_dashboard(credentials: Optional[HTTPBasicCredentials] = Depends(_dashboard_basic)) -> None:
+    """Require DASHBOARD_SECRET via HTTP Basic Auth. 404 if not configured; 401 if wrong."""
+    settings = get_settings()
+    secret = (settings.dashboard_secret or "").strip()
+    if not secret:
+        raise HTTPException(status_code=404, detail="Not found")
+    if not credentials:
+        raise HTTPException(
+            status_code=401,
+            detail="Dashboard requires authentication",
+            headers={"WWW-Authenticate": "Basic realm=\"Dashboard\""},
+        )
+    if not secrets.compare_digest(credentials.password or "", secret):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Basic realm=\"Dashboard\""},
+        )
 
 
 @asynccontextmanager
@@ -380,6 +405,69 @@ async def debug_order_page() -> FileResponse:
 async def debug_last_results_page() -> FileResponse:
     """Debug page: show all result images from the last order that has results."""
     return FileResponse(STATIC_DIR / "landing" / "debug_last_results.html", headers=_HTML_HEADERS)
+
+
+@app.get("/dashboard")
+async def dashboard_page(_: None = Depends(require_dashboard)) -> FileResponse:
+    """Private orders dashboard; requires DASHBOARD_SECRET (HTTP Basic Auth)."""
+    return FileResponse(STATIC_DIR / "landing" / "dashboard.html", headers=_HTML_HEADERS)
+
+
+@app.get("/api/dashboard/orders", response_model=list[DashboardOrderSummary])
+async def get_dashboard_orders(
+    _: None = Depends(require_dashboard),
+    db: Session = Depends(get_db),
+    limit: int = 100,
+    offset: int = 0,
+    status: Optional[str] = None,
+) -> list[DashboardOrderSummary]:
+    """List orders for the private dashboard; newest first. Optional ?status= filter."""
+    q = db.query(Order).order_by(Order.created_at.desc())
+    if status and status.strip():
+        q = q.filter(Order.status == status.strip().lower())
+    rows = q.offset(offset).limit(min(limit, 500)).all()
+    out = []
+    for o in rows:
+        result_count = None
+        if o.result_urls:
+            try:
+                arr = json.loads(o.result_urls) if isinstance(o.result_urls, str) else (o.result_urls or [])
+                result_count = len(arr) if isinstance(arr, list) else None
+            except Exception:
+                pass
+        out.append(
+            DashboardOrderSummary(
+                order_id=o.order_id,
+                status=o.status or "",
+                email=o.email or "",
+                style_id=o.style_id,
+                style_name=o.style_name,
+                portrait_mode=o.portrait_mode,
+                image_url=o.image_url,
+                style_image_url=o.style_image_url,
+                style_image_urls=o.style_image_urls,
+                result_urls=o.result_urls,
+                result_count=result_count,
+                style_transfer_job_id=o.style_transfer_job_id,
+                style_transfer_error=o.style_transfer_error,
+                replicate_prediction_details=o.replicate_prediction_details,
+                amount=o.amount,
+                payment_status=o.payment_status,
+                payment_provider=o.payment_provider,
+                payment_transaction_id=o.payment_transaction_id,
+                created_at=o.created_at,
+                paid_at=o.paid_at,
+                completed_at=o.completed_at,
+                failed_at=o.failed_at,
+                billing_name=o.billing_name,
+                billing_address=o.billing_address,
+                billing_city=o.billing_city,
+                billing_state=o.billing_state,
+                billing_zip=o.billing_zip,
+                billing_country=o.billing_country,
+            )
+        )
+    return out
 
 
 @app.get("/api/debug/last-order", response_model=OrderStatusResponse)

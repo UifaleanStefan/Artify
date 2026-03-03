@@ -61,6 +61,9 @@ class Settings(BaseSettings):
     from_email: str = "noreply@artifyai.com"
     from_name: str = "Artify"
 
+    # Private dashboard (optional): set DASHBOARD_SECRET to enable /dashboard
+    dashboard_secret: Optional[str] = None
+
 
 @lru_cache
 def get_settings() -> Settings:

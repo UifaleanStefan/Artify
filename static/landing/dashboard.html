@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orders dashboard – Artify</title>
+  <link rel="stylesheet" href="/static/landing/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'DM Sans', sans-serif; background: #f8f9fa; color: #1a1a1a; margin: 0; padding: 1rem; }
+    .dashboard-wrap { max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .dashboard-toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .dashboard-toolbar .last-updated { color: #666; font-size: 0.875rem; }
+    .btn-refresh { padding: 0.4rem 0.75rem; background: #2563eb; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; }
+    .btn-refresh:hover { background: #1d4ed8; }
+    .dashboard-table-wrap { overflow-x: auto; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    th, td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid #eee; font-size: 0.875rem; }
+    th { background: #f1f5f9; font-weight: 600; }
+    tr:hover td { background: #fafafa; }
+    .status-badge { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-paid { background: #dbeafe; color: #1e40af; }
+    .status-processing { background: #e0e7ff; color: #3730a3; }
+    .status-completed { background: #d1fae5; color: #065f46; }
+    .status-failed { background: #fee2e2; color: #991b1b; }
+    .status-cancelled { background: #f3f4f6; color: #4b5563; }
+    a.order-link { color: #2563eb; text-decoration: none; font-weight: 500; }
+    a.order-link:hover { text-decoration: underline; }
+    .details-row td { background: #f8fafc !important; padding: 0.75rem 1rem; font-size: 0.8rem; color: #475569; }
+    .details-row pre { margin: 0; white-space: pre-wrap; word-break: break-word; max-height: 120px; overflow-y: auto; }
+    .details-toggle { cursor: pointer; color: #2563eb; font-size: 0.8rem; }
+    .error-text { color: #b91c1c; }
+    .loading-msg { color: #666; padding: 2rem; text-align: center; }
+    .error-msg { color: #b91c1c; padding: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="dashboard-wrap">
+    <h1>Orders dashboard</h1>
+    <div class="dashboard-toolbar">
+      <span class="last-updated" id="last-updated">—</span>
+      <button type="button" class="btn-refresh" id="btn-refresh">Refresh</button>
+    </div>
+    <div class="dashboard-table-wrap">
+      <div class="loading-msg" id="loading-msg">Loading orders…</div>
+      <div class="error-msg" id="error-msg" style="display:none"></div>
+      <table id="orders-table" style="display:none">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Paid</th>
+            <th>Completed</th>
+            <th>Style</th>
+            <th>Amount</th>
+            <th>Provider</th>
+            <th>Results</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="orders-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var POLL_INTERVAL_MS = 8000;
+      var tbody = document.getElementById('orders-tbody');
+      var table = document.getElementById('orders-table');
+      var loadingMsg = document.getElementById('loading-msg');
+      var errorMsg = document.getElementById('error-msg');
+      var lastUpdated = document.getElementById('last-updated');
+      var btnRefresh = document.getElementById('btn-refresh');
+
+      function fmt(d) {
+        if (!d) return '—';
+        try {
+          var dt = typeof d === 'string' ? new Date(d) : d;
+          return dt.toLocaleString ? dt.toLocaleString() : String(d);
+        } catch (e) { return String(d); }
+      }
+
+      function statusClass(s) {
+        if (!s) return '';
+        s = s.toLowerCase();
+        if (s === 'pending') return 'status-pending';
+        if (s === 'paid') return 'status-paid';
+        if (s === 'processing') return 'status-processing';
+        if (s === 'completed') return 'status-completed';
+        if (s === 'failed') return 'status-failed';
+        if (s === 'cancelled') return 'status-cancelled';
+        return '';
+      }
+
+      function renderRow(o, index) {
+        var tr = document.createElement('tr');
+        tr.setAttribute('data-order-id', o.order_id);
+        tr.innerHTML =
+          '<td><a class="order-link" href="/order/' + escapeHtml(o.order_id) + '" target="_blank">' + escapeHtml(o.order_id) + '</a></td>' +
+          '<td>' + escapeHtml(o.email || '') + '</td>' +
+          '<td><span class="status-badge ' + statusClass(o.status) + '">' + escapeHtml(o.status || '') + '</span></td>' +
+          '<td>' + fmt(o.created_at) + '</td>' +
+          '<td>' + fmt(o.paid_at) + '</td>' +
+          '<td>' + fmt(o.completed_at) + '</td>' +
+          '<td>' + escapeHtml(o.style_name || '') + '</td>' +
+          '<td>' + (o.amount != null ? escapeHtml(String(o.amount)) : '—') + '</td>' +
+          '<td>' + escapeHtml(o.payment_provider || '') + '</td>' +
+          '<td>' + (o.result_count != null ? escapeHtml(String(o.result_count)) : '—') + '</td>' +
+          '<td><span class="details-toggle" data-index="' + index + '">Details</span></td>';
+        return tr;
+      }
+
+      function renderDetailsRow(o, index) {
+        var tr = document.createElement('tr');
+        tr.className = 'details-row';
+        tr.setAttribute('data-details-for', o.order_id);
+        var parts = [];
+        if (o.billing_name || o.billing_country) {
+          parts.push('Billing: ' + [o.billing_name, o.billing_address, o.billing_city, o.billing_state, o.billing_zip, o.billing_country].filter(Boolean).join(', '));
+        }
+        if (o.style_transfer_error) {
+          parts.push('Error: ' + o.style_transfer_error);
+        }
+        if (o.replicate_prediction_details) {
+          var snippet = o.replicate_prediction_details.length > 400 ? o.replicate_prediction_details.slice(0, 400) + '…' : o.replicate_prediction_details;
+          parts.push('Replicate: ' + snippet);
+        }
+        var content = parts.length ? parts.join('\n\n') : 'No extra details.';
+        tr.innerHTML = '<td colspan="11"><pre>' + escapeHtml(content) + '</pre></td>';
+        return tr;
+      }
+
+      function escapeHtml(s) {
+        if (s == null) return '';
+        var div = document.createElement('div');
+        div.textContent = s;
+        return div.innerHTML;
+      }
+
+      function render(orders) {
+        loadingMsg.style.display = 'none';
+        errorMsg.style.display = 'none';
+        table.style.display = 'table';
+        tbody.innerHTML = '';
+        if (!orders || orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="11">No orders.</td></tr>';
+          return;
+        }
+        orders.forEach(function (o, i) {
+          tbody.appendChild(renderRow(o, i));
+          var detailsTr = renderDetailsRow(o, i);
+          detailsTr.style.display = 'none';
+          detailsTr.setAttribute('data-details-index', String(i));
+          tbody.appendChild(detailsTr);
+        });
+
+        tbody.querySelectorAll('.details-toggle').forEach(function (el) {
+          el.addEventListener('click', function () {
+            var mainTr = this.closest('tr');
+            if (!mainTr) return;
+            var nextTr = mainTr.nextElementSibling;
+            if (nextTr && nextTr.classList.contains('details-row')) {
+              nextTr.style.display = nextTr.style.display === 'none' ? '' : 'none';
+            }
+          });
+        });
+      }
+
+      function showError(msg) {
+        loadingMsg.style.display = 'none';
+        table.style.display = 'none';
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = msg;
+      }
+
+      function fetchOrders() {
+        fetch('/api/dashboard/orders?limit=100', { credentials: 'include' })
+          .then(function (r) {
+            if (!r.ok) {
+              if (r.status === 401) throw new Error('Unauthorized');
+              throw new Error(r.status + ' ' + r.statusText);
+            }
+            return r.json();
+          })
+          .then(function (data) {
+            lastUpdated.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+            render(data);
+          })
+          .catch(function (err) {
+            showError(err.message || 'Failed to load orders');
+          });
+      }
+
+      btnRefresh.addEventListener('click', function () { fetchOrders(); });
+      fetchOrders();
+      setInterval(fetchOrders, POLL_INTERVAL_MS);
+    })();
+  </script>
+</body>
+</html>

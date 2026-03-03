@@ -45,3 +45,35 @@ class OrderStatusResponse(BaseModel):
     style_image_urls: Optional[str] = None
     replicate_prediction_details: Optional[str] = None
     error: Optional[str] = None
+
+
+class DashboardOrderSummary(BaseModel):
+    """Full order fields for the private dashboard (no binary blobs)."""
+    order_id: str
+    status: str
+    email: str
+    style_id: Optional[int] = None
+    style_name: Optional[str] = None
+    portrait_mode: Optional[str] = None
+    image_url: Optional[str] = None
+    style_image_url: Optional[str] = None
+    style_image_urls: Optional[str] = None
+    result_urls: Optional[str] = None
+    result_count: Optional[int] = None
+    style_transfer_job_id: Optional[str] = None
+    style_transfer_error: Optional[str] = None
+    replicate_prediction_details: Optional[str] = None
+    amount: Optional[float] = None
+    payment_status: Optional[str] = None
+    payment_provider: Optional[str] = None
+    payment_transaction_id: Optional[str] = None
+    created_at: Optional[datetime] = None
+    paid_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    failed_at: Optional[datetime] = None
+    billing_name: Optional[str] = None
+    billing_address: Optional[str] = None
+    billing_city: Optional[str] = None
+    billing_state: Optional[str] = None
+    billing_zip: Optional[str] = None
+    billing_country: Optional[str] = None
