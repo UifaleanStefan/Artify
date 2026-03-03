@@ -153,6 +153,10 @@ MAX_CONCURRENT_ORDERS = 8
 # Orders older than this are deleted by the TTL cleanup job
 ORDER_TTL_DAYS = 14
 
+# Failed orders within this window are eligible for one automatic retry (after cooldown)
+FAILED_ORDER_RETRY_DAYS = 3
+FAILED_ORDER_RETRY_COOLDOWN_MINUTES = 30
+
 
 def get_provider() -> ReplicateClient | OpenAIStylizeClient:
     settings = get_settings()
@@ -611,7 +615,7 @@ async def _processing_supervisor_loop() -> None:
 
 
 def _get_unfinished_order_ids_sync() -> list[str]:
-    """Blocking DB scan run in thread; returns orders needing work."""
+    """Blocking DB scan run in thread; returns orders needing work (including eligible failed orders for retry)."""
     db = SessionLocal()
     try:
         orders = db.query(Order).filter(
@@ -623,6 +627,30 @@ def _get_unfinished_order_ids_sync() -> list[str]:
             done = _done_image_count(o)
             if target > 0 and done < target:
                 order_ids.append(o.order_id)
+
+        # Re-queue eligible failed orders (failed within last 3 days, past 30-min cooldown, max 1 retry)
+        now = datetime.utcnow()
+        window_start = now - timedelta(days=FAILED_ORDER_RETRY_DAYS)
+        window_end = now - timedelta(minutes=FAILED_ORDER_RETRY_COOLDOWN_MINUTES)
+        failed_eligible = (
+            db.query(Order)
+            .filter(
+                Order.status == OrderStatus.FAILED.value,
+                Order.failed_at.isnot(None),
+                Order.failed_at >= window_start,
+                Order.failed_at <= window_end,
+                Order.retry_count < 1,
+            )
+            .all()
+        )
+        for o in failed_eligible:
+            o.status = OrderStatus.PROCESSING.value
+            o.failed_at = None
+            o.retry_count = (o.retry_count or 0) + 1
+            o.style_transfer_error = None
+            db.commit()
+            order_ids.append(o.order_id)
+
         return order_ids
     finally:
         db.close()

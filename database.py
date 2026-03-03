@@ -55,6 +55,7 @@ class Order(Base):
     paid_at = Column(DateTime)
     completed_at = Column(DateTime)
     failed_at = Column(DateTime)
+    retry_count = Column(Integer, default=0, nullable=False)  # number of auto-retries (max 1)
 
     billing_name = Column(String(255))
     billing_address = Column(Text)
@@ -121,6 +122,7 @@ def init_db():
         "ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS style_image_urls TEXT",
         "ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS replicate_prediction_details TEXT",
         "ALTER TABLE art_orders ALTER COLUMN style_transfer_job_id TYPE TEXT",
+        "ALTER TABLE art_orders ADD COLUMN IF NOT EXISTS retry_count INTEGER NOT NULL DEFAULT 0",
     ):
         try:
             with engine.connect() as conn:

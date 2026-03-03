@@ -7,14 +7,14 @@ Copiază aici cele 6 imagini pentru cele 3 slider-e "Vezi transformarea":
 Original = poza înainte; styled = portretul artistic după transformare.
 Redenumește fișierele tale în original1–3.jpg și styled1–3.jpg.
 
-IMPORTANT – aliniere înainte/după:
-- Fiecare pereche (originalN.jpg, styledN.jpg) trebuie să aibă ACELEAȘI dimensiuni în pixeli
-  (ex: 1200×900 sau 800×600), altfel comparația va arăta deplasată.
-- Imaginea "styled" ar trebui să fie rezultatul transferului de stil aplicat pe "original",
-  astfel încât compoziția (poziția feței, cadrul) să coincidă.
+ALINIERE ÎNAINTE/DUPĂ (pixel la pixel):
+- Pagina folosește original1_aligned.jpg, original2_aligned.jpg, original3_aligned.jpg pentru
+  "înainte". Aceste fișiere sunt generate din originale prin decupare la centru la aceleași
+  dimensiuni ca imaginile styled, astfel încât înainte și după să arate aceeași regiune.
+- După ce adaugi sau înlocuiești perechile (originalN.jpg, styledN.jpg), rulează:
+  python scripts/align_demo_pairs.py
+  Scriptul creează originalN_aligned.jpg pentru fiecare pereche (necesită Pillow: pip install Pillow).
+- Imaginea "styled" ar trebui să fie rezultatul transferului de stil aplicat pe "original";
+  scriptul de aliniere presupune că styled arată regiunea din centrul originalului (zoom la centru).
 - Recomandat: același raport de aspect pentru toate cele 6 fișiere (ex: 4:3) pentru a se potrivi
   cu containerul de pe pagină.
-
-Dacă imaginile styled au dimensiuni diferite de originale, poți rula scriptul din repo:
-  python scripts/resize_demo_pairs.py
-Scriptul redimensionează styled1–3.jpg la dimensiunile original1–3.jpg (necesită Pillow: pip install Pillow).
