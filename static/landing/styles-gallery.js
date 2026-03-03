@@ -57,7 +57,7 @@
         '<div class="gallery-card-body">' +
           '<h3>' + s.title + '</h3>' +
           '<p class="gallery-card-artist">' + s.artist + '</p>' +
-          '<p class="gallery-card-desc">' + s.description + '</p>' +
+          '<p class="gallery-card-desc">' + (s.description || '').replace(/15 portrete/g, pack + ' portrete') + '</p>' +
           '<div class="gallery-card-footer">' +
             '<span class="gallery-card-rating">★ ' + s.rating + '</span>' +
             (isComingSoon ? '<span class="gallery-card-coming-soon-text">În curând</span>' : '<span class="gallery-card-select">Alege stilul →</span>') +

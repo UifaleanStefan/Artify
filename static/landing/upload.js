@@ -176,7 +176,12 @@
     }
     if (styleTitle) styleTitle.textContent = style.title;
     if (styleArtist) styleArtist.textContent = style.artist;
-    if (styleDesc) styleDesc.textContent = style.description || '';
+    if (styleDesc) {
+      var desc = style.description || '';
+      // Replace "15 portrete" with the actual pack size
+      desc = desc.replace(/15 portrete/g, pack + ' portrete');
+      styleDesc.textContent = desc;
+    }
     var changeLink = document.querySelector('.upload-change-link');
     if (changeLink) changeLink.href = '/styles' + (pack === '15' ? '?pack=15' : '');
   }
