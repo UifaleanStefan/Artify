@@ -243,11 +243,15 @@
   }
 
   function render(state, data) {
-    if (!stateEl) return;
+    console.log('Render called with state:', state, 'data:', data);
+    if (!stateEl) {
+      console.error('stateEl not found!');
+      return;
+    }
     if (state === 'loading') {
       stateEl.innerHTML = '<p class="order-status-loading">Se încarcă…</p>';
-      resultsEl.style.display = 'none';
-      infoCardEl.style.display = 'block';
+      if (resultsEl) resultsEl.style.display = 'none';
+      if (infoCardEl) infoCardEl.style.display = 'block';
       document.body.classList.remove('museum-mode');
       return;
     }
@@ -272,14 +276,22 @@
       try {
         globalUrls = typeof data.result_urls === 'string' ? JSON.parse(data.result_urls) : (data.result_urls || []);
       } catch (e) {
+        console.error('Error parsing result_urls:', e, data.result_urls);
         globalUrls = [];
       }
       try {
         globalStyleUrls = typeof data.style_image_urls === 'string' ? JSON.parse(data.style_image_urls) : (data.style_image_urls || []);
       } catch (e) {
+        console.error('Error parsing style_image_urls:', e, data.style_image_urls);
         globalStyleUrls = [];
       }
       globalLabels = data.result_labels || [];
+
+      if (!globalUrls || globalUrls.length === 0) {
+        console.error('No result URLs found for completed order:', data);
+        render('failed', { error: 'Comanda este completă dar nu are imagini rezultate. Contactează-ne la artify.system@gmail.com cu ID-ul: ' + orderId });
+        return;
+      }
 
       if (globalUrls.length) {
         var packNameEl = document.getElementById('museum-pack-name');
@@ -362,28 +374,44 @@
       render('failed', { error: 'Lipsă ID comandă în URL.' });
       return;
     }
+    console.log('Checking order status for:', orderId);
     render('loading');
-    fetch('/api/orders/' + encodeURIComponent(orderId) + '/status')
+    var apiUrl = '/api/orders/' + encodeURIComponent(orderId) + '/status';
+    console.log('Fetching:', apiUrl);
+    fetch(apiUrl)
       .then(function (r) {
         if (!r.ok) {
           if (r.status === 404) {
             render('failed', { error: 'Comandă negăsită. Verifică ID-ul comenzii: ' + orderId });
+            return null; // Return null to prevent further processing
           } else {
             return r.json().then(function(data) {
               render('failed', { error: data.detail || 'Eroare la încărcarea comenzii.' });
+              return null; // Return null to prevent further processing
             });
           }
-          return;
         }
         return r.json();
       })
       .then(function (data) {
         if (!data) return; // Already handled error case
+        console.log('Order status response:', data);
         var status = (data.status || '').toLowerCase();
-        if (status === 'completed') render('completed', data);
-        else if (status === 'failed') render('failed', { error: data.error || 'Comanda a eșuat.' });
-        else if (status === 'processing' || status === 'paid' || status === 'pending') render('processing');
-        else render('failed', { error: data.detail || 'Status necunoscut pentru comandă.' });
+        if (status === 'completed') {
+          if (!data.result_urls) {
+            console.warn('Order completed but no result_urls:', data);
+            render('failed', { error: 'Comanda este completă dar nu are imagini rezultate. Contactează-ne la artify.system@gmail.com' });
+            return;
+          }
+          render('completed', data);
+        } else if (status === 'failed') {
+          render('failed', { error: data.error || 'Comanda a eșuat.' });
+        } else if (status === 'processing' || status === 'paid' || status === 'pending') {
+          render('processing');
+        } else {
+          console.warn('Unknown order status:', status, data);
+          render('failed', { error: data.detail || 'Status necunoscut pentru comandă: ' + status });
+        }
       })
       .catch(function (err) {
         console.error('Error fetching order status:', err);
