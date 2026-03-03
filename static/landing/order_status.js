@@ -10,6 +10,7 @@
   var downloadBtn = document.getElementById('order-status-download');
   var idEl = document.getElementById('order-status-id');
   var infoCardEl = document.getElementById('order-status-card-info');
+  var orderStatusWrap = document.querySelector('.order-status-wrap');
   
   var prevBtn = document.getElementById('exhibition-prev');
   var nextBtn = document.getElementById('exhibition-next');
@@ -78,6 +79,36 @@
     el.classList.remove('fade-enter');
     void el.offsetWidth; // force reflow
     el.classList.add('fade-enter');
+  }
+
+  function sweepSlider(wrap, fromPct, toPct, duration, onDone) {
+    var start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var ease = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+      var pct = fromPct + (toPct - fromPct) * ease;
+      wrap.style.setProperty('--compare-pct', String(pct));
+      if (p < 1) requestAnimationFrame(step);
+      else if (onDone) onDone();
+    }
+    requestAnimationFrame(step);
+  }
+
+  function autoAnimateCompare(wrap) {
+    // Start at 50%, sweep to 20% (show artistic), then to 80% (show original), back to 50%
+    wrap.style.setProperty('--compare-pct', '50');
+    setTimeout(function() {
+      sweepSlider(wrap, 50, 20, 900, function() {
+        setTimeout(function() {
+          sweepSlider(wrap, 20, 80, 1400, function() {
+            setTimeout(function() {
+              sweepSlider(wrap, 80, 50, 700);
+            }, 400);
+          });
+        }, 300);
+      });
+    }, 500);
   }
 
   function initSlider(wrap) {
@@ -194,7 +225,13 @@
           '</div>' +
         '</div>';
       
-      initSlider(document.getElementById('museum-compare-wrap'));
+      var compareWrap = document.getElementById('museum-compare-wrap');
+      initSlider(compareWrap);
+      
+      // Auto-animate slider on mobile to show it's interactive (only for first image)
+      if (currentIndex === 0 && window.innerWidth <= 900 && compareWrap) {
+        autoAnimateCompare(compareWrap);
+      }
     } else {
       heroWrap.innerHTML = '<img src="' + imgUrl + '" class="museum-hero-img" alt="Operă" />';
     }
@@ -271,6 +308,7 @@
     }
     if (state === 'completed' && data.result_urls) {
       if (infoCardEl) infoCardEl.style.display = 'none';
+      if (orderStatusWrap) orderStatusWrap.style.display = 'none'; // Hide "Se încarcă" div
       document.body.classList.add('museum-mode');
 
       try {
