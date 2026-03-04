@@ -1491,7 +1491,7 @@ a.style-card:hover .style-card-bg {
 .instagram-profile-replica {
   max-width: 400px;
   margin: 0 auto 1.5rem;
-  padding: 0 1rem;
+  padding: 0;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -1501,20 +1501,20 @@ a.style-card:hover .style-card-bg {
 .instagram-profile-header {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
-  padding: 1.25rem 1rem;
+  gap: 1rem;
+  padding: 1rem 1rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 .instagram-profile-avatar {
   flex-shrink: 0;
-  width: 86px;
-  height: 86px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
+  font-size: 2rem;
 }
 .instagram-profile-info {
   flex: 1;
@@ -1522,19 +1522,24 @@ a.style-card:hover .style-card-bg {
 }
 .instagram-profile-username {
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   color: var(--text);
+  margin-bottom: 0.15rem;
+}
+.instagram-profile-handle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
   margin-bottom: 0.25rem;
 }
 .instagram-profile-stats {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
-  margin-bottom: 0.75rem;
 }
 .instagram-profile-view-btn {
+  flex-shrink: 0;
   display: inline-block;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.875rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #fff;
   background: #0095f6;
@@ -1550,11 +1555,29 @@ a.style-card:hover .style-card-bg {
 .instagram-preview {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
+  gap: 0;
   padding: 0;
   max-width: 100%;
   margin: 0;
   min-height: 140px;
+}
+
+.instagram-profile-cta-btn {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background: #0095f6;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  transition: background 0.2s;
+}
+.instagram-profile-cta-btn:hover {
+  background: #0080d9;
+  color: #fff;
 }
 .instagram-preview-cell {
   display: flex;
@@ -1595,20 +1618,24 @@ a.style-card:hover .style-card-bg {
 }
 @media (max-width: 480px) {
   .instagram-profile-header {
-    padding: 1rem;
-    gap: 1rem;
+    padding: 0.875rem 1rem;
+    gap: 0.75rem;
   }
   .instagram-profile-avatar {
-    width: 72px;
-    height: 72px;
-    font-size: 2rem;
+    width: 56px;
+    height: 56px;
+    font-size: 1.75rem;
   }
   .instagram-profile-username {
-    font-size: 1.1rem;
+    font-size: 1rem;
+  }
+  .instagram-profile-view-btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
   }
   .instagram-preview {
     grid-template-columns: repeat(2, 1fr);
-    gap: 2px;
+    gap: 0;
   }
 }
 
