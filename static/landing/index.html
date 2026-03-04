@@ -294,49 +294,46 @@
     <div class="section-divider section-divider--thin" aria-hidden="true"></div>
     <a href="https://instagram.com/artify.ro" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg cta-instagram-btn">Vezi rezultate pe Instagram</a>
     <p class="section-subtitle instagram-preview-subtitle">Rezultate reale @artify.ro</p>
-    <!--
-      To show live Instagram embeds from @artify.ro:
-      1. Go to https://www.instagram.com/artify.ro/
-      2. Open 3–4 posts you want to display; for each post the URL is like .../p/ABC123xyz/
-      3. Copy the post ID (the part after /p/ and before the next /), e.g. ABC123xyz
-      4. Set data-post-ids below to a comma-separated list, e.g. data-post-ids="ABC123,DEF456,GHI789,JKL012"
-    -->
-    <div class="instagram-preview" id="instagram-preview" data-post-ids="DVeQS66gBpo,DVeQk1SAPf6,DVeTEZMAIxW,DVeT4fXAEK0">
-      <div class="instagram-preview-item" data-post-id=""></div>
-      <div class="instagram-preview-item" data-post-id=""></div>
-      <div class="instagram-preview-item" data-post-id=""></div>
-      <div class="instagram-preview-item" data-post-id=""></div>
+
+    <div class="instagram-profile-replica">
+      <div class="instagram-profile-header">
+        <div class="instagram-profile-avatar" aria-hidden="true"><span class="logo-icon">🎨</span></div>
+        <div class="instagram-profile-info">
+          <div class="instagram-profile-username">artify.ro</div>
+          <div class="instagram-profile-stats">39 followers</div>
+          <a href="https://www.instagram.com/artify.ro" target="_blank" rel="noopener noreferrer" class="instagram-profile-view-btn">View profile</a>
+        </div>
+      </div>
+      <!--
+        Post IDs: comma-separated list from instagram.com/artify.ro (e.g. .../p/ABC123/ → ABC123).
+        Optional: data-thumbnail-urls="url1,url2,..." for custom thumbnail images per post (same order as post IDs).
+      -->
+      <div class="instagram-preview" id="instagram-preview" data-post-ids="DVeQS66gBpo,DVeQk1SAPf6,DVeTEZMAIxW,DVeT4fXAEK0"></div>
     </div>
     <script>
       (function() {
         var container = document.getElementById('instagram-preview');
         if (!container) return;
-        var items = container.querySelectorAll('.instagram-preview-item');
         var ids = (container.getAttribute('data-post-ids') || '').trim().split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-        if (ids.length > 0) {
-          items.forEach(function(el, i) {
-            if (ids[i]) {
-              var iframe = document.createElement('iframe');
-              iframe.src = 'https://www.instagram.com/p/' + ids[i] + '/embed/';
-              iframe.setAttribute('frameborder', '0');
-              iframe.setAttribute('scrolling', 'no');
-              iframe.className = 'instagram-embed-frame';
-              el.innerHTML = '';
-              el.appendChild(iframe);
-            }
-          });
-        } else {
-          items.forEach(function(el) {
-            var a = document.createElement('a');
-            a.href = 'https://instagram.com/artify.ro';
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.className = 'instagram-preview-placeholder';
-            a.innerHTML = '<span class="instagram-placeholder-icon" aria-hidden="true"></span><span>Vezi pe Instagram</span>';
-            el.innerHTML = '';
-            el.appendChild(a);
-          });
-        }
+        var thumbUrls = (container.getAttribute('data-thumbnail-urls') || '').trim().split(',').map(function(s) { return s.trim(); });
+        ids.forEach(function(id, i) {
+          var a = document.createElement('a');
+          a.href = 'https://www.instagram.com/p/' + id + '/';
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.className = 'instagram-preview-cell';
+          a.setAttribute('aria-label', 'View post on Instagram');
+          if (thumbUrls[i]) {
+            var img = document.createElement('img');
+            img.src = thumbUrls[i];
+            img.alt = '';
+            img.loading = 'lazy';
+            a.appendChild(img);
+          } else {
+            a.innerHTML = '<span class="instagram-cell-placeholder" aria-hidden="true"></span>';
+          }
+          container.appendChild(a);
+        });
       })();
     </script>
   </section>
