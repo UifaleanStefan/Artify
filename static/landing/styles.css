@@ -1487,19 +1487,24 @@ a.style-card:hover .style-card-bg {
   color: var(--text-muted);
 }
 
-/* Live Elfsight widget: wide container so it can show 3 columns × 2 rows */
+/* Live Elfsight widget: centered on web, force 3-column grid on all devices */
 .instagram-live-widget-container {
   max-width: 900px;
   width: 100%;
   margin: 0 auto 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  justify-content: center;
+}
+.instagram-live-widget-container > div {
+  margin: 0 auto;
 }
 .instagram-live-widget-container iframe {
   width: 100% !important;
-}
-@media (min-width: 768px) {
-  .instagram-live-widget-container iframe {
-    min-width: 780px;
-  }
+  min-width: 780px;
+  display: block;
+  margin: 0 auto;
 }
 
 /* Instagram profile replica: one header + grid of post thumbnails */
@@ -1943,6 +1948,9 @@ a.style-card:hover .style-card-bg {
 .pc-badge--discount { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; }
 .pc-badge--popular { background: linear-gradient(135deg, var(--primary) 0%, var(--accent-3) 100%); color: #fff; }
 .pc-badge--soon { background: linear-gradient(135deg, #f59e0b, #ec4899); color: #fff; }
+.pc-badge--compact { font-size: 0.65rem; padding: 0.25rem 0.5rem; white-space: nowrap; }
+.pc-badges-row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: nowrap; }
+.pc-header--two-badges .pc-badges-row { flex-shrink: 0; }
 
 /* Card body */
 .pc-body { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
