@@ -295,15 +295,34 @@
     <a href="https://instagram.com/artify.ro" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg cta-instagram-btn">Vezi rezultate pe Instagram</a>
     <p class="section-subtitle instagram-preview-subtitle">Rezultate reale @artify.ro</p>
 
-    <div class="instagram-profile-replica">
+    <!-- 
+      LIVE INSTAGRAM WIDGET (Elfsight)
+      Elfsight Instagram Feed widget – if it fails to load, the static fallback below is shown.
+    -->
+    <div class="instagram-live-widget-container" id="instagram-live-widget-container">
+      <script src="https://elfsightcdn.com/platform.js" async></script>
+      <div class="elfsight-app-8a09467f-142d-4d57-a6c6-13946ae09b40" data-elfsight-app-lazy></div>
+    </div>
+
+    <!-- STATIC FALLBACK (Visible if live widget fails/is missing) -->
+    <div class="instagram-profile-replica" id="instagram-fallback-container" style="display: none;">
       <div class="instagram-profile-header">
         <div class="instagram-profile-avatar" aria-hidden="true"><span class="logo-icon">🎨</span></div>
         <div class="instagram-profile-info">
-          <div class="instagram-profile-username">artify.ro</div>
-          <div class="instagram-profile-handle">@artify.ro</div>
-          <div class="instagram-profile-stats">39 followers</div>
+          <div class="instagram-profile-top">
+            <div class="instagram-profile-username">artify.ro</div>
+            <a href="https://www.instagram.com/artify.ro" target="_blank" rel="noopener noreferrer" class="instagram-profile-view-btn">Follow</a>
+          </div>
+          <div class="instagram-profile-stats">
+            <span><strong>6</strong> posts</span>
+            <span><strong>39</strong> followers</span>
+            <span><strong>1</strong> following</span>
+          </div>
+          <div class="instagram-profile-bio">
+            <strong>Artify.ro</strong><br>
+            Transformă-ți pozele în artă.
+          </div>
         </div>
-        <a href="https://www.instagram.com/artify.ro" target="_blank" rel="noopener noreferrer" class="instagram-profile-view-btn">View profile</a>
       </div>
       <!--
         Post IDs: comma-separated list from instagram.com/artify.ro (e.g. .../p/ABC123/ → ABC123).
@@ -341,10 +360,43 @@
             container.appendChild(a);
           });
         }
+        
+        // Fallback Logic to show static profile if Widget fails
+        function initInstagramWidgetFallback() {
+          var widgetContainer = document.getElementById('instagram-live-widget-container');
+          var fallbackContainer = document.getElementById('instagram-fallback-container');
+          if (!widgetContainer || !fallbackContainer) return;
+
+          // Check if placeholder ID is still there
+          var isDefaultWidget = false; /* Real widget ID is set; only use fallback if widget fails to load */
+          
+          if (isDefaultWidget) {
+            // Switch immediately if default ID is detected
+            widgetContainer.style.display = 'none';
+            fallbackContainer.style.display = 'block';
+            return;
+          }
+
+          // Otherwise wait 3.5s to see if iframe loaded or height expanded
+          setTimeout(function() {
+            var widgetContent = widgetContainer.querySelector('iframe') || widgetContainer.querySelector('.eapps-instagram-feed');
+            var isLoaded = widgetContent || widgetContainer.offsetHeight > 50;
+            
+            if (!isLoaded) {
+              widgetContainer.style.display = 'none';
+              fallbackContainer.style.display = 'block';
+            }
+          }, 3500);
+        }
+
         if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', initInstagramPreview);
+          document.addEventListener('DOMContentLoaded', function() {
+            initInstagramPreview();
+            initInstagramWidgetFallback();
+          });
         } else {
           initInstagramPreview();
+          initInstagramWidgetFallback();
         }
       })();
     </script>
