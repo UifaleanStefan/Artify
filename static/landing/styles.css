@@ -1788,6 +1788,16 @@ a.style-card:hover .style-card-bg {
   box-shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
 }
 
+.pc-discount-callout {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #b45309;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.15));
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
 .pc-price-old-wrap {
   display: flex;
   align-items: center;
