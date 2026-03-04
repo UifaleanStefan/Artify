@@ -312,28 +312,35 @@
     </div>
     <script>
       (function() {
-        var container = document.getElementById('instagram-preview');
-        if (!container) return;
-        var ids = (container.getAttribute('data-post-ids') || '').trim().split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-        var thumbUrls = (container.getAttribute('data-thumbnail-urls') || '').trim().split(',').map(function(s) { return s.trim(); });
-        ids.forEach(function(id, i) {
-          var a = document.createElement('a');
-          a.href = 'https://www.instagram.com/p/' + id + '/';
-          a.target = '_blank';
-          a.rel = 'noopener noreferrer';
-          a.className = 'instagram-preview-cell';
-          a.setAttribute('aria-label', 'View post on Instagram');
-          if (thumbUrls[i]) {
-            var img = document.createElement('img');
-            img.src = thumbUrls[i];
-            img.alt = '';
-            img.loading = 'lazy';
-            a.appendChild(img);
-          } else {
-            a.innerHTML = '<span class="instagram-cell-placeholder" aria-hidden="true"></span>';
-          }
-          container.appendChild(a);
-        });
+        function initInstagramPreview() {
+          var container = document.getElementById('instagram-preview');
+          if (!container) return;
+          var ids = (container.getAttribute('data-post-ids') || '').trim().split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+          var thumbUrls = (container.getAttribute('data-thumbnail-urls') || '').trim().split(',').map(function(s) { return s.trim(); });
+          ids.forEach(function(id, i) {
+            var a = document.createElement('a');
+            a.href = 'https://www.instagram.com/p/' + id + '/';
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.className = 'instagram-preview-cell';
+            a.setAttribute('aria-label', 'View post on Instagram');
+            if (thumbUrls[i]) {
+              var img = document.createElement('img');
+              img.src = thumbUrls[i];
+              img.alt = '';
+              img.loading = 'lazy';
+              a.appendChild(img);
+            } else {
+              a.innerHTML = '<span class="instagram-cell-placeholder" aria-hidden="true"></span>';
+            }
+            container.appendChild(a);
+          });
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initInstagramPreview);
+        } else {
+          initInstagramPreview();
+        }
       })();
     </script>
   </section>
