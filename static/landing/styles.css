@@ -1487,6 +1487,21 @@ a.style-card:hover .style-card-bg {
   color: var(--text-muted);
 }
 
+/* Live Elfsight widget: wide container so it can show 3 columns × 2 rows */
+.instagram-live-widget-container {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto 1.5rem;
+}
+.instagram-live-widget-container iframe {
+  width: 100% !important;
+}
+@media (min-width: 768px) {
+  .instagram-live-widget-container iframe {
+    min-width: 780px;
+  }
+}
+
 /* Instagram profile replica: one header + grid of post thumbnails */
 .instagram-profile-replica {
   max-width: 400px;
