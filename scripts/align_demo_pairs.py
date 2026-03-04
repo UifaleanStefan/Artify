@@ -18,6 +18,23 @@ except ImportError:
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEMO_DIR = REPO_ROOT / "static" / "landing" / "demo"
 
+# Per-pair: crop original to center (frac of width, frac of height) so "before"
+# matches the tighter framing of the styled image. Only set for pairs where
+# the styled content is more zoomed in. E.g. 0.9 = use center 90% of original.
+ORIGINAL_CROP_FRAC: dict[int, float] = {
+    2: 0.90,  # pair 2 (girl): styled is tighter; crop original to match
+}
+
+
+def center_crop_fraction(img: Image.Image, frac: float) -> Image.Image:
+    """Crop to center frac of width and height (e.g. 0.9 = center 90%)."""
+    w, h = img.size
+    cw = int(round(w * frac))
+    ch = int(round(h * frac))
+    left = (w - cw) // 2
+    top = (h - ch) // 2
+    return img.crop((left, top, left + cw, top + ch))
+
 
 def center_crop_to_ratio(img: Image.Image, target_ratio: float) -> Image.Image:
     """
