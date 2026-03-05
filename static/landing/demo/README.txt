@@ -8,13 +8,11 @@ Original = poza înainte; styled = portretul artistic după transformare.
 Redenumește fișierele tale în original1–3.jpg și styled1–3.jpg.
 
 ALINIERE ÎNAINTE/DUPĂ (pixel la pixel):
-- Pagina folosește original1_aligned.jpg, original2_aligned.jpg, original3_aligned.jpg pentru
-  "înainte". Aceste fișiere sunt generate din originale prin decupare la centru la aceleași
-  dimensiuni ca imaginile styled, astfel încât înainte și după să arate aceeași regiune.
-- După ce adaugi sau înlocuiești perechile (originalN.jpg, styledN.jpg), rulează:
+- Pagina folosește original1.jpg, original2.png, original3.jpg pentru "înainte" și
+  styled1_aligned.jpg, styled2_aligned.jpg, styled3_aligned.jpg pentru "după".
+  (Cardurile sunt afișate în ordinea: pair 3, pair 2, pair 1.)
+- După ce adaugi sau înlocuiești perechile (originalN, styledN), rulează:
   python scripts/align_demo_pairs.py
-  Scriptul creează originalN_aligned.jpg pentru fiecare pereche (necesită Pillow: pip install Pillow).
-- Imaginea "styled" ar trebui să fie rezultatul transferului de stil aplicat pe "original";
-  scriptul de aliniere presupune că styled arată regiunea din centrul originalului (zoom la centru).
-- Recomandat: același raport de aspect pentru toate cele 6 fișiere (ex: 4:3) pentru a se potrivi
-  cu containerul de pe pagină.
+  Scriptul creează styledN_aligned.jpg (aliniat la dimensiunile originalului, fără stretch).
+- Originalele rămân neschimbate; doar fișierele styled sunt redimensionate/aliniate.
+- Recomandat: același raport de aspect pentru toate fișierele (ex: 4:3) pentru container.
