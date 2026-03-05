@@ -1952,6 +1952,20 @@ a.style-card:hover .style-card-bg {
 .pc-badges-row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: nowrap; }
 .pc-header--two-badges .pc-badges-row { flex-shrink: 0; }
 
+@media (max-width: 600px) {
+  .pricing-card--popular .pc-header--two-badges {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .pricing-card--popular .pc-icon {
+    width: 40px;
+    height: 40px;
+  }
+  .pricing-card--popular .pc-badge--compact {
+    font-size: 0.6rem;
+  }
+}
+
 /* Card body */
 .pc-body { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
 
