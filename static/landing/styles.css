@@ -357,9 +357,10 @@ img { max-width: 100%; height: auto; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 0.35rem;
-  padding: 0.65rem 0.75rem;
-  font-size: 0.7rem;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.65rem;
   white-space: normal;
   text-align: center;
   line-height: 1.25;
@@ -374,7 +375,7 @@ img { max-width: 100%; height: auto; }
   transition: transform 0.15s, box-shadow 0.15s;
   margin-top: 0.5rem;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -1497,11 +1498,11 @@ a.style-card:hover .style-card-bg {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 4rem;
+  margin-bottom: 5.5rem;
 }
 .instagram-live-widget-container,
 .instagram-profile-replica {
-  margin-top: 1.5rem;
+  margin-top: 2.5rem;
 }
 .instagram-preview-subtitle {
   margin-top: 1rem;
