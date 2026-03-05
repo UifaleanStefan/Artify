@@ -1781,8 +1781,8 @@ async def create_checkout_session(
     amount_cents = int(round(float(order.amount or 9.99) * 100))
 
     try:
+        # Let Stripe choose payment methods compatible with RON (avoid 400 on payment_methods)
         session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
             line_items=[{
                 "price_data": {
                     "currency": "ron",
@@ -1790,7 +1790,6 @@ async def create_checkout_session(
                     "product_data": {
                         "name": f"Artify – {style_name} ({pack_label})",
                         "description": f"Portretul tău pictat în {pack_label} stiluri artistice.",
-                        "images": [],
                     },
                 },
                 "quantity": 1,
@@ -1800,10 +1799,14 @@ async def create_checkout_session(
             success_url=f"{base_url}/payment/success?order_id={order_id}&session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{base_url}/payment/cancel?order_id={order_id}",
             metadata={"order_id": order_id},
+            locale="ro",
         )
     except stripe.StripeError as e:
-        logger.error(f"Stripe checkout creation failed for {order_id}: {e}")
-        raise HTTPException(status_code=502, detail=f"Stripe error: {str(e)}")
+        err_msg = str(e)
+        logger.error("Stripe checkout creation failed for %s: %s (type=%s)", order_id, err_msg, type(e).__name__)
+        if hasattr(e, "user_message") and e.user_message:
+            logger.error("Stripe user_message: %s", e.user_message)
+        raise HTTPException(status_code=502, detail=f"Stripe error: {err_msg}")
 
     # Store the session ID on the order so we can verify it in the webhook
     order.payment_transaction_id = session.id
