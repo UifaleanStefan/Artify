@@ -1847,7 +1847,7 @@ async def create_checkout_session(
     amount_cents = int(round(float(order.amount or 9.99) * 100))
 
     try:
-        # Let Stripe choose payment methods compatible with RON (avoid 400 on payment_methods)
+        # Card is supported for RON; explicit type avoids "No valid payment method types" error
         session = stripe.checkout.Session.create(
             line_items=[{
                 "price_data": {
@@ -1861,6 +1861,7 @@ async def create_checkout_session(
                 "quantity": 1,
             }],
             mode="payment",
+            payment_method_types=["card"],
             customer_email=order.email or None,
             success_url=f"{base_url}/payment/success?order_id={order_id}&session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{base_url}/payment/cancel?order_id={order_id}",
