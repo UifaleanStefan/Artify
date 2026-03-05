@@ -1948,23 +1948,6 @@ a.style-card:hover .style-card-bg {
 .pc-badge--discount { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; }
 .pc-badge--popular { background: linear-gradient(135deg, var(--primary) 0%, var(--accent-3) 100%); color: #fff; }
 .pc-badge--soon { background: linear-gradient(135deg, #f59e0b, #ec4899); color: #fff; }
-.pc-badge--compact { font-size: 0.65rem; padding: 0.25rem 0.5rem; white-space: nowrap; }
-.pc-badges-row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: nowrap; }
-.pc-header--two-badges .pc-badges-row { flex-shrink: 0; }
-
-@media (max-width: 600px) {
-  .pricing-card--popular .pc-header--two-badges {
-    flex-direction: row;
-    align-items: flex-start;
-  }
-  .pricing-card--popular .pc-icon {
-    width: 40px;
-    height: 40px;
-  }
-  .pricing-card--popular .pc-badge--compact {
-    font-size: 0.6rem;
-  }
-}
 
 /* Card body */
 .pc-body { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
@@ -2062,7 +2045,11 @@ a.style-card:hover .style-card-bg {
   font-size: 1.875rem;
   font-weight: 800;
   vertical-align: super;
-  margin-left: -0.1em;
+  margin-left: 0.05em;
+  background: none;
+  -webkit-text-fill-color: #ffffff;
+  color: #ffffff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 .pc-price--special {
   background: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #f59e0b 100%);
