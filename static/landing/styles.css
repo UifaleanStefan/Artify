@@ -1896,6 +1896,16 @@ a.style-card:hover .style-card-bg {
   box-shadow: 0 16px 40px rgba(37, 99, 235, 0.13);
 }
 
+/* 15 Portrete card – allow corner ribbon to show */
+.pricing-card--order-2 {
+  overflow: visible;
+}
+.pricing-card--order-2 .pc-header,
+.pricing-card--order-2 .pc-body {
+  position: relative;
+  z-index: 0;
+}
+
 /* Popular card – dark */
 .pricing-card--popular {
   background: #263348;
@@ -1955,6 +1965,28 @@ a.style-card:hover .style-card-bg {
 .pricing-card--coming-soon .pc-icon {
   background: linear-gradient(135deg, rgba(245,158,11,0.25), rgba(236,72,153,0.15));
   box-shadow: 0 2px 8px rgba(245,158,11,0.15);
+}
+
+/* Corner ribbon – e.g. "Cadoul perfect" on 15-portrete card */
+.pc-ribbon {
+  position: absolute;
+  top: 18px;
+  right: -36px;
+  transform: rotate(45deg);
+  padding: 0.4rem 2.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+  line-height: 1.2;
+}
+.pc-ribbon--gift {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 50%, #ec4899 100%);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Badges */
