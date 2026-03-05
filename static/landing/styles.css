@@ -1491,36 +1491,24 @@ a.style-card:hover .style-card-bg {
   color: var(--text-muted);
 }
 
-/* Live Elfsight widget: use as provided, centered */
+/* Live Elfsight widget: centered, force 3-column grid on all devices (mobile can scroll horizontally) */
 .instagram-live-widget-container {
-  max-width: 100%;
+  max-width: 900px;
   width: 100%;
   margin: 0 auto 1.5rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   justify-content: center;
 }
 .instagram-live-widget-container > div {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
+  margin: 0 auto;
 }
-@media (max-width: 768px) {
-  .cta-instagram-section {
-    overflow-x: hidden;
-  }
-  .instagram-live-widget-container {
-    overflow-x: hidden;
-    width: 100%;
-    max-width: 100vw;
-    box-sizing: border-box;
-  }
-  .instagram-live-widget-container > div {
-    min-width: 0;
-    overflow-x: hidden;
-  }
-  .instagram-live-widget-container iframe {
-    max-width: 100%;
-  }
+.instagram-live-widget-container iframe {
+  width: 100% !important;
+  min-width: 780px;
+  display: block;
+  margin: 0 auto;
 }
 
 /* Instagram profile replica: one header + grid of post thumbnails */

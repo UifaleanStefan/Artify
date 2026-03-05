@@ -361,32 +361,24 @@
           });
         }
         
-        // Fallback Logic to show static profile if Widget fails
-        function initInstagramWidgetFallback() {
+        // Show fallback only if Elfsight widget fails to load (all viewports)
+        function scheduleWidgetFailCheck() {
           var widgetContainer = document.getElementById('instagram-live-widget-container');
           var fallbackContainer = document.getElementById('instagram-fallback-container');
           if (!widgetContainer || !fallbackContainer) return;
 
-          // Check if placeholder ID is still there
-          var isDefaultWidget = false; /* Real widget ID is set; only use fallback if widget fails to load */
-          
-          if (isDefaultWidget) {
-            // Switch immediately if default ID is detected
-            widgetContainer.style.display = 'none';
-            fallbackContainer.style.display = 'block';
-            return;
-          }
-
-          // Otherwise wait 3.5s to see if iframe loaded or height expanded
           setTimeout(function() {
             var widgetContent = widgetContainer.querySelector('iframe') || widgetContainer.querySelector('.eapps-instagram-feed');
             var isLoaded = widgetContent || widgetContainer.offsetHeight > 50;
-            
             if (!isLoaded) {
               widgetContainer.style.display = 'none';
               fallbackContainer.style.display = 'block';
             }
           }, 3500);
+        }
+
+        function initInstagramWidgetFallback() {
+          scheduleWidgetFailCheck();
         }
 
         if (document.readyState === 'loading') {
@@ -496,7 +488,8 @@
           <ul class="pc-features">
             <li><span class="pc-check">✓</span> 15 portrete în stilul ales</li>
             <li><span class="pc-check">✓</span> Toate stilurile disponibile</li>
-            <li><span class="pc-check">✓</span> Rezoluție mare, gata de print</li>
+            <li><span class="pc-check">✓</span> Rezoluție mare, gata de pus pe rețele sociale</li>
+            <li><span class="pc-check">✓</span> Ideal pentru cadou</li>
             <li><span class="pc-check">✓</span> Livrare pe email în 5 minute</li>
           </ul>
           <a href="/styles?pack=15" class="btn pc-btn pc-btn--outline">Descoperă portretul tău →</a>
@@ -527,7 +520,7 @@
           <ul class="pc-features pc-features--light">
             <li><span class="pc-check pc-check--light">✓</span> 5 portrete în stilul ales</li>
             <li><span class="pc-check pc-check--light">✓</span> Toate stilurile disponibile</li>
-            <li><span class="pc-check pc-check--light">✓</span> Rezoluție mare, gata de print</li>
+            <li><span class="pc-check pc-check--light">✓</span> Rezoluție mare, gata de pus pe rețele sociale</li>
             <li><span class="pc-check pc-check--light">✓</span> Livrare pe email în 5 minute</li>
           </ul>
           <a href="/styles" class="btn pc-btn pc-btn--primary">Descoperă portretul tău →</a>
