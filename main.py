@@ -1813,6 +1813,12 @@ async def create_checkout_session(
     order.payment_provider = "stripe"
     db.commit()
 
+    logger.info(
+        "Stripe Checkout created for order %s: session_id=%s url=%s",
+        order_id,
+        session.id,
+        (session.url or "")[:80] + "..." if session.url and len(session.url) > 80 else (session.url or ""),
+    )
     return {"checkout_url": session.url, "session_id": session.id}
 
 

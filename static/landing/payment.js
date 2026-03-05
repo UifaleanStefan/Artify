@@ -97,9 +97,13 @@
       })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, data: d }; }); })
       .then(function (res) {
-        if (!res.ok) throw new Error((res.data && res.data.detail) || 'Crearea comenzii a eșuat.');
+        if (!res.ok) {
+          console.error('[Artify payment] Order create failed:', res.status, res.data);
+          throw new Error((res.data && res.data.detail) || 'Crearea comenzii a eșuat.');
+        }
         var orderId = res.data && res.data.order_id;
         if (!orderId) throw new Error('Comanda a fost creată dar nu s-a returnat order_id.');
+        console.log('[Artify payment] Order created:', orderId);
 
         // Step 2: Create a Stripe Checkout session and redirect
         return fetch('/api/orders/' + encodeURIComponent(orderId) + '/checkout', {
@@ -108,15 +112,21 @@
         }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { return { ok: r.ok, data: d }; }); });
       })
       .then(function (res) {
-        if (!res.ok) throw new Error((res.data && res.data.detail) || 'Inițializarea plății a eșuat.');
+        if (!res.ok) {
+          console.error('[Artify payment] Checkout create failed:', res.status, res.data);
+          throw new Error((res.data && res.data.detail) || 'Inițializarea plății a eșuat.');
+        }
         var checkoutUrl = res.data && res.data.checkout_url;
+        var sessionId = res.data && res.data.session_id;
         if (!checkoutUrl) throw new Error('Nu s-a putut obține link-ul de plată.');
-        // Redirect to Stripe Checkout
+        console.log('[Artify payment] Redirecting to Stripe. session_id=', sessionId, 'url=', checkoutUrl.substring(0, 60) + '...');
+        // Redirect to Stripe Checkout (400 on payment_methods happens on Stripe's page – check Stripe Dashboard → Logs)
         window.location.href = checkoutUrl;
       })
       .catch(function (err) {
         payBtn.disabled = false;
         payBtn.textContent = 'Plătește ' + priceStr + ' →';
+        console.error('[Artify payment] Error:', err.message, err);
         alert(err.message || 'Ceva nu a mers bine. Te rugăm să încerci din nou.');
       });
     });
