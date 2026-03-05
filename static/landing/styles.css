@@ -996,12 +996,12 @@ img { max-width: 100%; height: auto; }
   display: block;
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--primary);
+  color: #1a1a1a;
   margin-bottom: 0.25rem;
 }
 .stats-label {
   font-size: 0.8125rem;
-  color: var(--text-muted);
+  color: #1a1a1a;
   font-weight: 500;
 }
 @media (max-width: 768px) {
@@ -2324,8 +2324,8 @@ a.style-card:hover .style-card-bg {
 .footer-brand .footer-social h4 { display: none; }
 .footer-brand .social-icons { gap: 0.5rem; }
 .footer-brand .social-icons a {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: rgba(255, 255, 255, 0.9);
@@ -2334,6 +2334,10 @@ a.style-card:hover .style-card-bg {
   justify-content: center;
   font-size: 0.875rem;
   text-decoration: none;
+}
+.footer-brand .social-icons a svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 .footer-brand .social-instagram-link {
   width: auto !important;
@@ -2382,8 +2386,8 @@ a.style-card:hover .style-card-bg {
 .footer-contact-item:hover svg { color: var(--primary-light); }
 .social-icons { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
 .social-icons a {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.75rem;
+  height: 2.75rem;
   border-radius: 50%;
   border: 2px solid var(--primary);
   color: var(--primary);
@@ -2392,6 +2396,10 @@ a.style-card:hover .style-card-bg {
   justify-content: center;
   font-size: 0.875rem;
   text-decoration: none;
+}
+.social-icons a svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 .social-instagram-link {
   width: auto !important;

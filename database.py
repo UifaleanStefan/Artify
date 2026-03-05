@@ -102,12 +102,13 @@ def get_database_url() -> str:
 
 
 DATABASE_URL = get_database_url()
+_settings = get_settings()
 
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
+    pool_size=_settings.db_pool_size,
+    max_overflow=_settings.db_max_overflow,
     connect_args={"connect_timeout": 10},
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

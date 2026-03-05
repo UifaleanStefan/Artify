@@ -11,6 +11,8 @@ import sys
 import time
 import uuid
 import zipfile
+from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -21,7 +23,7 @@ import httpx
 import stripe
 import secrets
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, RedirectResponse, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -51,11 +53,25 @@ def _resolve_style_image_url(style_image_url: Optional[str]) -> Optional[str]:
     return url
 
 
+def _fetch_one_result_url(index: int, url: str, order_id: str) -> tuple[int, bytes | None, str | None]:
+    """Fetch a single result URL; returns (index, content, content_type) or (index, None, None) on failure."""
+    try:
+        with httpx.Client(timeout=45) as client:
+            r = client.get(url)
+        if r.status_code >= 400:
+            logger.warning("Failed to fetch result image %s for %s: %s", index, order_id, r.status_code)
+            return (index, None, None)
+        ct = r.headers.get("content-type", "image/jpeg").split(";")[0].strip()
+        return (index, r.content, ct)
+    except Exception as e:
+        logger.warning("Fetch result image %s for %s failed: %s", index, order_id, e)
+        return (index, None, None)
+
+
 def _persist_result_images(order_id: str, result_items: list) -> list[str]:
     """
-    Persist result images to DB and disk. Each item can be:
-    - str (URL): fetch and persist
-    - dict with "content" (bytes) and "content_type": decode and persist directly (OpenAI b64)
+    Persist result images to DB and disk. Fetches URLs in parallel, then writes in order.
+    Each item can be: str (URL), or dict with "content" (bytes) and "content_type".
     Returns list of permanent URLs.
     """
     base_url = (get_settings().public_base_url or "").rstrip("/")
@@ -65,34 +81,41 @@ def _persist_result_images(order_id: str, result_items: list) -> list[str]:
     try:
         results_dir = get_order_results_dir() / order_id
         results_dir.mkdir(parents=True, exist_ok=True)
-        permanent = []
+        # Phase 1: collect in-memory items and URL fetch tasks
+        resolved: dict[int, tuple[bytes, str]] = {}
+        url_tasks: list[tuple[int, str]] = []
+        for i, item in enumerate(result_items, start=1):
+            if isinstance(item, dict) and "content" in item:
+                content = item["content"]
+                content_type = item.get("content_type", "image/jpeg").split(";")[0].strip()
+                resolved[i] = (content, content_type)
+            else:
+                url = str(item)
+                if not url.startswith(("http://", "https://")):
+                    logger.debug("Skipping persist for result image %s (non-fetchable): %s", i, url[:50] if len(url) > 50 else url)
+                    continue
+                url_tasks.append((i, url))
+        # Phase 2: fetch all URLs in parallel
+        if url_tasks:
+            with ThreadPoolExecutor(max_workers=min(len(url_tasks), 10)) as executor:
+                futures = [executor.submit(_fetch_one_result_url, i, url, order_id) for i, url in url_tasks]
+                for fut in as_completed(futures):
+                    idx, content, ct = fut.result()
+                    if content is not None and ct:
+                        if ct not in ("image/jpeg", "image/png", "image/webp"):
+                            ct = "image/jpeg"
+                        resolved[idx] = (content, ct)
+        # Phase 3: write to DB and disk in index order
+        permanent: list[str] = [""] * len(result_items)
         db = SessionLocal()
+        write_ok = True
         try:
-            for i, item in enumerate(result_items, start=1):
+            for i in range(1, len(result_items) + 1):
+                if i not in resolved:
+                    permanent[i - 1] = str(result_items[i - 1]) if isinstance(result_items[i - 1], str) else ""
+                    continue
                 try:
-                    if isinstance(item, dict) and "content" in item:
-                        content = item["content"]
-                        content_type = item.get("content_type", "image/jpeg").split(";")[0].strip()
-                    else:
-                        url = str(item)
-                        if not url.startswith(("http://", "https://")):
-                            logger.debug(
-                                "Skipping persist for result image %s (non-fetchable placeholder): %s",
-                                i, url[:50] if len(url) > 50 else url,
-                            )
-                            permanent.append("")
-                            continue
-                        with httpx.Client(timeout=45) as client:
-                            r = client.get(url)
-                        if r.status_code >= 400:
-                            logger.warning("Failed to fetch result image %s for %s: %s", i, order_id, r.status_code)
-                            permanent.append(url)
-                            continue
-                        content = r.content
-                        content_type = r.headers.get("content-type", "image/jpeg").split(";")[0].strip()
-                    if content_type not in ("image/jpeg", "image/png", "image/webp"):
-                        content_type = "image/jpeg"
-                    # Store in DB (survives redeploy)
+                    content, content_type = resolved[i]
                     row = OrderResultImage(
                         order_id=order_id,
                         image_index=i,
@@ -100,7 +123,6 @@ def _persist_result_images(order_id: str, result_items: list) -> list[str]:
                         data=content,
                     )
                     db.merge(row)
-                    # Also write to disk for backward compat and redundancy
                     ext = "jpg"
                     if "png" in content_type:
                         ext = "png"
@@ -108,13 +130,14 @@ def _persist_result_images(order_id: str, result_items: list) -> list[str]:
                         ext = "webp"
                     path = results_dir / f"{i}.{ext}"
                     path.write_bytes(content)
-                    permanent.append(f"{base_url}/api/orders/{order_id}/result/{i}")
+                    permanent[i - 1] = f"{base_url}/api/orders/{order_id}/result/{i}"
                 except Exception as e:
                     logger.warning("Persist result image %s for %s failed: %s", i, order_id, e)
-                    permanent.append(str(item) if isinstance(item, str) else "")
-            if len(permanent) == len(result_items):
+                    permanent[i - 1] = str(result_items[i - 1]) if isinstance(result_items[i - 1], str) else ""
+                    write_ok = False
+            if write_ok:
                 db.commit()
-                logger.info("Persisted %d result images for order %s (DB + disk)", len(permanent), order_id)
+                logger.info("Persisted %d result images for order %s (DB + disk)", len([p for p in permanent if p]), order_id)
                 return permanent
             db.rollback()
         finally:
@@ -148,7 +171,6 @@ _DB_INIT_STARTED = False
 # Max number of orders processed at the same time (backend-only; no UX change).
 # If you run multiple Uvicorn workers, this limit is per process (e.g. 2 workers => up to 16 concurrent).
 _order_concurrency_semaphore: asyncio.Semaphore | None = None
-MAX_CONCURRENT_ORDERS = 8
 
 # Orders older than this are deleted by the TTL cleanup job
 ORDER_TTL_DAYS = 14
@@ -206,7 +228,8 @@ def _get_order_semaphore() -> asyncio.Semaphore:
     """Lazy-init semaphore so it's created inside the event loop."""
     global _order_concurrency_semaphore
     if _order_concurrency_semaphore is None:
-        _order_concurrency_semaphore = asyncio.Semaphore(MAX_CONCURRENT_ORDERS)
+        n = get_settings().max_concurrent_orders
+        _order_concurrency_semaphore = asyncio.Semaphore(n)
     return _order_concurrency_semaphore
 
 
@@ -306,6 +329,42 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 
+_rate_limit_store: dict[str, list[float]] = defaultdict(list)
+_rate_limit_lock: asyncio.Lock | None = None
+
+
+def _get_rate_limit_lock() -> asyncio.Lock:
+    global _rate_limit_lock
+    if _rate_limit_lock is None:
+        _rate_limit_lock = asyncio.Lock()
+    return _rate_limit_lock
+
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    """Per-IP rate limiting; exempts webhook. Uses in-memory store (per process)."""
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+        if path == "/api/stripe/webhook":
+            return await call_next(request)
+        settings = get_settings()
+        limit = settings.rate_limit_static_per_minute if path.startswith("/static/") else settings.rate_limit_api_per_minute
+        if limit <= 0:
+            return await call_next(request)
+        client_ip = request.client.host if request.client else "0.0.0.0"
+        if request.headers.get("x-forwarded-for"):
+            client_ip = request.headers["x-forwarded-for"].split(",")[0].strip()
+        now = time.time()
+        window = 60.0
+        async with _get_rate_limit_lock():
+            times = _rate_limit_store[client_ip]
+            times[:] = [t for t in times if now - t < window]
+            if len(times) >= limit:
+                return JSONResponse(status_code=429, content={"detail": "Too many requests. Please try again later."})
+            times.append(now)
+        return await call_next(request)
+
+
+app.add_middleware(RateLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 
 
@@ -332,6 +391,13 @@ _HTML_HEADERS = {"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma
 async def health() -> JSONResponse:
     """Lightweight health endpoint for uptime checks."""
     return JSONResponse({"status": "ok"})
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon() -> RedirectResponse:
+    """Redirect to SVG favicon so browser tab/bookmarks show Artify icon."""
+    return RedirectResponse(url="/static/landing/favicon.svg", status_code=302)
+
 
 @app.get("/")
 async def index() -> FileResponse:
@@ -1856,6 +1922,7 @@ async def stripe_webhook(request: Request, background_tasks: BackgroundTasks, db
             logger.warning(f"Stripe webhook: order not found {order_id}")
             return {"status": "ignored"}
 
+        # Idempotency: only transition from PENDING; Stripe may retry the webhook
         if order.status == OrderStatus.PENDING.value:
             order.status = OrderStatus.PAID.value
             order.payment_status = "paid"
@@ -1866,7 +1933,7 @@ async def stripe_webhook(request: Request, background_tasks: BackgroundTasks, db
             background_tasks.add_task(process_order_style_transfer, order_id)
             logger.info(f"Stripe payment confirmed, processing started: {order_id}")
         else:
-            logger.info(f"Stripe webhook: order {order_id} already in status {order.status}, skipping")
+            logger.info(f"Stripe webhook: order {order_id} already {order.status}, skipping (idempotent)")
 
     return {"status": "ok"}
 
@@ -1899,18 +1966,26 @@ async def pay_order(
 
 
 async def process_order_style_transfer(order_id: str):
-    """Run style transfers in a worker thread so API remains responsive. Capped at MAX_CONCURRENT_ORDERS."""
+    """Run style transfers in a worker thread so API remains responsive. Capped at MAX_CONCURRENT_ORDERS. Email sent after semaphore release."""
     if order_id in _ACTIVE_ORDER_TASKS:
         return
     _ACTIVE_ORDER_TASKS.add(order_id)
     try:
         async with _get_order_semaphore():
-            await asyncio.to_thread(_run_style_transfer_sync, order_id)
+            result = await asyncio.to_thread(_run_style_transfer_sync, order_id)
+        if result and result[0] == "completed":
+            await asyncio.to_thread(
+                EmailService().send_result_ready,
+                result[1], result[2], result[3], result[4],
+                result_labels=result[5] if len(result) > 5 else None,
+            )
+        elif result and result[0] == "failed":
+            await asyncio.to_thread(EmailService().send_order_failed, result[1], result[2], result[3])
     finally:
         _ACTIVE_ORDER_TASKS.discard(order_id)
 
 
-def _run_style_transfer_sync(order_id: str) -> None:
+def _run_style_transfer_sync(order_id: str) -> None | tuple[str, ...]:
     db = SessionLocal()
     lock_acquired = False
     try:
@@ -1938,8 +2013,7 @@ def _run_style_transfer_sync(order_id: str) -> None:
             order.style_transfer_error = error_msg
             order.failed_at = datetime.utcnow()
             db.commit()
-            EmailService().send_order_failed(order_id, order.email, error_msg)
-            return
+            return ("failed", order_id, order.email, error_msg)
 
         # Resume: if already processing with partial results, skip completed ones
         result_urls_list = []
@@ -2006,9 +2080,10 @@ def _run_style_transfer_sync(order_id: str) -> None:
             )
             remaining_style_urls = style_urls[skip:]
             replicate_fallback = get_replicate_service() if use_openai else None
+            style_delay = get_settings().style_image_delay_seconds
             for i, style_url in enumerate(remaining_style_urls):
-                if i > 0:
-                    time.sleep(30)
+                if i > 0 and style_delay > 0:
+                    time.sleep(style_delay)
                 result_url, job_id = None, None
                 provider_used = service
                 style_prompt = _style_url_to_prompt(style_url, order.style_id) if use_openai else None
@@ -2096,20 +2171,16 @@ def _run_style_transfer_sync(order_id: str) -> None:
 
             styles = _load_styles_data()
             result_labels = _build_result_labels(order, result_urls_list, styles)
-            # Validate order_id before sending email
-            if not order_id or order_id != order.order_id:
-                logger.error("Order ID mismatch: passed=%s, order.order_id=%s", order_id, order.order_id)
-                order_id = order.order_id  # Use the correct order_id from DB
-            logger.info("Sending result ready email for order %s to %s", order_id, order.email)
-            EmailService().send_result_ready(
-                order_id, order.email, result_urls_list, order.style_name, result_labels=result_labels
-            )
+            if order_id != order.order_id:
+                order_id = order.order_id
+            return ("completed", order_id, order.email, result_urls_list, order.style_name or None, result_labels)
 
         except StyleTransferRateLimit as e:
             order.status = OrderStatus.FAILED.value
             order.style_transfer_error = f"Rate limit: {e}"
             order.failed_at = datetime.utcnow()
             db.commit()
+            return ("failed", order_id, order.email, str(e))
         except (StyleTransferTimeout, StyleTransferError) as e:
             msg = str(e)
             # Transient upstream source-url failures (catbox/litterbox 504) should be retried.
@@ -2118,18 +2189,19 @@ def _run_style_transfer_sync(order_id: str) -> None:
                 order.status = OrderStatus.PROCESSING.value
                 order.style_transfer_error = msg
                 db.commit()
-                return
+                return None
             order.status = OrderStatus.FAILED.value
             order.style_transfer_error = msg
             order.failed_at = datetime.utcnow()
             db.commit()
-            EmailService().send_order_failed(order_id, order.email, msg)
+            return ("failed", order_id, order.email, msg)
         except Exception as e:
             logger.exception(f"Unexpected error processing order {order_id}")
             order.status = OrderStatus.FAILED.value
             order.style_transfer_error = str(e)
             order.failed_at = datetime.utcnow()
             db.commit()
+            return ("failed", order_id, order.email, str(e))
     finally:
         if lock_acquired:
             _release_order_lock_sync(db, order_id)

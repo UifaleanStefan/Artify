@@ -44,7 +44,13 @@ class Settings(BaseSettings):
 
     # Database
     database_url: Optional[str] = None
+    db_pool_size: int = 10
+    db_max_overflow: int = 15
     result_image_ttl_days: int = 14  # Delete result image blobs from DB after this many days
+
+    # Order processing concurrency (per process; total = this × number of Uvicorn workers)
+    max_concurrent_orders: int = 8
+    style_image_delay_seconds: int = 30  # Delay between style images in a pack (provider throttle)
 
     # Stripe payments
     stripe_secret_key: Optional[str] = None        # sk_live_... or sk_test_...
@@ -63,6 +69,10 @@ class Settings(BaseSettings):
 
     # Private dashboard (optional): set DASHBOARD_SECRET to enable /dashboard
     dashboard_secret: Optional[str] = None
+
+    # Rate limiting (per IP, requests per minute; 0 to disable)
+    rate_limit_api_per_minute: int = 60
+    rate_limit_static_per_minute: int = 120
 
 
 @lru_cache

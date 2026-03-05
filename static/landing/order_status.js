@@ -233,7 +233,8 @@
         autoAnimateCompare(compareWrap);
       }
     } else {
-      heroWrap.innerHTML = '<img src="' + imgUrl + '" class="museum-hero-img" alt="Operă" />';
+      var loadingAttr = (currentIndex === 0) ? ' loading="eager" fetchpriority="high"' : '';
+      heroWrap.innerHTML = '<img src="' + imgUrl + '" class="museum-hero-img" alt="Operă"' + loadingAttr + ' />';
     }
     
     // Update caption

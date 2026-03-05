@@ -29,11 +29,6 @@
     return map[cat] || 'tag-impressionism';
   }
 
-  function thumbStyle(s) {
-    if (s.preview && s.styleImageUrl) return 'background-image:url(' + s.styleImageUrl + ')';
-    return '';
-  }
-
   function renderCards(styles) {
     if (!grid) return;
     grid.innerHTML = '';
@@ -48,9 +43,15 @@
       var card = document.createElement(isComingSoon ? 'div' : 'a');
       card.className = 'gallery-card' + (isComingSoon ? ' gallery-card--coming-soon' : '');
       if (!isComingSoon) card.href = '/upload?style=' + s.id + '&pack=' + pack;
+      var thumbInner = '';
+      if (s.preview && s.styleImageUrl) {
+        thumbInner = '<img src="' + s.styleImageUrl + '" alt="" loading="lazy" class="gallery-card-thumb-img" />';
+      } else {
+        thumbInner = '<div class="gallery-card-thumb-bg ' + (s.thumbnailClass || '') + '"></div>';
+      }
       card.innerHTML =
         '<div class="gallery-card-thumb">' +
-          '<div class="gallery-card-thumb-bg ' + (s.preview && s.styleImageUrl ? '' : (s.thumbnailClass || '')) + '"' + (s.preview && s.styleImageUrl ? ' style="' + thumbStyle(s) + '"' : '') + '></div>' +
+          '<div class="gallery-card-thumb-bg-wrap">' + thumbInner + '</div>' +
           '<span class="gallery-card-tag ' + tagClass(s.category) + '">' + s.category + '</span>' +
           (isComingSoon ? '<span class="gallery-card-coming-soon">În curând</span>' : '') +
         '</div>' +
