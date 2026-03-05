@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="/static/landing/styles/masters/masters-02.jpg" />
 </head>
 <body class="page-home">
   <a href="#main-content" class="skip-link">Sari la conținut</a>
@@ -65,15 +66,15 @@
     <!-- Floating painting cards – decorative background -->
     <div class="hero-paintings" aria-hidden="true">
       <!-- Left side: Mona Lisa, Starry Night, Girl with a Pearl Earring, Water Lilies -->
-      <div class="paint-card pc-1"><img src="/static/landing/styles/masters/masters-02.jpg" alt="Mona Lisa"></div>
-      <div class="paint-card pc-2"><img src="/static/landing/styles/impression-color/impression-color-13.jpg" alt="Starry Night"></div>
-      <div class="paint-card pc-3"><img src="/static/landing/styles/evolution-portraits/evolution-portraits-08.jpg" alt="Girl with a Pearl Earring"></div>
-      <div class="paint-card pc-4"><img src="/static/landing/styles/impression-color/impression-color-02.jpg" alt="Water Lilies"></div>
+      <div class="paint-card pc-1"><img src="/static/landing/styles/masters/masters-02.jpg" alt="Mona Lisa" fetchpriority="high"></div>
+      <div class="paint-card pc-2"><img src="/static/landing/styles/impression-color/impression-color-13.jpg" alt="Starry Night" fetchpriority="high"></div>
+      <div class="paint-card pc-3"><img src="/static/landing/styles/evolution-portraits/evolution-portraits-08.jpg" alt="Girl with a Pearl Earring" loading="lazy"></div>
+      <div class="paint-card pc-4"><img src="/static/landing/styles/impression-color/impression-color-02.jpg" alt="Water Lilies" loading="lazy"></div>
       <!-- Right side: The Scream, Persistence of Memory, Sunflowers, Napoleon -->
-      <div class="paint-card pc-5"><img src="/static/landing/styles/masters/masters-04.jpg" alt="The Scream"></div>
-      <div class="paint-card pc-6"><img src="/static/landing/styles/masters/masters-15.jpg" alt="The Persistence of Memory"></div>
-      <div class="paint-card pc-7"><img src="/static/landing/styles/impression-color/impression-color-15.jpg" alt="Sunflowers"></div>
-      <div class="paint-card pc-8"><img src="/static/landing/styles/royalty-portraits/royalty-portraits-01.jpg" alt="Napoleon Crossing the Alps"></div>
+      <div class="paint-card pc-5"><img src="/static/landing/styles/masters/masters-04.jpg" alt="The Scream" loading="lazy"></div>
+      <div class="paint-card pc-6"><img src="/static/landing/styles/masters/masters-15.jpg" alt="The Persistence of Memory" loading="lazy"></div>
+      <div class="paint-card pc-7"><img src="/static/landing/styles/impression-color/impression-color-15.jpg" alt="Sunflowers" loading="lazy"></div>
+      <div class="paint-card pc-8"><img src="/static/landing/styles/royalty-portraits/royalty-portraits-01.jpg" alt="Napoleon Crossing the Alps" loading="lazy"></div>
     </div>
     <div class="hero-content">
       <span class="hero-pill hero-pill-emotional">
@@ -185,11 +186,11 @@
       <div class="demo-compare-card">
         <div class="compare-wrap" id="compare-wrap-1" data-compare="1">
           <div class="compare-before">
-            <img src="/static/landing/demo/original3.jpg" alt="Poză originală 1" />
+            <img src="/static/landing/demo/original3.jpg" alt="Poză originală 1" loading="lazy" />
             <span class="compare-label compare-label-right">Original</span>
           </div>
           <div class="compare-after">
-            <img src="/static/landing/demo/styled3_aligned.jpg" alt="Portret artistic 1" />
+            <img src="/static/landing/demo/styled3_aligned.jpg" alt="Portret artistic 1" loading="lazy" />
             <span class="compare-label compare-label-left">Portret artistic</span>
           </div>
           <div class="compare-divider" data-compare="1">
@@ -204,11 +205,11 @@
       <div class="demo-compare-card">
         <div class="compare-wrap" id="compare-wrap-2" data-compare="2">
           <div class="compare-before">
-            <img src="/static/landing/demo/original2.png" alt="Poză originală 2" />
+            <img src="/static/landing/demo/original2.png" alt="Poză originală 2" loading="lazy" />
             <span class="compare-label compare-label-right">Original</span>
           </div>
           <div class="compare-after">
-            <img src="/static/landing/demo/styled2_aligned.jpg" alt="Portret artistic 2" />
+            <img src="/static/landing/demo/styled2_aligned.jpg" alt="Portret artistic 2" loading="lazy" />
             <span class="compare-label compare-label-left">Portret artistic</span>
           </div>
           <div class="compare-divider" data-compare="2">
@@ -216,18 +217,18 @@
           </div>
         </div>
         <div class="demo-compare-footer">
-          <span class="demo-compare-tag">Vincent van Gogh — Terasa cafenelei noaptea</span>
+          <span class="demo-compare-tag">Camille Pissarro — Boulevard Montmartre</span>
           <p class="demo-compare-desc">Transformă-ți fotografia într-o operă de artă. Compară originalul cu rezultatul stilizat.</p>
         </div>
       </div>
       <div class="demo-compare-card">
         <div class="compare-wrap" id="compare-wrap-3" data-compare="3">
           <div class="compare-before">
-            <img src="/static/landing/demo/original1.jpg" alt="Poză originală 3" />
+            <img src="/static/landing/demo/original1.jpg" alt="Poză originală 3" loading="lazy" />
             <span class="compare-label compare-label-right">Original</span>
           </div>
           <div class="compare-after">
-            <img src="/static/landing/demo/styled1_aligned.jpg" alt="Portret artistic 3" />
+            <img src="/static/landing/demo/styled1_aligned.jpg" alt="Portret artistic 3" loading="lazy" />
             <span class="compare-label compare-label-left">Portret artistic</span>
           </div>
           <div class="compare-divider" data-compare="3">
@@ -646,9 +647,9 @@
     </div>
   </div>
 
-  <script src="/static/landing/script.js"></script>
-  <script src="/static/landing/testimonials.js"></script>
-  <script src="/static/landing/style-cards-scroll.js"></script>
-  <script src="/static/landing/demo-compare.js"></script>
+  <script src="/static/landing/script.js" defer></script>
+  <script src="/static/landing/testimonials.js" defer></script>
+  <script src="/static/landing/style-cards-scroll.js" defer></script>
+  <script src="/static/landing/demo-compare.js" defer></script>
 </body>
 </html>

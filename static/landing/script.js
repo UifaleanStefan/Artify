@@ -28,7 +28,7 @@
       }
     });
   }
-  window.addEventListener('scroll', onScroll);
+  window.addEventListener('scroll', onScroll, { passive: true });
 
   /* Header scroll fade: transparent at top, frosted once scrolled */
   var mainHeader = document.getElementById('main-header');
