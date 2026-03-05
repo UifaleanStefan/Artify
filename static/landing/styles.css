@@ -96,6 +96,10 @@ html, body { scrollbar-width: thin; scrollbar-color: var(--primary) var(--bg-lig
   .promo-banner-text { font-size: 0.8125rem; }
   .promo-banner-marquee { animation-duration: 35s; }
 }
+@media (max-width: 768px) {
+  .promo-banner { max-width: 100vw; overflow: hidden; }
+  .promo-banner-marquee-wrap { max-width: 100vw; }
+}
 
 body {
   margin: 0;
@@ -1487,7 +1491,6 @@ a.style-card:hover .style-card-bg {
   color: var(--text-muted);
 }
 
-/* Live Elfsight widget: centered on web, force 3-column grid on all devices */
 /* Live Elfsight widget: use as provided, centered */
 .instagram-live-widget-container {
   max-width: 100%;
@@ -1499,6 +1502,25 @@ a.style-card:hover .style-card-bg {
 .instagram-live-widget-container > div {
   width: 100%;
   max-width: 100%;
+  min-width: 0;
+}
+@media (max-width: 768px) {
+  .cta-instagram-section {
+    overflow-x: hidden;
+  }
+  .instagram-live-widget-container {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+  .instagram-live-widget-container > div {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+  .instagram-live-widget-container iframe {
+    max-width: 100%;
+  }
 }
 
 /* Instagram profile replica: one header + grid of post thumbnails */
