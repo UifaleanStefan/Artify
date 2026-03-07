@@ -442,13 +442,24 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 _HTML_HEADERS = {"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache", "Expires": "0"}
 
 
-def _facebook_pixel_inline_script(pixel_id: str) -> str:
-    """Meta Pixel base + init + PageView + ViewContent(Home). Injected into landing so Pixel Helper sees it."""
+def _facebook_pixel_inline_script(pixel_id: str, path: str = "/") -> str:
+    """Meta Pixel base + init + PageView + optional ViewContent/InitiateCheckout. Injected so Pixel Helper sees it on all pages."""
     pid = (pixel_id or "").strip()
     if not pid:
         return ""
     pid_esc = pid.replace("\\", "\\\\").replace("'", "\\'")
-    # Exact format Meta recommends: base code + init + PageView; include comments so Pixel Helper can detect
+    path = (path or "/").strip().rstrip("/") or "/"
+    extra = ""
+    if path == "/":
+        extra = "fbq('track','ViewContent',{content_name:'Home',content_type:'product',content_ids:['home'],content_category:'landing',value:0,currency:'RON'});\n"
+    elif path == "/styles":
+        extra = "fbq('track','ViewContent',{content_name:'Styles',content_type:'product',content_ids:['styles'],content_category:'product',value:9.99,currency:'RON'});\n"
+    elif path == "/details":
+        extra = "fbq('track','ViewContent',{content_name:'Details',content_type:'product',content_ids:['details'],content_category:'product',value:9.99,currency:'RON'});\n"
+    elif path == "/upload":
+        extra = "fbq('track','ViewContent',{content_name:'Upload',content_type:'product',content_ids:['upload'],content_category:'product',value:9.99,currency:'RON'});\n"
+    elif path in ("/billing", "/payment"):
+        extra = "fbq('track','InitiateCheckout');\n"
     return (
         '<!-- Facebook Pixel Code -->\n'
         '<script>\n'
@@ -458,13 +469,26 @@ def _facebook_pixel_inline_script(pixel_id: str) -> str:
         '(window,document,\'script\',\'https://connect.facebook.net/en_US/fbevents.js\');\n'
         'fbq(\'init\',\'' + pid_esc + '\');\n'
         'fbq(\'track\',\'PageView\');\n'
-        'fbq(\'track\',\'ViewContent\',{content_name:\'Home\',content_type:\'product\',content_ids:[\'home\'],content_category:\'landing\',value:0,currency:\'RON\'});\n'
+        + extra +
         'window.__FB_PIXEL_INLINE_FIRED=true;\n'
         '</script>\n'
         '<noscript><img height="1" width="1" style="display:none" alt="" '
         'src="https://www.facebook.com/tr?id=' + pid + '&ev=PageView&noscript=1"/></noscript>\n'
         '<!-- End Facebook Pixel Code -->'
     )
+
+
+def _serve_html_with_pixel(filename: str, path: str) -> Response:
+    """Read landing HTML file, inject pixel snippet for path, return Response."""
+    filepath = STATIC_DIR / "landing" / filename
+    html = filepath.read_text(encoding="utf-8")
+    settings = get_settings()
+    pid = (settings.facebook_pixel_id or "").strip()
+    if pid and "<head>" in html:
+        snippet = _facebook_pixel_inline_script(pid, path)
+        if snippet:
+            html = html.replace("<head>", "<head>\n  " + snippet, 1)
+    return Response(content=html, media_type="text/html", headers={**_HTML_HEADERS, "X-Pixel-Injected": "1" if pid else "0"})
 
 
 # ── Page routes ──────────────────────────────────────────────
@@ -502,36 +526,32 @@ async def favicon() -> RedirectResponse:
 
 @app.get("/")
 async def index() -> Response:
-    """Landing page with pixel injected inline so Meta Pixel Helper detects it."""
-    path = STATIC_DIR / "landing" / "index.html"
-    html = path.read_text(encoding="utf-8")
-    settings = get_settings()
-    pid = (settings.facebook_pixel_id or "").strip()
-    if pid:
-        snippet = _facebook_pixel_inline_script(pid)
-        if snippet and "<head>" in html:
-            html = html.replace("<head>", "<head>\n  " + snippet, 1)
-    return Response(content=html, media_type="text/html", headers={**_HTML_HEADERS, "X-Pixel-Injected": "1" if pid else "0"})
+    return _serve_html_with_pixel("index.html", "/")
+
 
 @app.get("/styles")
-async def styles_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "styles.html", headers=_HTML_HEADERS)
+async def styles_page() -> Response:
+    return _serve_html_with_pixel("styles.html", "/styles")
+
 
 @app.get("/upload")
-async def upload_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "upload.html", headers=_HTML_HEADERS)
+async def upload_page() -> Response:
+    return _serve_html_with_pixel("upload.html", "/upload")
+
 
 @app.get("/details")
-async def details_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "details.html", headers=_HTML_HEADERS)
+async def details_page() -> Response:
+    return _serve_html_with_pixel("details.html", "/details")
+
 
 @app.get("/billing")
-async def billing_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "billing.html", headers=_HTML_HEADERS)
+async def billing_page() -> Response:
+    return _serve_html_with_pixel("billing.html", "/billing")
+
 
 @app.get("/payment")
-async def payment_page() -> FileResponse:
-    return FileResponse(STATIC_DIR / "landing" / "payment.html", headers=_HTML_HEADERS)
+async def payment_page() -> Response:
+    return _serve_html_with_pixel("payment.html", "/payment")
 
 @app.get("/payment/success")
 async def payment_success_page() -> FileResponse:
