@@ -460,6 +460,15 @@ async def get_public_config() -> JSONResponse:
     return JSONResponse(payload)
 
 
+@app.get("/api/config/pixel.js", response_class=Response)
+async def get_pixel_config_js() -> Response:
+    """Return Pixel ID as JS so the landing can load it synchronously before fb-pixel.js (faster init)."""
+    settings = get_settings()
+    pid = (settings.facebook_pixel_id or "").strip()
+    body = f'window.__FB_PIXEL_ID = "{pid}";'
+    return Response(content=body, media_type="application/javascript", headers={"Cache-Control": "public, max-age=300"})
+
+
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon() -> RedirectResponse:
     """Redirect to SVG favicon so browser tab/bookmarks show Artify icon."""

@@ -72,13 +72,18 @@
         });
     };
 
+    var id = (typeof window !== "undefined" && window.__FB_PIXEL_ID) ? window.__FB_PIXEL_ID : "";
+    if (id && typeof id === "string" && id.trim()) {
+        injectFbqAndInit(id.trim());
+        return;
+    }
     if (typeof fetch === "undefined") return;
     fetch("/api/config/public", { credentials: "same-origin" })
         .then(function (r) { return r.json(); })
         .then(function (data) {
-            var id = data && data.facebook_pixel_id;
-            if (id && typeof id === "string" && id.trim()) {
-                injectFbqAndInit(id.trim());
+            var fid = data && data.facebook_pixel_id;
+            if (fid && typeof fid === "string" && fid.trim()) {
+                injectFbqAndInit(fid.trim());
             }
         })
         .catch(function () {});
