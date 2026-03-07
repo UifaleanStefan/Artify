@@ -14,7 +14,13 @@
     .status.wait { background: #fef3c7; color: #92400e; }
     button { padding: 0.5rem 1rem; cursor: pointer; margin-top: 0.5rem; }
     ul { margin: 0.5rem 0; padding-left: 1.25rem; }
+    .checklist { list-style: none; padding-left: 0; }
+    .checklist li { padding: 0.35rem 0; padding-left: 1.5rem; position: relative; }
+    .checklist li::before { content: '☐'; position: absolute; left: 0; }
+    .checklist li.done::before { content: '✓'; color: #166534; }
+    code { background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 4px; font-size: 0.9em; }
     a { color: #2563eb; }
+    .events-list { font-size: 0.9rem; color: #475569; margin-top: 0.25rem; }
   </style>
   <script src="/static/landing/fb-pixel.js" defer></script>
 </head>
@@ -24,23 +30,30 @@
 
   <div id="config-status" class="status wait">Se verifică config…</div>
   <div id="pixel-status" class="status wait">Se așteaptă încărcarea pixelului…</div>
+  <div id="script-status" class="status wait" style="display:none;">Se verifică scriptul Facebook…</div>
 
   <p>
     <button type="button" id="btn-test-viewcontent">Trimite eveniment test ViewContent</button>
   </p>
-  <p id="test-result" style="display:none;" class="status ok">Eveniment trimis. Verifică în Meta Pixel Helper sau în Events Manager → Test Events.</p>
+  <p id="test-result" style="display:none;" class="status ok"></p>
+  <p class="events-list">Pe această pagină pixelul trimite automat: <strong>PageView</strong> și <strong>ViewContent</strong>. După click pe buton se trimite încă un <strong>ViewContent</strong> de test.</p>
 
-  <h2 style="font-size:1rem; margin-top:1.5rem;">Cum verifici</h2>
-  <ul>
-    <li><strong>Meta Pixel Helper</strong> (Chrome): instalează extensia, deschide această pagină și apasă pe iconița extensiei. Ar trebui să vezi PageView și (după click) ViewContent.</li>
-    <li><strong>Events Manager</strong>: sursa Website → <strong>Test Events</strong>. Deschide acest URL în browser; evenimentele apar în ~20 sec.</li>
-    <li><strong>Network</strong>: F12 → Network → filtrează „facebook” sau „fbevents”; la încărcare ar trebui să apară request către <code>connect.facebook.net</code>.</li>
-  </ul>
+  <h2 style="font-size:1rem; margin-top:1.5rem;">Verificare 100% – checklist</h2>
+  <p>Bifează fiecare pas. Dacă toate sunt OK, pixelul funcționează 100%.</p>
+  <ol class="checklist" id="checklist">
+    <li id="c1"><strong>Config</strong>: mai sus apare „Pixel ID din config: ••••xxxx” (verde). Dacă e roșu, setează <code>FACEBOOK_PIXEL_ID</code> în <code>.env</code> și repornește serverul.</li>
+    <li id="c2"><strong>Pixel încărcat</strong>: apare „Pixel încărcat: da” (verde).</li>
+    <li id="c3"><strong>Script în pagină</strong>: F12 → Network → filtrează „facebook” → reîncarcă → trebuie request la <code>connect.facebook.net</code>.</li>
+    <li id="c4"><strong>Meta Pixel Helper</strong>: <a href="https://chrome.google.com/webstore/detail/meta-pixel-helper/fdgfkebogiimcoedlicjlajpkdmockpc" target="_blank" rel="noopener">instalează</a>, reîncarcă pagina, apasă pe iconița extensiei → vezi PageView și ViewContent (verde). După click pe buton, apare încă un ViewContent.</li>
+    <li id="c5"><strong>Events Manager</strong>: <a href="https://business.facebook.com/events_manager" target="_blank" rel="noopener">Events Manager</a> → Website → <strong>Test Events</strong>. Deschide acest URL în browser; în 20–60 sec ar trebui să apară evenimente. Asta confirmă că Facebook primește datele.</li>
+  </ol>
+  <p><strong>Concluzie:</strong> Dacă 1–2 sunt verzi și 4 sau 5 confirmă în Helper / Events Manager, pixelul funcționează 100%.</p>
 
   <script>
     (function () {
       var configEl = document.getElementById('config-status');
       var pixelEl = document.getElementById('pixel-status');
+      var scriptEl = document.getElementById('script-status');
       var testBtn = document.getElementById('btn-test-viewcontent');
       var testResult = document.getElementById('test-result');
 
@@ -52,6 +65,7 @@
             var masked = id.length > 4 ? '••••' + id.slice(-4) : '••••';
             configEl.textContent = 'Pixel ID din config: ' + masked;
             configEl.className = 'status ok';
+            document.getElementById('c1').classList.add('done');
           } else {
             configEl.textContent = 'Pixel ID lipsește. Setează FACEBOOK_PIXEL_ID în .env (și repornește serverul).';
             configEl.className = 'status err';
@@ -63,14 +77,27 @@
         });
 
       function checkPixel() {
+        scriptEl.style.display = 'block';
+        var hasFbScript = !!document.querySelector('script[src*="connect.facebook.net"]');
         if (typeof window.fbq === 'function') {
-          pixelEl.textContent = 'Pixel încărcat: da. PageView și ViewContent (test) sunt trimise prin fbq.';
+          pixelEl.textContent = 'Pixel încărcat: da. PageView și ViewContent sunt trimise prin fbq.';
           pixelEl.className = 'status ok';
           testBtn.disabled = false;
+          document.getElementById('c2').classList.add('done');
+          if (hasFbScript) {
+            scriptEl.textContent = 'Script Facebook în pagină: da (connect.facebook.net).';
+            scriptEl.className = 'status ok';
+            document.getElementById('c3').classList.add('done');
+          } else {
+            scriptEl.textContent = 'Script Facebook: încă nu în DOM (poate se încarcă cu întârziere). Verifică în Network.';
+            scriptEl.className = 'status wait';
+          }
           return;
         }
         pixelEl.textContent = 'Pixel încărcat: nu (fbq lipsește). Verifică FACEBOOK_PIXEL_ID în .env.';
         pixelEl.className = 'status err';
+        scriptEl.textContent = 'Script Facebook: nu (pixelul nu s-a inițializat).';
+        scriptEl.className = 'status err';
       }
 
       setTimeout(checkPixel, 2500);
@@ -92,7 +119,7 @@
           value: 0,
           currency: 'RON'
         });
-        testResult.textContent = 'Eveniment ViewContent (test) trimis. Verifică în Meta Pixel Helper sau Events Manager → Test Events.';
+        testResult.textContent = 'Eveniment ViewContent (test) trimis. Verifică în Meta Pixel Helper (ar trebui să apară un nou ViewContent) sau Events Manager → Test Events.';
         testResult.className = 'status ok';
         testResult.style.display = 'block';
       });
