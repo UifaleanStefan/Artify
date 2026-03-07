@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Pixel Facebook – Artify</title>
+  <link rel="icon" href="/static/landing/favicon.svg" type="image/svg+xml" />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 560px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; }
+    .status { padding: 0.75rem; border-radius: 8px; margin: 0.75rem 0; }
+    .status.ok { background: #dcfce7; color: #166534; }
+    .status.err { background: #fee2e2; color: #991b1b; }
+    .status.wait { background: #fef3c7; color: #92400e; }
+    button { padding: 0.5rem 1rem; cursor: pointer; margin-top: 0.5rem; }
+    ul { margin: 0.5rem 0; padding-left: 1.25rem; }
+    a { color: #2563eb; }
+  </style>
+  <script src="/static/landing/fb-pixel.js" defer></script>
+</head>
+<body>
+  <h1>Test Pixel Facebook</h1>
+  <p>Verifică dacă pixelul se încarcă și primește evenimente.</p>
+
+  <div id="config-status" class="status wait">Se verifică config…</div>
+  <div id="pixel-status" class="status wait">Se așteaptă încărcarea pixelului…</div>
+
+  <p>
+    <button type="button" id="btn-test-viewcontent">Trimite eveniment test ViewContent</button>
+  </p>
+  <p id="test-result" style="display:none;" class="status ok">Eveniment trimis. Verifică în Meta Pixel Helper sau în Events Manager → Test Events.</p>
+
+  <h2 style="font-size:1rem; margin-top:1.5rem;">Cum verifici</h2>
+  <ul>
+    <li><strong>Meta Pixel Helper</strong> (Chrome): instalează extensia, deschide această pagină și apasă pe iconița extensiei. Ar trebui să vezi PageView și (după click) ViewContent.</li>
+    <li><strong>Events Manager</strong>: sursa Website → <strong>Test Events</strong>. Deschide acest URL în browser; evenimentele apar în ~20 sec.</li>
+    <li><strong>Network</strong>: F12 → Network → filtrează „facebook” sau „fbevents”; la încărcare ar trebui să apară request către <code>connect.facebook.net</code>.</li>
+  </ul>
+
+  <script>
+    (function () {
+      var configEl = document.getElementById('config-status');
+      var pixelEl = document.getElementById('pixel-status');
+      var testBtn = document.getElementById('btn-test-viewcontent');
+      var testResult = document.getElementById('test-result');
+
+      fetch('/api/config/public', { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var id = data && data.facebook_pixel_id;
+          if (id && typeof id === 'string' && id.trim()) {
+            var masked = id.length > 4 ? '••••' + id.slice(-4) : '••••';
+            configEl.textContent = 'Pixel ID din config: ' + masked;
+            configEl.className = 'status ok';
+          } else {
+            configEl.textContent = 'Pixel ID lipsește. Setează FACEBOOK_PIXEL_ID în .env (și repornește serverul).';
+            configEl.className = 'status err';
+          }
+        })
+        .catch(function () {
+          configEl.textContent = 'Eroare la încărcarea config (api/config/public).';
+          configEl.className = 'status err';
+        });
+
+      function checkPixel() {
+        if (typeof window.fbq === 'function') {
+          pixelEl.textContent = 'Pixel încărcat: da. PageView și ViewContent (test) sunt trimise prin fbq.';
+          pixelEl.className = 'status ok';
+          testBtn.disabled = false;
+          return;
+        }
+        pixelEl.textContent = 'Pixel încărcat: nu (fbq lipsește). Verifică FACEBOOK_PIXEL_ID în .env.';
+        pixelEl.className = 'status err';
+      }
+
+      setTimeout(checkPixel, 2500);
+      setTimeout(checkPixel, 5000);
+
+      testBtn.addEventListener('click', function () {
+        testResult.style.display = 'none';
+        if (typeof window.fbq !== 'function') {
+          testResult.textContent = 'Pixelul nu e încărcat. Nu se poate trimite eveniment.';
+          testResult.className = 'status err';
+          testResult.style.display = 'block';
+          return;
+        }
+        window.fbq('track', 'ViewContent', {
+          content_name: 'Pixel Test',
+          content_type: 'product',
+          content_ids: ['pixel-test'],
+          content_category: 'test',
+          value: 0,
+          currency: 'RON'
+        });
+        testResult.textContent = 'Eveniment ViewContent (test) trimis. Verifică în Meta Pixel Helper sau Events Manager → Test Events.';
+        testResult.className = 'status ok';
+        testResult.style.display = 'block';
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -27,9 +27,35 @@
         window.fbq("init", pixelId);
         window.fbq("track", "PageView");
 
-        var path = (typeof location !== "undefined" && location.pathname) ? location.pathname : "";
-        if (path.indexOf("/styles") === 0 || path === "/details" || path.indexOf("/upload") === 0) {
-            window.fbq("track", "ViewContent", { content_name: path || "page" });
+        var path = (typeof location !== "undefined" && location.pathname) ? location.pathname.replace(/\/$/, "") || "/" : "/";
+        var viewContentPayload = {
+            content_type: "product",
+            currency: "RON"
+        };
+        if (path === "/" || path === "") {
+            viewContentPayload.content_name = "Home";
+            viewContentPayload.content_ids = ["home"];
+            viewContentPayload.content_category = "landing";
+            viewContentPayload.value = 0;
+            window.fbq("track", "ViewContent", viewContentPayload);
+        } else if (path.indexOf("/styles") === 0) {
+            viewContentPayload.content_name = "Styles";
+            viewContentPayload.content_ids = ["styles"];
+            viewContentPayload.content_category = "product";
+            viewContentPayload.value = 9.99;
+            window.fbq("track", "ViewContent", viewContentPayload);
+        } else if (path === "/details") {
+            viewContentPayload.content_name = "Details";
+            viewContentPayload.content_ids = ["details"];
+            viewContentPayload.content_category = "product";
+            viewContentPayload.value = 9.99;
+            window.fbq("track", "ViewContent", viewContentPayload);
+        } else if (path.indexOf("/upload") === 0) {
+            viewContentPayload.content_name = "Upload";
+            viewContentPayload.content_ids = ["upload"];
+            viewContentPayload.content_category = "product";
+            viewContentPayload.value = 9.99;
+            window.fbq("track", "ViewContent", viewContentPayload);
         }
         if (path === "/billing" || path === "/payment") {
             window.fbq("track", "InitiateCheckout");

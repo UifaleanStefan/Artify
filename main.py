@@ -508,6 +508,12 @@ async def help_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "landing" / "help.html", headers=_HTML_HEADERS)
 
 
+@app.get("/pixel-test")
+async def pixel_test_page() -> FileResponse:
+    """Simple page to verify Facebook Pixel: config status, fbq loaded, and send test ViewContent."""
+    return FileResponse(STATIC_DIR / "landing" / "pixel_test.html", headers=_HTML_HEADERS)
+
+
 @app.get("/contact")
 async def contact_page() -> FileResponse:
     return FileResponse(STATIC_DIR / "landing" / "contact.html", headers=_HTML_HEADERS)
