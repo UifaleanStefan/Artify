@@ -50,6 +50,13 @@
   </ol>
   <p><strong>Concluzie:</strong> Dacă 1–2 sunt verzi și 4 sau 5 confirmă în Helper / Events Manager, pixelul funcționează 100%.</p>
 
+  <h2 style="font-size:1rem; margin-top:1.5rem;">Pe homepage (landing) apare „No Pixels found”?</h2>
+  <ul>
+    <li><strong>View Source</strong> pe pagina principală (/) și caută „Facebook Pixel Code”. Dacă nu apare, răspunsul e din cache sau e servit static (CDN/host) și pixelul nu e injectat.</li>
+    <li><strong>Incognito + fără extensii</strong>: unele extensii (ad blocker, privacy) blochează <code>connect.facebook.net</code>. Testează în fereastră incognito cu extensiile dezactivate.</li>
+    <li><strong>Header</strong>: la request la /, răspunsul ar trebui să aibă header <code>X-Pixel-Injected: 1</code> (vezi în F12 → Network → click pe document /).</li>
+  </ul>
+
   <script>
     (function () {
       var configEl = document.getElementById('config-status');

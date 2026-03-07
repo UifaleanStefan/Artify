@@ -443,21 +443,27 @@ _HTML_HEADERS = {"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma
 
 
 def _facebook_pixel_inline_script(pixel_id: str) -> str:
-    """Meta Pixel base + init + PageView + ViewContent(Home). Injected into landing so Pixel Helper sees it immediately."""
-    pid = (pixel_id or "").strip().replace("\\", "\\\\").replace('"', '\\"')
+    """Meta Pixel base + init + PageView + ViewContent(Home). Injected into landing so Pixel Helper sees it."""
+    pid = (pixel_id or "").strip()
     if not pid:
         return ""
+    pid_esc = pid.replace("\\", "\\\\").replace("'", "\\'")
+    # Exact format Meta recommends: base code + init + PageView; include comments so Pixel Helper can detect
     return (
-        '<script>'
+        '<!-- Facebook Pixel Code -->\n'
+        '<script>\n'
         '!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};'
-        'if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version="2.0";n.queue=[];'
+        'if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version=\'2.0\';n.queue=[];'
         't=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s);}'
-        '(window,document,"script","https://connect.facebook.net/en_US/fbevents.js");'
-        'fbq("init","' + pid + '");'
-        'fbq("track","PageView");'
-        'fbq("track","ViewContent",{content_name:"Home",content_type:"product",content_ids:["home"],content_category:"landing",value:0,currency:"RON"});'
-        'window.__FB_PIXEL_INLINE_FIRED=true;'
-        '</script>'
+        '(window,document,\'script\',\'https://connect.facebook.net/en_US/fbevents.js\');\n'
+        'fbq(\'init\',\'' + pid_esc + '\');\n'
+        'fbq(\'track\',\'PageView\');\n'
+        'fbq(\'track\',\'ViewContent\',{content_name:\'Home\',content_type:\'product\',content_ids:[\'home\'],content_category:\'landing\',value:0,currency:\'RON\'});\n'
+        'window.__FB_PIXEL_INLINE_FIRED=true;\n'
+        '</script>\n'
+        '<noscript><img height="1" width="1" style="display:none" alt="" '
+        'src="https://www.facebook.com/tr?id=' + pid + '&ev=PageView&noscript=1"/></noscript>\n'
+        '<!-- End Facebook Pixel Code -->'
     )
 
 
@@ -496,7 +502,7 @@ async def favicon() -> RedirectResponse:
 
 @app.get("/")
 async def index() -> Response:
-    """Landing page with pixel injected inline so Meta Pixel Helper detects it immediately."""
+    """Landing page with pixel injected inline so Meta Pixel Helper detects it."""
     path = STATIC_DIR / "landing" / "index.html"
     html = path.read_text(encoding="utf-8")
     settings = get_settings()
@@ -505,7 +511,7 @@ async def index() -> Response:
         snippet = _facebook_pixel_inline_script(pid)
         if snippet and "<head>" in html:
             html = html.replace("<head>", "<head>\n  " + snippet, 1)
-    return Response(content=html, media_type="text/html", headers=_HTML_HEADERS)
+    return Response(content=html, media_type="text/html", headers={**_HTML_HEADERS, "X-Pixel-Injected": "1" if pid else "0"})
 
 @app.get("/styles")
 async def styles_page() -> FileResponse:
