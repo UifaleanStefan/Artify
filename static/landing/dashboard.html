@@ -46,6 +46,8 @@
     .traffic-live { margin-top: 0.75rem; font-size: 0.8rem; color: #475569; max-height: 180px; overflow-y: auto; }
     .traffic-live ul { margin: 0; padding-left: 1.25rem; }
     .traffic-live li { margin: 0.2rem 0; }
+    .traffic-by-section table, .traffic-hourly table { margin-top: 0.5rem; }
+    .traffic-hourly h3 { margin: 0.75rem 0 0.25rem; font-size: 1rem; }
   </style>
 </head>
 <body>
@@ -53,9 +55,14 @@
     <h1>Orders dashboard</h1>
     <div class="traffic-card" id="traffic-card">
       <h2>Traffic</h2>
-      <p class="traffic-note">Active visitors in the last 10 minutes.</p>
+      <p class="traffic-note">Active visitors in the last 10 minutes. Data refreshes every 12s.</p>
+      <div id="traffic-error" class="error-msg" style="display:none;margin-bottom:0.5rem;"></div>
       <div id="traffic-unique">—</div>
+      <span id="traffic-updated" style="color:#666;font-size:0.85rem;"></span>
+      <button type="button" class="btn-refresh" id="btn-refresh-traffic" style="margin-left:0.5rem;">Refresh traffic</button>
       <div class="traffic-by-path" id="traffic-by-path"></div>
+      <div class="traffic-by-section" id="traffic-by-section"></div>
+      <div class="traffic-hourly" id="traffic-hourly"></div>
       <div class="traffic-live" id="traffic-live" style="display:none"></div>
     </div>
     <div class="dashboard-toolbar">
@@ -98,7 +105,12 @@
       var btnRefresh = document.getElementById('btn-refresh');
       var trafficUnique = document.getElementById('traffic-unique');
       var trafficByPath = document.getElementById('traffic-by-path');
+      var trafficBySection = document.getElementById('traffic-by-section');
+      var trafficHourly = document.getElementById('traffic-hourly');
       var trafficLive = document.getElementById('traffic-live');
+      var trafficError = document.getElementById('traffic-error');
+      var trafficUpdated = document.getElementById('traffic-updated');
+      var btnRefreshTraffic = document.getElementById('btn-refresh-traffic');
 
       function fmt(d) {
         if (!d) return '—';
@@ -219,10 +231,23 @@
           });
       }
 
+      function formatHourLabel(hourStr) {
+        if (!hourStr) return hourStr;
+        var parts = hourStr.split('T');
+        if (parts.length !== 2) return hourStr;
+        var d = new Date(parts[0] + 'T' + parts[1] + ':00:00Z');
+        var now = new Date();
+        var isToday = d.getUTCDate() === now.getUTCDate() && d.getUTCMonth() === now.getUTCMonth() && d.getUTCFullYear() === now.getUTCFullYear();
+        return isToday ? d.toUTCString().replace(/.*\s(\d{2}:\d{2}).*/, '$1 UTC') : d.toUTCString().replace(/.*\s(\d{2})\s(\w{3})\s(\d{4})\s(\d{2}:\d{2}).*/, '$2 $1 $3 $4 UTC');
+      }
+
       function renderTraffic(data) {
         if (!data) return;
         var n = data.unique_visitors != null ? data.unique_visitors : 0;
         trafficUnique.textContent = n + ' active visitor' + (n !== 1 ? 's' : '') + ' now';
+        if (data.server_time) {
+          trafficUpdated.textContent = 'Updated ' + new Date(data.server_time * 1000).toLocaleTimeString();
+        }
         var byPath = data.by_path || {};
         var paths = Object.keys(byPath).sort();
         if (paths.length === 0) {
@@ -235,6 +260,27 @@
           html += '</tbody></table>';
           trafficByPath.innerHTML = html;
         }
+        var bySection = data.by_section || {};
+        var sections = Object.keys(bySection).filter(function (s) { return s !== ''; }).sort();
+        if (sections.length === 0) {
+          trafficBySection.innerHTML = '';
+        } else {
+          var secHtml = '<table><thead><tr><th>Section</th><th>Count</th></tr></thead><tbody>';
+          sections.forEach(function (s) {
+            secHtml += '<tr><td>' + escapeHtml(s) + '</td><td>' + bySection[s] + '</td></tr>';
+          });
+          secHtml += '</tbody></table>';
+          trafficBySection.innerHTML = '<strong>By section</strong>' + secHtml;
+        }
+        var hourly = data.hourly_visitors || [];
+        if (hourly.length > 0) {
+          trafficHourly.innerHTML = '<h3>Visitors by hour (last 24h, UTC)</h3><table><thead><tr><th>Hour</th><th>Unique visitors</th></tr></thead><tbody>' +
+            hourly.map(function (h) {
+              return '<tr><td>' + escapeHtml(formatHourLabel(h.hour)) + '</td><td>' + (h.count || 0) + '</td></tr>';
+            }).join('') + '</tbody></table>';
+        } else {
+          trafficHourly.innerHTML = '<h3>Visitors by hour (last 24h)</h3><p style="margin:0;color:#666;">No hourly data yet.</p>';
+        }
         var visitors = data.visitors || [];
         if (visitors.length > 0) {
           trafficLive.style.display = 'block';
@@ -243,6 +289,10 @@
             if (v.last_seen) {
               var ago = Math.round((Date.now() / 1000 - v.last_seen) / 60);
               line += ' (' + (ago < 1 ? 'just now' : ago + 'm ago') + ')';
+            }
+            if (v.first_seen) {
+              var onSite = Math.round((Date.now() / 1000 - v.first_seen) / 60);
+              line += ' — ' + (onSite < 1 ? 'just arrived' : onSite + 'm on site');
             }
             return '<li>' + line + '</li>';
           }).join('');
@@ -253,18 +303,23 @@
       }
 
       function fetchTraffic() {
+        trafficError.style.display = 'none';
         fetch('/api/dashboard/traffic', { credentials: 'include' })
           .then(function (r) {
-            if (!r.ok) return;
+            if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
             return r.json();
           })
           .then(function (data) {
             if (data) renderTraffic(data);
           })
-          .catch(function () {});
+          .catch(function (err) {
+            trafficError.textContent = err.message || 'Failed to load traffic';
+            trafficError.style.display = 'block';
+          });
       }
 
       btnRefresh.addEventListener('click', function () { fetchOrders(); });
+      if (btnRefreshTraffic) btnRefreshTraffic.addEventListener('click', function () { fetchTraffic(); });
       fetchOrders();
       setInterval(fetchOrders, POLL_INTERVAL_MS);
       fetchTraffic();

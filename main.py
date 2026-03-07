@@ -332,10 +332,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 _rate_limit_store: dict[str, list[float]] = defaultdict(list)
 _rate_limit_lock: asyncio.Lock | None = None
 
-# Traffic beacon: in-memory store (vid -> { path, section, last_seen }), TTL cleanup
+# Traffic beacon: in-memory store (vid -> { path, section, last_seen, first_seen }), TTL cleanup
 TRAFFIC_TTL_SECONDS = 600  # 10 min
+HOURLY_TRAFFIC_HOURS = 24  # keep last N hours for "visitors per hour"
 _traffic_store: dict[str, dict] = {}
 _traffic_lock: asyncio.Lock | None = None
+# Hourly unique visitors: key = "YYYY-MM-DDTHH" (UTC), value = set of vids seen in that hour
+_hourly_store: dict[str, set[str]] = {}
 _ALLOWED_BEACON_PATHS = frozenset({
     "/", "/styles", "/upload", "/details", "/billing", "/payment",
     "/payment/success", "/payment/cancel", "/create/done", "/help", "/contact",
@@ -363,6 +366,22 @@ def _traffic_cleanup() -> None:
     expired = [vid for vid, data in _traffic_store.items() if (now - data.get("last_seen", 0)) > TRAFFIC_TTL_SECONDS]
     for vid in expired:
         del _traffic_store[vid]
+
+
+def _hour_key(ts: float | None = None) -> str:
+    """Return hour key for a timestamp (UTC), e.g. 2025-03-03T14. ts defaults to now."""
+    t = ts if ts is not None else time.time()
+    dt = datetime.utcfromtimestamp(t)
+    return dt.strftime("%Y-%m-%dT%H")
+
+
+def _hourly_cleanup() -> None:
+    """Drop hour buckets older than HOURLY_TRAFFIC_HOURS."""
+    now = time.time()
+    cutoff = datetime.utcfromtimestamp(now - HOURLY_TRAFFIC_HOURS * 3600).strftime("%Y-%m-%dT%H")
+    expired = [k for k in _hourly_store if k <= cutoff]
+    for k in expired:
+        del _hourly_store[k]
 
 
 def _is_allowed_beacon_path(path: str) -> bool:
@@ -593,22 +612,45 @@ async def get_dashboard_orders(
 
 @app.get("/api/dashboard/traffic")
 async def get_dashboard_traffic(_: None = Depends(require_dashboard)) -> JSONResponse:
-    """Return active traffic (unique visitors, by path). Auth: dashboard HTTP Basic."""
+    """Return active traffic (unique visitors, by path, by section). Auth: dashboard HTTP Basic."""
+    server_time = time.time()
     async with _get_traffic_lock():
         _traffic_cleanup()
+        _hourly_cleanup()
         by_path: dict[str, int] = {}
+        by_section: dict[str, int] = {}
         for data in _traffic_store.values():
             p = data.get("path") or "/"
             by_path[p] = by_path.get(p, 0) + 1
+            sec = data.get("section") or ""
+            by_section[sec] = by_section.get(sec, 0) + 1
+        sorted_visitors = sorted(
+            _traffic_store.values(), key=lambda x: x.get("last_seen", 0), reverse=True
+        )[:50]
         visitors_list = [
-            {"path": d.get("path", "/"), "section": d.get("section"), "last_seen": d.get("last_seen")}
-            for d in sorted(_traffic_store.values(), key=lambda x: x.get("last_seen", 0), reverse=True)[:50]
+            {
+                "path": d.get("path", "/"),
+                "section": d.get("section"),
+                "last_seen": d.get("last_seen"),
+                "first_seen": d.get("first_seen"),
+            }
+            for d in sorted_visitors
         ]
         unique_count = len(_traffic_store)
+        # Last 24 hours: one bucket per hour (UTC), sorted ascending
+        hourly_visitors: list[dict] = []
+        for i in range(HOURLY_TRAFFIC_HOURS - 1, -1, -1):
+            ts = server_time - i * 3600
+            hk = _hour_key(ts)
+            hourly_visitors.append({"hour": hk, "count": len(_hourly_store.get(hk, set()))})
     return JSONResponse(content={
         "unique_visitors": unique_count,
         "by_path": by_path,
+        "by_section": by_section,
         "visitors": visitors_list,
+        "hourly_visitors": hourly_visitors,
+        "server_time": server_time,
+        "ttl_seconds": TRAFFIC_TTL_SECONDS,
     })
 
 
@@ -631,7 +673,15 @@ async def beacon(
         section = section[:200]
     async with _get_traffic_lock():
         _traffic_cleanup()
-        _traffic_store[vid] = {"path": path, "section": section, "last_seen": time.time()}
+        _hourly_cleanup()
+        now = time.time()
+        existing = _traffic_store.get(vid)
+        first_seen = now if existing is None else existing.get("first_seen", now)
+        _traffic_store[vid] = {"path": path, "section": section, "last_seen": now, "first_seen": first_seen}
+        hour_key = _hour_key(now)
+        if hour_key not in _hourly_store:
+            _hourly_store[hour_key] = set()
+        _hourly_store[hour_key].add(vid)
     return Response(status_code=204)
 
 
