@@ -5,6 +5,7 @@
  */
 (function () {
     var purchaseFired = false;
+    if (typeof window !== "undefined" && window.__FB_PIXEL_INLINE_FIRED) return;
 
     function injectFbqAndInit(pixelId) {
         if (typeof window === "undefined" || window.fbq) return;
