@@ -1926,11 +1926,11 @@ a.style-card:hover .style-card-bg {
   filter: blur(0px);
 }
 
-/* Card header – icon + title block (left), badge (right), like reference */
+/* Card header – icon + title on one line, left-aligned */
 .pc-header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: flex-start;
   gap: 1rem;
   padding: 1.25rem 1.5rem 1rem;
   border-bottom: 1px solid rgba(0,0,0,0.05);
@@ -1949,8 +1949,15 @@ a.style-card:hover .style-card-bg {
 }
 .pc-header-titles {
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+}
+.pc-header-titles .pc-package-type::before {
+  content: " · ";
+  font-weight: 500;
+  opacity: 0.8;
 }
 .pc-header .pc-title {
   margin: 0;
