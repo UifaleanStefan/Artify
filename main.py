@@ -457,8 +457,8 @@ async def privacy_page() -> FileResponse:
 
 
 @app.get("/marketing")
-async def marketing_page() -> FileResponse:
-    """Marketing page: single high-quality style transfer demo."""
+async def marketing_page(_: None = Depends(require_dashboard)) -> FileResponse:
+    """Marketing page: single high-quality style transfer demo. Same password as dashboard."""
     return FileResponse(STATIC_DIR / "landing" / "marketing.html", headers=_HTML_HEADERS)
 
 
@@ -1449,8 +1449,8 @@ VALID_STYLE_IDS = frozenset({
 
 
 @app.get("/api/marketing/styles")
-async def get_marketing_styles() -> JSONResponse:
-    """Return all 90 paintings for the marketing style selector."""
+async def get_marketing_styles(_: None = Depends(require_dashboard)) -> JSONResponse:
+    """Return all 90 paintings for the marketing style selector. Same password as dashboard."""
     items = []
     for style_id, paths in _STYLE_ID_TO_PATHS.items():
         pack_name = _STYLE_ID_TO_PACK_NAME.get(style_id, "")
@@ -1472,6 +1472,7 @@ async def get_marketing_styles() -> JSONResponse:
 
 @app.post("/api/marketing/style-transfer")
 async def marketing_style_transfer(
+    _: None = Depends(require_dashboard),
     image: UploadFile = File(...),
     style_id: int = Form(...),
     style_index: int = Form(...),
@@ -1868,7 +1869,7 @@ async def create_checkout_session(
             cancel_url=f"{base_url}/payment/cancel?order_id={order_id}",
             metadata={"order_id": order_id},
             locale="ro",
-        )
+A        )
     except stripe.StripeError as e:
         err_msg = str(e)
         logger.error("Stripe checkout creation failed for %s: %s (type=%s)", order_id, err_msg, type(e).__name__)
