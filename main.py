@@ -431,6 +431,16 @@ async def health() -> JSONResponse:
     return JSONResponse({"status": "ok"})
 
 
+@app.get("/api/config/public")
+async def get_public_config() -> JSONResponse:
+    """Public config for frontend (e.g. Facebook Pixel ID). No auth."""
+    settings = get_settings()
+    payload: dict = {}
+    if settings.facebook_pixel_id and settings.facebook_pixel_id.strip():
+        payload["facebook_pixel_id"] = settings.facebook_pixel_id.strip()
+    return JSONResponse(payload)
+
+
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon() -> RedirectResponse:
     """Redirect to SVG favicon so browser tab/bookmarks show Artify icon."""

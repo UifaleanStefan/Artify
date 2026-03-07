@@ -70,6 +70,9 @@ class Settings(BaseSettings):
     # Private dashboard (optional): set DASHBOARD_SECRET to enable /dashboard
     dashboard_secret: Optional[str] = None
 
+    # Facebook Pixel (optional): set FACEBOOK_PIXEL_ID to enable pixel on public pages
+    facebook_pixel_id: Optional[str] = None
+
     # Rate limiting (per IP, requests per minute; 0 to disable)
     rate_limit_api_per_minute: int = 60
     rate_limit_static_per_minute: int = 120

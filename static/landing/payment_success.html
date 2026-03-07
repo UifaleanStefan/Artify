@@ -37,6 +37,7 @@
     }
   </style>
   <script src="/static/landing/beacon.js" defer></script>
+  <script src="/static/landing/fb-pixel.js" defer></script>
 </head>
 <body>
   <div class="promo-banner" aria-live="polite">
@@ -185,6 +186,9 @@
       .then(function (data) {
         styleId = data.style_id || null;
         email = data.email || null;
+        if (data.amount != null && typeof window.__fbqPurchase === "function") {
+          window.__fbqPurchase(data.amount, "RON");
+        }
       })
       .catch(function () {
         // Ignore errors - we'll redirect anyway
