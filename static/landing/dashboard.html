@@ -46,8 +46,14 @@
     .traffic-live { margin-top: 0.75rem; font-size: 0.8rem; color: #475569; max-height: 180px; overflow-y: auto; }
     .traffic-live ul { margin: 0; padding-left: 1.25rem; }
     .traffic-live li { margin: 0.2rem 0; }
-    .traffic-by-section table, .traffic-hourly table { margin-top: 0.5rem; }
-    .traffic-hourly h3 { margin: 0.75rem 0 0.25rem; font-size: 1rem; }
+    .traffic-by-section table { margin-top: 0.5rem; }
+    .traffic-hourly { margin-top: 0.75rem; }
+    .traffic-hourly h3 { margin: 0 0 0.35rem; font-size: 1rem; }
+    .traffic-hourly .hourly-bars { display: flex; align-items: flex-end; gap: 2px; height: 36px; margin: 0.25rem 0; }
+    .traffic-hourly .hourly-bar { flex: 1; min-width: 6px; background: #cbd5e1; border-radius: 2px; transition: background 0.15s; }
+    .traffic-hourly .hourly-bar:hover { background: #64748b; }
+    .traffic-hourly .hourly-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: #64748b; margin-top: 0.15rem; }
+    .traffic-hourly .hourly-summary { font-size: 0.8rem; color: #475569; margin-top: 0.25rem; }
   </style>
 </head>
 <body>
@@ -274,12 +280,20 @@
         }
         var hourly = data.hourly_visitors || [];
         if (hourly.length > 0) {
-          trafficHourly.innerHTML = '<h3>Visitors by hour (last 24h, UTC)</h3><table><thead><tr><th>Hour</th><th>Unique visitors</th></tr></thead><tbody>' +
-            hourly.map(function (h) {
-              return '<tr><td>' + escapeHtml(formatHourLabel(h.hour)) + '</td><td>' + (h.count || 0) + '</td></tr>';
-            }).join('') + '</tbody></table>';
+          var maxCount = Math.max(1, Math.max.apply(null, hourly.map(function (h) { return h.count || 0; })));
+          var bars = hourly.map(function (h) {
+            var c = h.count || 0;
+            var pct = maxCount > 0 ? (c / maxCount) * 100 : 0;
+            var heightPx = Math.max(4, 4 + (pct / 100) * 28);
+            return '<span class="hourly-bar" style="height:' + heightPx + 'px" title="' + escapeHtml(formatHourLabel(h.hour)) + ': ' + c + '"></span>';
+          }).join('');
+          var peak = hourly.reduce(function (best, h) { return (h.count || 0) > (best.count || 0) ? h : best; }, hourly[0] || {});
+          var total = hourly.reduce(function (s, h) { return s + (h.count || 0); }, 0);
+          var summary = 'Peak: ' + formatHourLabel(peak.hour) + ' (' + (peak.count || 0) + ')';
+          if (total > 0) summary += ' — Total: ' + total + ' visits';
+          trafficHourly.innerHTML = '<h3>Last 24h (UTC)</h3><div class="hourly-bars">' + bars + '</div><div class="hourly-labels"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div><div class="hourly-summary">' + escapeHtml(summary) + '</div>';
         } else {
-          trafficHourly.innerHTML = '<h3>Visitors by hour (last 24h)</h3><p style="margin:0;color:#666;">No hourly data yet.</p>';
+          trafficHourly.innerHTML = '<h3>Last 24h (UTC)</h3><p style="margin:0;color:#666;font-size:0.85rem;">No hourly data yet.</p>';
         }
         var visitors = data.visitors || [];
         if (visitors.length > 0) {
