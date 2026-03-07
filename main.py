@@ -1869,7 +1869,7 @@ async def create_checkout_session(
             cancel_url=f"{base_url}/payment/cancel?order_id={order_id}",
             metadata={"order_id": order_id},
             locale="ro",
-A        )
+        )
     except stripe.StripeError as e:
         err_msg = str(e)
         logger.error("Stripe checkout creation failed for %s: %s (type=%s)", order_id, err_msg, type(e).__name__)
