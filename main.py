@@ -332,12 +332,47 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 _rate_limit_store: dict[str, list[float]] = defaultdict(list)
 _rate_limit_lock: asyncio.Lock | None = None
 
+# Traffic beacon: in-memory store (vid -> { path, section, last_seen }), TTL cleanup
+TRAFFIC_TTL_SECONDS = 600  # 10 min
+_traffic_store: dict[str, dict] = {}
+_traffic_lock: asyncio.Lock | None = None
+_ALLOWED_BEACON_PATHS = frozenset({
+    "/", "/styles", "/upload", "/details", "/billing", "/payment",
+    "/payment/success", "/payment/cancel", "/create/done", "/help", "/contact",
+    "/terms", "/privacy", "/order",
+})
+
 
 def _get_rate_limit_lock() -> asyncio.Lock:
     global _rate_limit_lock
     if _rate_limit_lock is None:
         _rate_limit_lock = asyncio.Lock()
     return _rate_limit_lock
+
+
+def _get_traffic_lock() -> asyncio.Lock:
+    global _traffic_lock
+    if _traffic_lock is None:
+        _traffic_lock = asyncio.Lock()
+    return _traffic_lock
+
+
+def _traffic_cleanup() -> None:
+    """Drop entries older than TRAFFIC_TTL_SECONDS."""
+    now = time.time()
+    expired = [vid for vid, data in _traffic_store.items() if (now - data.get("last_seen", 0)) > TRAFFIC_TTL_SECONDS]
+    for vid in expired:
+        del _traffic_store[vid]
+
+
+def _is_allowed_beacon_path(path: str) -> bool:
+    if not path or not path.startswith("/") or len(path) > 200:
+        return False
+    if path in _ALLOWED_BEACON_PATHS:
+        return True
+    if path.startswith("/order/"):
+        return True
+    return False
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
@@ -347,7 +382,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if path == "/api/stripe/webhook":
             return await call_next(request)
         settings = get_settings()
-        limit = settings.rate_limit_static_per_minute if path.startswith("/static/") else settings.rate_limit_api_per_minute
+        if path == "/api/beacon":
+            limit = 20  # per-IP per minute for beacon
+        else:
+            limit = settings.rate_limit_static_per_minute if path.startswith("/static/") else settings.rate_limit_api_per_minute
         if limit <= 0:
             return await call_next(request)
         client_ip = request.client.host if request.client else "0.0.0.0"
@@ -541,6 +579,50 @@ async def get_dashboard_orders(
             )
         )
     return out
+
+
+@app.get("/api/dashboard/traffic")
+async def get_dashboard_traffic(_: None = Depends(require_dashboard)) -> JSONResponse:
+    """Return active traffic (unique visitors, by path). Auth: dashboard HTTP Basic."""
+    async with _get_traffic_lock():
+        _traffic_cleanup()
+        by_path: dict[str, int] = {}
+        for data in _traffic_store.values():
+            p = data.get("path") or "/"
+            by_path[p] = by_path.get(p, 0) + 1
+        visitors_list = [
+            {"path": d.get("path", "/"), "section": d.get("section"), "last_seen": d.get("last_seen")}
+            for d in sorted(_traffic_store.values(), key=lambda x: x.get("last_seen", 0), reverse=True)[:50]
+        ]
+        unique_count = len(_traffic_store)
+    return JSONResponse(content={
+        "unique_visitors": unique_count,
+        "by_path": by_path,
+        "visitors": visitors_list,
+    })
+
+
+@app.get("/api/beacon")
+async def beacon(
+    request: Request,
+    path: str = "",
+    vid: str = "",
+    section: Optional[str] = "",
+) -> Response:
+    """Public beacon: record path + optional section for visitor vid. No auth; per-IP rate limited. Returns 204."""
+    path = (path or "").strip()
+    vid = (vid or "").strip()
+    section = (section or "").strip() or None
+    if not _is_allowed_beacon_path(path):
+        raise HTTPException(status_code=400, detail="Invalid path")
+    if not re.match(r"^[a-zA-Z0-9\-]{1,64}$", vid):
+        raise HTTPException(status_code=400, detail="Invalid vid")
+    if section is not None and len(section) > 200:
+        section = section[:200]
+    async with _get_traffic_lock():
+        _traffic_cleanup()
+        _traffic_store[vid] = {"path": path, "section": section, "last_seen": time.time()}
+    return Response(status_code=204)
 
 
 @app.get("/api/debug/last-order", response_model=OrderStatusResponse)
