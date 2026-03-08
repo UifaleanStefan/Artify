@@ -1953,6 +1953,12 @@ a.style-card:hover .style-card-bg {
   align-items: baseline;
   flex-wrap: nowrap;
   gap: 0.5rem;
+  justify-content: flex-start;
+  text-align: left;
+}
+.pc-header-titles .pc-title,
+.pc-header-titles .pc-package-type {
+  white-space: nowrap;
 }
 .pc-header-titles .pc-package-type::before {
   content: " · ";
@@ -1981,7 +1987,8 @@ a.style-card:hover .style-card-bg {
   letter-spacing: 0.02em;
 }
 .pc-package-type--light {
-  color: rgba(255, 255, 255, 0.95);
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 .pc-icon {
