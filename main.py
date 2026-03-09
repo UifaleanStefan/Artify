@@ -27,7 +27,7 @@ from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse, Red
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import text
+from sqlalchemy import func, text
 from sqlalchemy.orm import Session
 
 from clients import (
@@ -147,9 +147,16 @@ def _persist_result_images(order_id: str, result_items: list) -> list[str]:
     return [str(x) if isinstance(x, str) else "" for x in result_items]
 
 
-from database import Order, OrderResultImage, OrderSourceImage, OrderStatus, get_db, SessionLocal, init_db
+from database import AnalyticsEvent, Order, OrderResultImage, OrderSourceImage, OrderStatus, get_db, SessionLocal, init_db
 from models import StyleTransferResponse
-from models.order_schemas import OrderCreateRequest, OrderResponse, OrderStatusResponse, DashboardOrderSummary
+from models.order_schemas import (
+    AnalyticsEventPayload,
+    AnalyticsEventsRequest,
+    OrderCreateRequest,
+    OrderResponse,
+    OrderStatusResponse,
+    DashboardOrderSummary,
+)
 from services import StyleTransferService
 from services.email_service import EmailService
 
@@ -401,8 +408,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if path == "/api/stripe/webhook":
             return await call_next(request)
         settings = get_settings()
-        if path == "/api/beacon":
-            limit = 20  # per-IP per minute for beacon
+        if path in ("/api/beacon", "/api/analytics/events"):
+            limit = 20  # per-IP per minute for beacon/analytics
         else:
             limit = settings.rate_limit_static_per_minute if path.startswith("/static/") else settings.rate_limit_api_per_minute
         if limit <= 0:
@@ -680,46 +687,235 @@ async def get_dashboard_orders(
 
 
 @app.get("/api/dashboard/traffic")
-async def get_dashboard_traffic(_: None = Depends(require_dashboard)) -> JSONResponse:
-    """Return active traffic (unique visitors, by path, by section). Auth: dashboard HTTP Basic."""
+async def get_dashboard_traffic(
+    _: None = Depends(require_dashboard),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    """Return active traffic from DB (unique visitors, by path, by section, hourly). Auth: dashboard HTTP Basic."""
     server_time = time.time()
-    async with _get_traffic_lock():
-        _traffic_cleanup()
-        _hourly_cleanup()
-        by_path: dict[str, int] = {}
-        by_section: dict[str, int] = {}
-        for data in _traffic_store.values():
-            p = data.get("path") or "/"
-            by_path[p] = by_path.get(p, 0) + 1
-            sec = data.get("section") or ""
-            by_section[sec] = by_section.get(sec, 0) + 1
-        sorted_visitors = sorted(
-            _traffic_store.values(), key=lambda x: x.get("last_seen", 0), reverse=True
-        )[:50]
-        visitors_list = [
-            {
-                "path": d.get("path", "/"),
-                "section": d.get("section"),
-                "last_seen": d.get("last_seen"),
-                "first_seen": d.get("first_seen"),
+    cutoff = datetime.utcnow() - timedelta(seconds=TRAFFIC_TTL_SECONDS)
+    # Latest event per visitor in last 10 min
+    recent = (
+        db.query(AnalyticsEvent)
+        .filter(AnalyticsEvent.created_at >= cutoff)
+        .order_by(AnalyticsEvent.visitor_id, AnalyticsEvent.created_at.desc())
+        .all()
+    )
+    # Group by visitor_id, keep latest (first after desc order) per visitor
+    by_visitor: dict[str, dict] = {}
+    for ev in recent:
+        if ev.visitor_id not in by_visitor:
+            by_visitor[ev.visitor_id] = {
+                "path": ev.path or "/",
+                "section": ev.section or "",
+                "last_seen": ev.created_at.timestamp() if ev.created_at else 0,
+                "first_seen": ev.created_at.timestamp() if ev.created_at else 0,
             }
-            for d in sorted_visitors
-        ]
-        unique_count = len(_traffic_store)
-        # Last 24 hours: one bucket per hour (UTC), sorted ascending
-        hourly_visitors: list[dict] = []
-        for i in range(HOURLY_TRAFFIC_HOURS - 1, -1, -1):
-            ts = server_time - i * 3600
-            hk = _hour_key(ts)
-            hourly_visitors.append({"hour": hk, "count": len(_hourly_store.get(hk, set()))})
+        else:
+            by_visitor[ev.visitor_id]["first_seen"] = min(
+                by_visitor[ev.visitor_id]["first_seen"],
+                ev.created_at.timestamp() if ev.created_at else 0,
+            )
+    by_path = defaultdict(int)
+    by_section = defaultdict(int)
+    for d in by_visitor.values():
+        by_path[d["path"]] += 1
+        by_section[d["section"]] += 1
+    sorted_visitors = sorted(by_visitor.values(), key=lambda x: x["last_seen"], reverse=True)[:50]
+    visitors_list = [
+        {"path": d["path"], "section": d["section"], "last_seen": d["last_seen"], "first_seen": d["first_seen"]}
+        for d in sorted_visitors
+    ]
+    # Hourly: distinct visitors per hour (last 24h) from DB
+    hourly_start = datetime.utcnow() - timedelta(hours=HOURLY_TRAFFIC_HOURS)
+    hourly_by_key: dict[str, int] = {}
+    try:
+        hourly_rows = (
+            db.query(
+                func.date_trunc("hour", AnalyticsEvent.created_at).label("hour_ts"),
+                func.count(func.distinct(AnalyticsEvent.visitor_id)).label("cnt"),
+            )
+            .filter(AnalyticsEvent.created_at >= hourly_start)
+            .group_by(func.date_trunc("hour", AnalyticsEvent.created_at))
+            .all()
+        )
+        for row in hourly_rows:
+            ht = getattr(row, "hour_ts", None)
+            if ht is not None:
+                hk = ht.strftime("%Y-%m-%dT%H") if hasattr(ht, "strftime") else str(ht)[:13].replace(" ", "T")
+                hourly_by_key[hk] = getattr(row, "cnt", 0) or 0
+    except Exception as e:
+        logger.warning("Hourly analytics query failed (use Postgres for traffic): %s", e)
+    hourly_visitors = []
+    for i in range(HOURLY_TRAFFIC_HOURS - 1, -1, -1):
+        ts = server_time - i * 3600
+        hk = _hour_key(ts)
+        hourly_visitors.append({"hour": hk, "count": hourly_by_key.get(hk, 0)})
     return JSONResponse(content={
-        "unique_visitors": unique_count,
-        "by_path": by_path,
-        "by_section": by_section,
+        "unique_visitors": len(by_visitor),
+        "by_path": dict(by_path),
+        "by_section": dict(by_section),
         "visitors": visitors_list,
         "hourly_visitors": hourly_visitors,
         "server_time": server_time,
         "ttl_seconds": TRAFFIC_TTL_SECONDS,
+    })
+
+
+def _write_analytics_event(
+    db: Session,
+    event_type: str,
+    session_id: str,
+    visitor_id: str,
+    path: str,
+    section: Optional[str] = None,
+    time_on_page_sec: Optional[float] = None,
+    referrer: Optional[str] = None,
+    utm_source: Optional[str] = None,
+    utm_medium: Optional[str] = None,
+    utm_campaign: Optional[str] = None,
+    device: Optional[str] = None,
+) -> None:
+    """Persist one analytics event to DB. Caller commits."""
+    path = (path or "/")[:512]
+    section = (section or None) and section[:256] if section else None
+    referrer = (referrer or None) and referrer[:1024] if referrer else None
+    utm_source = (utm_source or None) and utm_source[:256] if utm_source else None
+    utm_medium = (utm_medium or None) and utm_medium[:256] if utm_medium else None
+    utm_campaign = (utm_campaign or None) and utm_campaign[:256] if utm_campaign else None
+    device = (device or None) and device[:64] if device else None
+    row = AnalyticsEvent(
+        event_type=event_type[:32] if event_type else "page_view",
+        session_id=session_id[:64],
+        visitor_id=visitor_id[:64],
+        path=path,
+        section=section,
+        time_on_page_sec=time_on_page_sec,
+        referrer=referrer,
+        utm_source=utm_source,
+        utm_medium=utm_medium,
+        utm_campaign=utm_campaign,
+        device=device,
+    )
+    db.add(row)
+
+
+@app.post("/api/analytics/events")
+async def post_analytics_events(
+    body: AnalyticsEventsRequest,
+    db: Session = Depends(get_db),
+) -> Response:
+    """Public endpoint: record analytics events (page_view, time on page, referrer, UTM). No auth; per-IP rate limited. Returns 204."""
+    if not body.events:
+        return Response(status_code=204)
+    for ev in body.events:
+        path = (ev.path or "").strip() or "/"
+        if not _is_allowed_beacon_path(path):
+            continue
+        if not re.match(r"^[a-zA-Z0-9\-_]{1,64}$", ev.session_id or ""):
+            continue
+        if not re.match(r"^[a-zA-Z0-9\-]{1,64}$", ev.visitor_id or ""):
+            continue
+        _write_analytics_event(
+            db,
+            event_type=ev.event_type or "page_view",
+            session_id=ev.session_id,
+            visitor_id=ev.visitor_id,
+            path=path,
+            section=ev.section,
+            time_on_page_sec=ev.time_on_page_sec,
+            referrer=ev.referrer,
+            utm_source=ev.utm_source,
+            utm_medium=ev.utm_medium,
+            utm_campaign=ev.utm_campaign,
+            device=ev.device,
+        )
+    try:
+        db.commit()
+    except Exception as e:
+        logger.warning("Analytics events commit failed: %s", e)
+        db.rollback()
+    return Response(status_code=204)
+
+
+@app.get("/api/dashboard/analytics")
+async def get_dashboard_analytics(
+    _: None = Depends(require_dashboard),
+    db: Session = Depends(get_db),
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+    limit: int = 10000,
+) -> JSONResponse:
+    """Aggregated analytics for dashboard: time per path, pages visited, drop-off, referrer/UTM, device. Auth: dashboard."""
+    now = datetime.utcnow()
+    try:
+        start = datetime.fromisoformat(from_date.replace("Z", "+00:00")) if from_date else (now - timedelta(days=7))
+    except Exception:
+        start = now - timedelta(days=7)
+    try:
+        end = datetime.fromisoformat(to_date.replace("Z", "+00:00")) if to_date else now
+    except Exception:
+        end = now
+    if start > end:
+        start, end = end, start
+    limit = min(max(1, limit), 100000)
+    events = (
+        db.query(AnalyticsEvent)
+        .filter(AnalyticsEvent.created_at >= start, AnalyticsEvent.created_at <= end)
+        .order_by(AnalyticsEvent.created_at.asc())
+        .limit(limit)
+        .all()
+    )
+    # Time spent per path (only events with time_on_page_sec)
+    time_per_path: dict[str, list[float]] = defaultdict(list)
+    # Page visit counts
+    page_counts: dict[str, int] = defaultdict(int)
+    # Last path per session (drop-off)
+    session_last_path: dict[str, tuple[str, datetime]] = {}
+    referrer_counts: dict[str, int] = defaultdict(int)
+    utm_source_counts: dict[str, int] = defaultdict(int)
+    utm_medium_counts: dict[str, int] = defaultdict(int)
+    utm_campaign_counts: dict[str, int] = defaultdict(int)
+    device_counts: dict[str, int] = defaultdict(int)
+    for ev in events:
+        path = ev.path or "/"
+        page_counts[path] += 1
+        if ev.time_on_page_sec is not None and ev.time_on_page_sec >= 0:
+            time_per_path[path].append(ev.time_on_page_sec)
+        if ev.session_id:
+            session_last_path[ev.session_id] = (path, ev.created_at or now)
+        if ev.referrer:
+            ref = (ev.referrer or "")[:200]
+            referrer_counts[ref] += 1
+        if ev.utm_source:
+            utm_source_counts[ev.utm_source] += 1
+        if ev.utm_medium:
+            utm_medium_counts[ev.utm_medium] += 1
+        if ev.utm_campaign:
+            utm_campaign_counts[ev.utm_campaign] += 1
+        if ev.device:
+            device_counts[ev.device] += 1
+    time_spent = []
+    for path, secs in time_per_path.items():
+        total = sum(secs)
+        time_spent.append({"path": path, "total_sec": round(total, 1), "count": len(secs), "avg_sec": round(total / len(secs), 1)})
+    time_spent.sort(key=lambda x: -x["total_sec"])
+    drop_off_counts: dict[str, int] = defaultdict(int)
+    for _sid, (path, _ts) in session_last_path.items():
+        drop_off_counts[path] += 1
+    drop_off = [{"path": path, "sessions": count} for path, count in sorted(drop_off_counts.items(), key=lambda x: -x[1])]
+    pages_visited = [{"path": path, "visits": count} for path, count in sorted(page_counts.items(), key=lambda x: -x[1])]
+    return JSONResponse(content={
+        "from_date": start.isoformat(),
+        "to_date": end.isoformat(),
+        "time_spent_per_path": time_spent[:100],
+        "pages_visited": pages_visited[:100],
+        "drop_off": drop_off[:50],
+        "referrer": [{"referrer": k, "count": v} for k, v in sorted(referrer_counts.items(), key=lambda x: -x[1])[:30]],
+        "utm_source": [{"value": k, "count": v} for k, v in sorted(utm_source_counts.items(), key=lambda x: -x[1])[:20]],
+        "utm_medium": [{"value": k, "count": v} for k, v in sorted(utm_medium_counts.items(), key=lambda x: -x[1])[:20]],
+        "utm_campaign": [{"value": k, "count": v} for k, v in sorted(utm_campaign_counts.items(), key=lambda x: -x[1])[:20]],
+        "device": [{"device": k, "count": v} for k, v in sorted(device_counts.items(), key=lambda x: -x[1])],
     })
 
 
@@ -729,17 +925,27 @@ async def beacon(
     path: str = "",
     vid: str = "",
     section: Optional[str] = "",
+    sid: Optional[str] = "",
+    db: Session = Depends(get_db),
 ) -> Response:
-    """Public beacon: record path + optional section for visitor vid. No auth; per-IP rate limited. Returns 204."""
+    """Public beacon: record path + optional section for visitor vid. No auth; per-IP rate limited. Persists to DB and in-memory. Returns 204."""
     path = (path or "").strip()
     vid = (vid or "").strip()
     section = (section or "").strip() or None
+    sid = (sid or vid or "").strip()[:64]
     if not _is_allowed_beacon_path(path):
         raise HTTPException(status_code=400, detail="Invalid path")
     if not re.match(r"^[a-zA-Z0-9\-]{1,64}$", vid):
         raise HTTPException(status_code=400, detail="Invalid vid")
     if section is not None and len(section) > 200:
         section = section[:200]
+    # Persist to DB
+    try:
+        _write_analytics_event(db, "page_view", sid, vid, path or "/", section=section)
+        db.commit()
+    except Exception as e:
+        logger.warning("Beacon DB write failed: %s", e)
+        db.rollback()
     async with _get_traffic_lock():
         _traffic_cleanup()
         _hourly_cleanup()

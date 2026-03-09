@@ -77,3 +77,23 @@ class DashboardOrderSummary(BaseModel):
     billing_state: Optional[str] = None
     billing_zip: Optional[str] = None
     billing_country: Optional[str] = None
+
+
+class AnalyticsEventPayload(BaseModel):
+    """Single analytics event for POST /api/analytics/events."""
+    event_type: Optional[str] = "page_view"
+    path: str
+    section: Optional[str] = None
+    time_on_page_sec: Optional[float] = None
+    session_id: str
+    visitor_id: str
+    referrer: Optional[str] = None
+    utm_source: Optional[str] = None
+    utm_medium: Optional[str] = None
+    utm_campaign: Optional[str] = None
+    device: Optional[str] = None
+
+
+class AnalyticsEventsRequest(BaseModel):
+    """Request body: one or more events."""
+    events: list[AnalyticsEventPayload]

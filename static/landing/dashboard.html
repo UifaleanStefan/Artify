@@ -54,6 +54,12 @@
     .traffic-hourly .hourly-bar:hover { background: #64748b; }
     .traffic-hourly .hourly-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: #64748b; margin-top: 0.15rem; }
     .traffic-hourly .hourly-summary { font-size: 0.8rem; color: #475569; margin-top: 0.25rem; }
+    .analytics-card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+    .analytics-card h2 { font-size: 1.1rem; margin: 0 0 0.5rem 0; font-weight: 600; }
+    .analytics-card .analytics-note { color: #666; font-size: 0.8rem; margin-bottom: 0.75rem; }
+    .analytics-card table { font-size: 0.875rem; margin-top: 0.5rem; min-width: 200px; }
+    .analytics-card th, .analytics-card td { padding: 0.35rem 0.5rem; text-align: left; border-bottom: 1px solid #eee; }
+    .analytics-range { margin-bottom: 0.5rem; font-size: 0.85rem; color: #64748b; }
   </style>
 </head>
 <body>
@@ -70,6 +76,18 @@
       <div class="traffic-by-section" id="traffic-by-section"></div>
       <div class="traffic-hourly" id="traffic-hourly"></div>
       <div class="traffic-live" id="traffic-live" style="display:none"></div>
+    </div>
+    <div class="analytics-card" id="analytics-card">
+      <h2>Analytics</h2>
+      <p class="analytics-note">Time spent, pages visited, drop-off, and marketing (last 7 days). Data is persisted.</p>
+      <div class="analytics-range" id="analytics-range">—</div>
+      <div id="analytics-error" class="error-msg" style="display:none;margin-bottom:0.5rem;"></div>
+      <button type="button" class="btn-refresh" id="btn-refresh-analytics" style="margin-bottom:0.75rem;">Refresh analytics</button>
+      <div id="analytics-time-spent"></div>
+      <div id="analytics-pages-visited"></div>
+      <div id="analytics-drop-off"></div>
+      <div id="analytics-marketing"></div>
+      <div id="analytics-device"></div>
     </div>
     <div class="dashboard-toolbar">
       <span class="last-updated" id="last-updated">—</span>
@@ -117,6 +135,14 @@
       var trafficError = document.getElementById('traffic-error');
       var trafficUpdated = document.getElementById('traffic-updated');
       var btnRefreshTraffic = document.getElementById('btn-refresh-traffic');
+      var analyticsRange = document.getElementById('analytics-range');
+      var analyticsError = document.getElementById('analytics-error');
+      var analyticsTimeSpent = document.getElementById('analytics-time-spent');
+      var analyticsPagesVisited = document.getElementById('analytics-pages-visited');
+      var analyticsDropOff = document.getElementById('analytics-drop-off');
+      var analyticsMarketing = document.getElementById('analytics-marketing');
+      var analyticsDevice = document.getElementById('analytics-device');
+      var btnRefreshAnalytics = document.getElementById('btn-refresh-analytics');
 
       function fmt(d) {
         if (!d) return '—';
@@ -332,12 +358,128 @@
           });
       }
 
+      function formatSec(s) {
+        if (s == null || s < 0) return '—';
+        if (s < 60) return Math.round(s) + 's';
+        var m = Math.floor(s / 60);
+        var sec = Math.round(s % 60);
+        return m + 'm ' + sec + 's';
+      }
+
+      function renderAnalytics(data) {
+        if (!data) return;
+        if (analyticsRange) analyticsRange.textContent = 'From ' + (data.from_date || '') + ' to ' + (data.to_date || '');
+        if (analyticsTimeSpent) {
+          var rows = data.time_spent_per_path || [];
+          if (rows.length === 0) {
+            analyticsTimeSpent.innerHTML = '<h3 style="font-size:1rem;margin:0 0 0.35rem 0;">Time spent per path</h3><p style="margin:0;color:#666;font-size:0.85rem;">No data yet.</p>';
+          } else {
+            var html = '<h3 style="font-size:1rem;margin:0 0 0.35rem 0;">Time spent per path</h3><table><thead><tr><th>Path</th><th>Total</th><th>Avg</th><th>Count</th></tr></thead><tbody>';
+            rows.forEach(function (r) {
+              html += '<tr><td>' + escapeHtml(r.path) + '</td><td>' + formatSec(r.total_sec) + '</td><td>' + formatSec(r.avg_sec) + '</td><td>' + (r.count || 0) + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            analyticsTimeSpent.innerHTML = html;
+          }
+        }
+        if (analyticsPagesVisited) {
+          var pages = data.pages_visited || [];
+          if (pages.length === 0) {
+            analyticsPagesVisited.innerHTML = '<h3 style="font-size:1rem;margin:0.75rem 0 0.35rem 0;">Pages visited</h3><p style="margin:0;color:#666;font-size:0.85rem;">No data yet.</p>';
+          } else {
+            var html = '<h3 style="font-size:1rem;margin:0.75rem 0 0.35rem 0;">Pages visited</h3><table><thead><tr><th>Path</th><th>Visits</th></tr></thead><tbody>';
+            pages.forEach(function (p) {
+              html += '<tr><td>' + escapeHtml(p.path) + '</td><td>' + (p.visits || 0) + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            analyticsPagesVisited.innerHTML = html;
+          }
+        }
+        if (analyticsDropOff) {
+          var drop = data.drop_off || [];
+          if (drop.length === 0) {
+            analyticsDropOff.innerHTML = '<h3 style="font-size:1rem;margin:0.75rem 0 0.35rem 0;">Drop-off (last page per session)</h3><p style="margin:0;color:#666;font-size:0.85rem;">No data yet.</p>';
+          } else {
+            var html = '<h3 style="font-size:1rem;margin:0.75rem 0 0.35rem 0;">Drop-off (last page per session)</h3><table><thead><tr><th>Last path</th><th>Sessions</th></tr></thead><tbody>';
+            drop.forEach(function (d) {
+              html += '<tr><td>' + escapeHtml(d.path) + '</td><td>' + (d.sessions || 0) + '</td></tr>';
+            });
+            html += '</tbody></table>';
+            analyticsDropOff.innerHTML = html;
+          }
+        }
+        if (analyticsMarketing) {
+          var ref = data.referrer || [];
+          var us = data.utm_source || [];
+          var um = data.utm_medium || [];
+          var uc = data.utm_campaign || [];
+          var parts = [];
+          if (ref.length > 0) {
+            parts.push('<h3 style="font-size:1rem;margin:0.75rem 0 0.35rem 0;">Referrer</h3><table><thead><tr><th>Referrer</th><th>Count</th></tr></thead><tbody>');
+            ref.slice(0, 10).forEach(function (r) { parts.push('<tr><td>' + escapeHtml(r.referrer) + '</td><td>' + r.count + '</td></tr>'); });
+            parts.push('</tbody></table>');
+          }
+          if (us.length > 0) {
+            parts.push('<h3 style="font-size:1rem;margin:0.75rem 0 0.35rem 0;">UTM Source</h3><table><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>');
+            us.forEach(function (r) { parts.push('<tr><td>' + escapeHtml(r.value) + '</td><td>' + r.count + '</td></tr>'); });
+            parts.push('</tbody></table>');
+          }
+          if (um.length > 0) {
+            parts.push('<h3 style="font-size:1rem;margin:0.75rem 0 0.35rem 0;">UTM Medium</h3><table><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>');
+            um.forEach(function (r) { parts.push('<tr><td>' + escapeHtml(r.value) + '</td><td>' + r.count + '</td></tr>'); });
+            parts.push('</tbody></table>');
+          }
+          if (uc.length > 0) {
+            parts.push('<h3 style="font-size:1rem;margin:0.75rem 0 0.35rem 0;">UTM Campaign</h3><table><thead><tr><th>Value</th><th>Count</th></tr></thead><tbody>');
+            uc.forEach(function (r) { parts.push('<tr><td>' + escapeHtml(r.value) + '</td><td>' + r.count + '</td></tr>'); });
+            parts.push('</tbody></table>');
+          }
+          analyticsMarketing.innerHTML = parts.length ? parts.join('') : '<h3 style="font-size:1rem;margin:0.75rem 0 0.35rem 0;">Marketing</h3><p style="margin:0;color:#666;font-size:0.85rem;">No referrer/UTM data yet.</p>';
+        }
+        if (analyticsDevice) {
+          var dev = data.device || [];
+          if (dev.length === 0) {
+            analyticsDevice.innerHTML = '<h3 style="font-size:1rem;margin:0.75rem 0 0.35rem 0;">Device</h3><p style="margin:0;color:#666;font-size:0.85rem;">No data yet.</p>';
+          } else {
+            var html = '<h3 style="font-size:1rem;margin:0.75rem 0 0.35rem 0;">Device</h3><table><thead><tr><th>Device</th><th>Count</th></tr></thead><tbody>';
+            dev.forEach(function (d) { html += '<tr><td>' + escapeHtml(d.device) + '</td><td>' + d.count + '</td></tr>'; });
+            html += '</tbody></table>';
+            analyticsDevice.innerHTML = html;
+          }
+        }
+      }
+
+      function fetchAnalytics() {
+        if (analyticsError) analyticsError.style.display = 'none';
+        var from = new Date();
+        from.setDate(from.getDate() - 7);
+        var to = new Date();
+        var fromStr = from.toISOString().slice(0, 10);
+        var toStr = to.toISOString().slice(0, 10);
+        fetch('/api/dashboard/analytics?from_date=' + encodeURIComponent(fromStr) + '&to_date=' + encodeURIComponent(toStr), { credentials: 'include' })
+          .then(function (r) {
+            if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+            return r.json();
+          })
+          .then(function (data) {
+            if (data) renderAnalytics(data);
+          })
+          .catch(function (err) {
+            if (analyticsError) {
+              analyticsError.textContent = err.message || 'Failed to load analytics';
+              analyticsError.style.display = 'block';
+            }
+          });
+      }
+
       btnRefresh.addEventListener('click', function () { fetchOrders(); });
       if (btnRefreshTraffic) btnRefreshTraffic.addEventListener('click', function () { fetchTraffic(); });
+      if (btnRefreshAnalytics) btnRefreshAnalytics.addEventListener('click', function () { fetchAnalytics(); });
       fetchOrders();
       setInterval(fetchOrders, POLL_INTERVAL_MS);
       fetchTraffic();
       setInterval(fetchTraffic, TRAFFIC_POLL_MS);
+      fetchAnalytics();
     })();
   </script>
 </body>

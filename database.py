@@ -9,6 +9,7 @@ from typing import Optional
 from sqlalchemy import Column, DateTime, Float, Integer, LargeBinary, String, Text, create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Index
 
 from config import get_settings
 
@@ -84,6 +85,27 @@ class OrderSourceImage(Base):
     content_type = Column(String(32), nullable=False, default="image/jpeg")
     data = Column(LargeBinary, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
+class AnalyticsEvent(Base):
+    """Persistent analytics events for dashboard: page views, time on page, sessions, drop-off, referrer/UTM."""
+    __tablename__ = "art_analytics_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    event_type = Column(String(32), default="page_view", nullable=False)
+    session_id = Column(String(64), nullable=False, index=True)
+    visitor_id = Column(String(64), nullable=False, index=True)
+    path = Column(String(512), nullable=False, index=True)
+    section = Column(String(256))
+    time_on_page_sec = Column(Float)
+    referrer = Column(String(1024))
+    utm_source = Column(String(256))
+    utm_medium = Column(String(256))
+    utm_campaign = Column(String(256))
+    device = Column(String(64))
+
+    __table_args__ = (Index("ix_art_analytics_events_created_at", "created_at"),)
 
 
 def get_database_url() -> str:
