@@ -730,22 +730,38 @@ async def get_dashboard_traffic(
     hourly_start = datetime.utcnow() - timedelta(hours=HOURLY_TRAFFIC_HOURS)
     hourly_by_key: dict[str, int] = {}
     try:
-        hourly_rows = (
-            db.query(
-                func.date_trunc("hour", AnalyticsEvent.created_at).label("hour_ts"),
-                func.count(func.distinct(AnalyticsEvent.visitor_id)).label("cnt"),
+        # PostgreSQL: use date_trunc for efficient grouping
+        if "sqlite" not in (db.get_bind().url.drivername or ""):
+            hourly_rows = (
+                db.query(
+                    func.date_trunc("hour", AnalyticsEvent.created_at).label("hour_ts"),
+                    func.count(func.distinct(AnalyticsEvent.visitor_id)).label("cnt"),
+                )
+                .filter(AnalyticsEvent.created_at >= hourly_start)
+                .group_by(func.date_trunc("hour", AnalyticsEvent.created_at))
+                .all()
             )
-            .filter(AnalyticsEvent.created_at >= hourly_start)
-            .group_by(func.date_trunc("hour", AnalyticsEvent.created_at))
-            .all()
-        )
-        for row in hourly_rows:
-            ht = getattr(row, "hour_ts", None)
-            if ht is not None:
-                hk = ht.strftime("%Y-%m-%dT%H") if hasattr(ht, "strftime") else str(ht)[:13].replace(" ", "T")
-                hourly_by_key[hk] = getattr(row, "cnt", 0) or 0
+            for row in hourly_rows:
+                ht = getattr(row, "hour_ts", None)
+                if ht is not None:
+                    hk = ht.strftime("%Y-%m-%dT%H") if hasattr(ht, "strftime") else str(ht)[:13].replace(" ", "T")
+                    hourly_by_key[hk] = getattr(row, "cnt", 0) or 0
+        else:
+            # SQLite: fetch events and group in Python
+            hourly_events = (
+                db.query(AnalyticsEvent)
+                .filter(AnalyticsEvent.created_at >= hourly_start)
+                .all()
+            )
+            distinct_per_hour: dict[str, set[str]] = {}
+            for ev in hourly_events:
+                if ev.created_at and ev.visitor_id:
+                    hk = ev.created_at.strftime("%Y-%m-%dT%H")
+                    distinct_per_hour.setdefault(hk, set()).add(ev.visitor_id)
+            for hk, vid_set in distinct_per_hour.items():
+                hourly_by_key[hk] = len(vid_set)
     except Exception as e:
-        logger.warning("Hourly analytics query failed (use Postgres for traffic): %s", e)
+        logger.warning("Hourly analytics query failed: %s", e)
     hourly_visitors = []
     for i in range(HOURLY_TRAFFIC_HOURS - 1, -1, -1):
         ts = server_time - i * 3600

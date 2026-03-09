@@ -114,10 +114,8 @@ def get_database_url() -> str:
     if not db_url:
         db_url = os.environ.get("POSTGRES_URL", "").strip()
     if not db_url:
-        raise ValueError(
-            "DATABASE_URL environment variable is not set. "
-            "Set DATABASE_URL in your .env file or environment."
-        )
+        # Local dev: use SQLite so the server and analytics work without PostgreSQL
+        db_url = "sqlite:///./artify.db"
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
     return db_url
@@ -126,13 +124,16 @@ def get_database_url() -> str:
 DATABASE_URL = get_database_url()
 _settings = get_settings()
 
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,
-    pool_size=_settings.db_pool_size,
-    max_overflow=_settings.db_max_overflow,
-    connect_args={"connect_timeout": 10},
-)
+_engine_kw: dict = {}
+if DATABASE_URL.startswith("sqlite"):
+    _engine_kw["connect_args"] = {"check_same_thread": False}
+    _engine_kw["pool_pre_ping"] = False  # SQLite has no pre-ping
+else:
+    _engine_kw["pool_pre_ping"] = True
+    _engine_kw["pool_size"] = _settings.db_pool_size
+    _engine_kw["max_overflow"] = _settings.db_max_overflow
+    _engine_kw["connect_args"] = {"connect_timeout": 10}
+engine = create_engine(DATABASE_URL, **_engine_kw)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
